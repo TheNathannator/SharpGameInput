@@ -1,0 +1,453 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ output extension=".cs" #>
+<#+
+protected enum Visibility
+{
+    Public,
+    Internal,
+    Private,
+}
+
+protected enum ParameterIndirection
+{
+    None,
+    In,
+    Out,
+    Ref,
+}
+
+[System.Flags]
+protected enum ParameterFlag
+{
+    None = 0,
+
+    Nullable = 0x01,
+    Pointer  = 0x02,
+}
+
+protected struct InterfaceParameter
+{
+    public string Name;
+    public string TypeDecl;
+    public string TypeName;
+
+    public ParameterFlag Flags;
+    public ParameterIndirection Indirection;
+
+    public InterfaceParameter(string typeDecl, string name)
+    {
+        // Parse type declaration components
+        string typeName = typeDecl;
+        var flags = ParameterFlag.None;
+        var indirection = ParameterIndirection.None;
+
+        if (typeName.StartsWith("in "))
+        {
+            indirection = ParameterIndirection.In;
+            typeName = typeName[3..];
+        }
+        else if (typeName.StartsWith("out "))
+        {
+            indirection = ParameterIndirection.Out;
+            typeName = typeName[4..];
+        }
+        else if (typeName.StartsWith("ref "))
+        {
+            indirection = ParameterIndirection.Ref;
+            typeName = typeName[4..];
+        }
+
+        if (typeName.EndsWith("?"))
+        {
+            flags |= ParameterFlag.Nullable;
+            typeName = typeName[..^1];
+        }
+
+        if (typeName.EndsWith("*"))
+        {
+            flags |= ParameterFlag.Pointer;
+        }
+
+        // Pseudo-syntax for allowing nullable pointer types;
+        // not actually supported in C#
+        if (typeDecl.EndsWith("*?"))
+        {
+            typeDecl = typeDecl[..^1];
+        }
+
+        Name = name;
+        TypeDecl = typeDecl;
+        TypeName = typeName;
+
+        Flags = flags;
+        Indirection = indirection;
+    }
+
+    public string ToFnPointerType()
+    {
+        string type = TypeName;
+
+        if (InterfaceTypes.Contains(type) || LightInterfaceTypes.Contains(type))
+        {
+            type = "IntPtr";
+        }
+
+        type = Indirection switch
+        {
+            ParameterIndirection.In => "in " + type,
+            ParameterIndirection.Out => "out " + type,
+            ParameterIndirection.Ref => "ref " + type,
+            _ => type,
+        };
+
+        return type;
+    }
+
+    public string ToFnPointerArgument()
+    {
+        string argument = Name;
+
+        if (InterfaceTypes.Contains(TypeName) || LightInterfaceTypes.Contains(TypeName))
+        {
+            if (Indirection == ParameterIndirection.Out)
+            {
+                // out IntPtr name_handle
+                argument = $"IntPtr {Name}_handle";
+            }
+            else if ((Flags & ParameterFlag.Nullable) != 0)
+            {
+                argument = $"{Name}?.DangerousGetHandle() ?? IntPtr.Zero";
+            }
+            else
+            {
+                argument = $"{Name}.DangerousGetHandle()";
+            }
+        }
+
+        argument = Indirection switch
+        {
+            ParameterIndirection.In => "in " + argument,
+            ParameterIndirection.Out => "out " + argument,
+            ParameterIndirection.Ref => "ref " + argument,
+            _ => argument,
+        };
+
+        return argument;
+    }
+
+    public static implicit operator InterfaceParameter((string TypeDecl, string Name) parameter)
+        => new(parameter.TypeDecl, parameter.Name);
+}
+
+protected struct InterfaceMethod
+{
+    public string Name;
+    public Visibility Visibility;
+    public string ReturnType;
+    public InterfaceParameter[] Parameters;
+
+    public bool IsCustom;
+    public Action CustomAction;
+
+    public string VisModifier => Visibility switch
+    {
+        Visibility.Public => "public",
+        Visibility.Internal => "internal",
+        Visibility.Private => "private",
+        _ => throw new System.Diagnostics.UnreachableException($"Invalid visibility {Visibility}")
+    };
+
+    public bool IsVoid => ReturnType == "void";
+
+    public InterfaceMethod(string returnType, string name, params InterfaceParameter[] parameters)
+        : this(Visibility.Public, returnType, name, parameters)
+    {
+    }
+
+    public InterfaceMethod(Visibility visibility, string returnType, string name, params InterfaceParameter[] parameters)
+    {
+        Name = name;
+        Visibility = visibility;
+        ReturnType = returnType;
+        Parameters = parameters;
+
+        IsCustom = false;
+        CustomAction = null;
+    }
+
+    public InterfaceMethod(Action customAction)
+    {
+        Name = "";
+        Visibility = Visibility.Public;
+        ReturnType = "";
+        Parameters = Array.Empty<InterfaceParameter>();
+
+        IsCustom = true;
+        CustomAction = customAction;
+    }
+}
+
+public static HashSet<string> InterfaceTypes = new();
+public static HashSet<string> LightInterfaceTypes = new();
+
+protected void DefineInterface(string name, params InterfaceMethod[] methods)
+{
+#>
+    public sealed unsafe partial class <#= name #> : GameInputComPtr<<#= name #>>
+    {
+        internal <#= name #>(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
+
+        protected override <#= name #> DuplicateImpl() => new(handle, true);
+<#+ ForwardInterfaceMethods(methods); #>
+    }
+<#+
+}
+
+protected void DefineLightInterface(string name, params InterfaceMethod[] methods)
+{
+#>
+    public sealed unsafe partial class <#= name #> : GameInputComPtr<<#= name #>>
+    {
+        internal <#= name #>(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
+
+        protected override <#= name #> DuplicateImpl() => new(handle, true);
+<#+ ForwardInterfaceMethods(methods); #>
+
+        public bool Equals(Light<#= name #> obj)
+            => obj == this;
+    }
+
+    public unsafe ref partial struct Light<#= name #>
+    {
+        internal IntPtr handle;
+        private bool ownsHandle;
+
+        public bool IsInvalid => handle == IntPtr.Zero;
+
+        internal Light<#= name #>(IntPtr handle, bool ownsHandle)
+        {
+            this.handle = handle;
+            this.ownsHandle = ownsHandle;
+        }
+
+        public void Dispose()
+        {
+            if (handle != IntPtr.Zero && ownsHandle)
+            {
+                Marshal.Release(handle);
+                handle = IntPtr.Zero;
+            }
+        }
+
+        public IntPtr DangerousGetHandle() => handle;
+
+        public <#= name #> ToComPtr()
+        {
+            // Move handle to the new instance
+            var handle = this.handle;
+            this.handle = IntPtr.Zero;
+            return new(handle, ownsHandle);
+        }
+
+        public static implicit operator Light<#= name #>(<#= name #> instance)
+        {
+            return new(instance.DangerousGetHandle(), ownsHandle: false);
+        }
+
+        public static bool operator ==(Light<#= name #> left, Light<#= name #> right)
+        {
+            // GameInput interfaces can be compared directly by pointer for equality
+            return left.handle == right.handle;
+        }
+
+        public static bool operator ==(<#= name #>? left, Light<#= name #> right)
+        {
+            return left?.handle == right.handle;
+        }
+
+        public static bool operator ==(Light<#= name #> left, <#= name #>? right)
+        {
+            return left.handle == right?.handle;
+        }
+
+        public static bool operator !=(Light<#= name #> left, Light<#= name #> right)
+            => !(left == right);
+
+        public static bool operator !=(<#= name #>? left, Light<#= name #> right)
+            => !(left == right);
+
+        public static bool operator !=(Light<#= name #> left, <#= name #>? right)
+            => !(left == right);
+
+        public bool Equals(Light<#= name #> obj)
+            => obj == this;
+
+        public bool Equals(<#= name #> obj)
+            => obj == this;
+
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
+        [Obsolete("Equals(object) on Light<#= name #> will always throw an exception. Use the equality operator instead.", true)]
+        public override bool Equals(object? obj)
+            => throw new NotSupportedException();
+#pragma warning restore CS0809
+
+        public override int GetHashCode()
+            => handle.GetHashCode();
+<#+ ForwardInterfaceMethods(methods); #>
+    }
+<#+
+}
+
+private void ForwardInterfaceMethods(InterfaceMethod[] methods)
+{
+    int vtableIndex = 0;
+
+    // IUnknown methods
+    // These are already provided through the Marshal class,
+    // so we don't need to expose them ourselves
+    // ForwardMethod(vtableIndex++, new(Visibility.Internal, "HRESULT", "QueryInterface", 
+    //     ("REFIID", "riid"),
+    //     ("out void*", "ppvObj")
+    // ));
+    // ForwardMethod(vtableIndex++, new(Visibility.Internal, "ULONG", "AddRef"));
+    // ForwardMethod(vtableIndex++, new(Visibility.Internal, "ULONG", "Release"));
+    vtableIndex += 3;
+
+    // Other interface methods
+    for (int i = 0; i < methods.Length; i++)
+    {
+        var method = methods[i];
+        if (method.IsCustom)
+        {
+            method.CustomAction();
+        }
+        else
+        {
+            ForwardMethod(vtableIndex++, methods[i]);
+        }
+    }
+}
+
+private void ForwardMethod(int vtableIndex, InterfaceMethod method)
+{
+    var fnPtrTypes = method.Parameters.Select((p) => p.ToFnPointerType()).Prepend("IntPtr").Append(method.ReturnType);
+    var fnCallArgs = method.Parameters.Select((p) => p.ToFnPointerArgument()).Prepend("thisPtr");
+    string fnPtrType = $"delegate* unmanaged[Stdcall]<{string.Join(", ", fnPtrTypes)}>";
+
+    // Make the generated code look a little nicer if there's no parameters
+    if (method.Parameters.Length < 1)
+    {
+#>
+
+        <#= method.VisModifier #> <#= method.ReturnType #> <#= method.Name #>()
+<#+
+    }
+    else
+    {
+#>
+
+        <#= method.VisModifier #> <#= method.ReturnType #> <#= method.Name #>(
+<#+
+        for (int i = 0; i < method.Parameters.Length; i++)
+        {
+            var parameter = method.Parameters[i];
+            if (i < method.Parameters.Length - 1)
+            {
+#>
+            <#= parameter.TypeDecl #> <#= parameter.Name #>,
+<#+
+            }
+            else
+            {
+#>
+            <#= parameter.TypeDecl #> <#= parameter.Name #>
+<#+
+            }
+        }
+#>
+        )
+<#+
+    }
+#>
+        {
+            ThrowHelper.CheckDisposed(IsInvalid, "this");
+<#+
+    foreach (var parameter in method.Parameters)
+    {
+        // Don't check output or optional parameters
+        if (parameter.Indirection == ParameterIndirection.Out || (parameter.Flags & ParameterFlag.Nullable) != 0)
+            continue;
+
+        // Verify input handle types
+        if (InterfaceTypes.Contains(parameter.TypeName))
+        {
+#>
+            ThrowHelper.CheckHandle(<#= parameter.Name #>);
+<#+
+        }
+        else if (LightInterfaceTypes.Contains(parameter.TypeName))
+        {
+#>
+            ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, nameof(<#= parameter.Name #>));
+<#+
+        }
+        // Verify pointer types
+        else if ((parameter.Flags & ParameterFlag.Pointer) != 0)
+        {
+#>
+            ThrowHelper.CheckNull(<#= parameter.Name #>);
+<#+
+        }
+    }
+#>
+
+            var thisPtr = handle;
+            var vtable = *(void***)thisPtr;
+            var fnPtr = (<#= fnPtrType #>)vtable[<#= vtableIndex #>];
+
+<#+
+    if (method.IsVoid)
+    {
+#>
+            fnPtr(
+                <#= string.Join(",\n                ", fnCallArgs) #>
+            );
+
+<#+
+    }
+    else
+    {
+#>
+            var result = fnPtr(
+                <#= string.Join(",\n                ", fnCallArgs) #>
+            );
+
+<#+
+    }
+
+    foreach (var parameter in method.Parameters)
+    {
+        if (InterfaceTypes.Contains(parameter.TypeName) || LightInterfaceTypes.Contains(parameter.TypeName))
+        {
+            if (parameter.Indirection == ParameterIndirection.Out)
+            {
+#>
+            <#= parameter.Name #> = new(<#= parameter.Name #>_handle, ownsHandle: true);
+<#+
+            }
+        }
+    }
+
+    if (!method.IsVoid)
+    {
+#>
+            return result;
+<#+
+    }
+#>
+        }
+<#+
+}
+#>

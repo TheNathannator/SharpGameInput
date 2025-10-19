@@ -1,4 +1,5 @@
 <#@ template hostspecific="false" language="C#" #>
+<#@ include file="InterfaceGeneration.t4" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#@ output extension=".cs" #>
@@ -15,7 +16,7 @@ using System.Runtime.InteropServices;
 #nullable enable
 
 <#
-HashSet<string> interfaceTypes = new()
+InterfaceTypes = new()
 {
     "IGameInput",
     "IGameInputReading",
@@ -25,357 +26,37 @@ HashSet<string> interfaceTypes = new()
     "IGameInputRawDeviceReport",
 };
 
-HashSet<string> lightInterfaceTypes = interfaceTypes.Select((n) => "Light" + n).ToHashSet();
-
-const int TypeMarker_In = 0x01;
-const int TypeMarker_Out = 0x02;
-const int TypeMarker_Nullable = 0x04;
-const int TypeMarker_Pointer = 0x08;
-
-const int IUnknownMethodCount = 3;
-int methodIndex = 0;
-
-void DefineInterface(string name, Action makeMethods)
-{
-#>
-    public sealed unsafe partial class <#= name #> : GameInputComPtr<<#= name #>>
-    {
-        internal <#= name #>(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
-
-        protected override <#= name #> DuplicateImpl() => new(handle, true);
-<#
-    methodIndex = 0;
-    makeMethods();
-#>
-    }
-<#
-}
-
-void DefineLightInterface(string name, Action makeMethods)
-{
-#>
-    public sealed unsafe partial class <#= name #> : GameInputComPtr<<#= name #>>
-    {
-        internal <#= name #>(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
-
-        protected override <#= name #> DuplicateImpl() => new(handle, true);
-<#
-    methodIndex = 0;
-    makeMethods();
-#>
-
-        public bool Equals(Light<#= name #> obj)
-            => obj == this;
-    }
-
-    public unsafe ref partial struct Light<#= name #>
-    {
-        internal IntPtr handle;
-        private bool ownsHandle;
-
-        public bool IsInvalid => handle == IntPtr.Zero;
-
-        internal Light<#= name #>(IntPtr handle, bool ownsHandle)
-        {
-            this.handle = handle;
-            this.ownsHandle = ownsHandle;
-        }
-
-        public void Dispose()
-        {
-            if (handle != IntPtr.Zero && ownsHandle)
-            {
-                Marshal.Release(handle);
-                handle = IntPtr.Zero;
-            }
-        }
-
-        public IntPtr DangerousGetHandle() => handle;
-
-        public <#= name #> ToComPtr()
-        {
-            // Move handle to the new instance
-            var handle = this.handle;
-            this.handle = IntPtr.Zero;
-            return new(handle, ownsHandle);
-        }
-
-        public static implicit operator Light<#= name #>(<#= name #> instance)
-        {
-            return new(instance.DangerousGetHandle(), ownsHandle: false);
-        }
-
-        public static bool operator ==(Light<#= name #> left, Light<#= name #> right)
-        {
-            // GameInput interfaces can be compared directly by pointer for equality
-            return left.handle == right.handle;
-        }
-
-        public static bool operator ==(<#= name #>? left, Light<#= name #> right)
-        {
-            return left?.handle == right.handle;
-        }
-
-        public static bool operator ==(Light<#= name #> left, <#= name #>? right)
-        {
-            return left.handle == right?.handle;
-        }
-
-        public static bool operator !=(Light<#= name #> left, Light<#= name #> right)
-            => !(left == right);
-
-        public static bool operator !=(<#= name #>? left, Light<#= name #> right)
-            => !(left == right);
-
-        public static bool operator !=(Light<#= name #> left, <#= name #>? right)
-            => !(left == right);
-
-        public bool Equals(Light<#= name #> obj)
-            => obj == this;
-
-        public bool Equals(<#= name #> obj)
-            => obj == this;
-
-#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
-        [Obsolete("Equals(object) on Light<#= name #> will always throw an exception. Use the equality operator instead.", true)]
-        public override bool Equals(object? obj)
-            => throw new NotSupportedException();
-#pragma warning restore CS0809
-
-        public override int GetHashCode()
-            => handle.GetHashCode();
-<#
-    methodIndex = 0;
-    makeMethods();
-#>
-    }
-<#
-}
-
-void ForwardMethod(string returnType, string name, params (string type, string name)[] parameters)
-{
-    _ForwardMethod("public", returnType, name, parameters);
-}
-
-void ForwardMethodInternally(string returnType, string name, params (string type, string name)[] parameters)
-{
-    _ForwardMethod("internal", returnType, name, parameters);
-}
-
-void ForwardMethodPrivately(string returnType, string name, params (string type, string name)[] parameters)
-{
-    _ForwardMethod("private", returnType, name, parameters);
-}
-
-void _ForwardMethod(string accessibility, string returnType, string name, params (string type, string name)[] _parameters)
-{
-    (string stripped, int flags) GetTypeModifiers(string type)
-    {
-        int flags = 0;
-
-        if (type.StartsWith("in "))
-        {
-            flags |= TypeMarker_In;
-            type = type[3..];
-        }
-        else if (type.StartsWith("out "))
-        {
-            flags |= TypeMarker_Out;
-            type = type[4..];
-        }
-
-        if (type.EndsWith("?"))
-        {
-            flags |= TypeMarker_Nullable;
-            type = type[..^1];
-        }
-
-        if (type.EndsWith("*"))
-            flags |= TypeMarker_Pointer;
-
-        return (type, flags);
-    }
-
-    string FixupType(string type)
-    {
-        // Pseudo-syntax for allowing nullable pointer types;
-        // not actually supported in C#
-        if (type.EndsWith("*?"))
-            type = type[..^1];
-
-        return type;
-    }
-
-    (string name, string type, string strippedType, int flags)[] parameters = _parameters.Select((p) =>
-    {
-        var (strippedType, flags) = GetTypeModifiers(p.type);
-        return (p.name, FixupType(p.type), strippedType, flags);
-    }).ToArray();
-
-    bool isVoid = returnType == "void";
-#>
-
-<#
-    // Make the generated code look a little nicer if there's no parameters
-    if (parameters.Length > 0)
-    {
-#>
-        <#= accessibility #> <#= returnType #> <#= name #>(
-            <#= string.Join(",\n            ", parameters.Select((p) => $"{p.type} {p.name}")) #>
-        )
-<#
-    }
-    else
-    {
-#>
-        <#= accessibility #> <#= returnType #> <#= name #>()
-<#
-    }
-
-    var fnPtrParams = parameters.Select((p) =>
-    {
-        string type = p.strippedType;
-        int flags = p.flags;
-
-        if (interfaceTypes.Contains(type) || lightInterfaceTypes.Contains(type))
-            type = "IntPtr";
-
-        if ((flags & TypeMarker_In) != 0)
-            type = "in " + type;
-        else if ((flags & TypeMarker_Out) != 0)
-            type = "out " + type;
-
-        return type;
-    }).Prepend("IntPtr").Append(returnType);
-
-    var fnCallParams = parameters.Select((p) =>
-    {
-        string argument = p.name;
-        string type = p.strippedType;
-        int flags = p.flags;
-
-        if (interfaceTypes.Contains(type) || lightInterfaceTypes.Contains(type))
-        {
-            if ((flags & TypeMarker_Out) != 0)
-                argument = $"IntPtr {p.name}_handle";
-            else if ((flags & TypeMarker_Nullable) != 0)
-                argument = $"{p.name}?.DangerousGetHandle() ?? IntPtr.Zero";
-            else
-                argument = $"{p.name}.DangerousGetHandle()";
-        }
-
-        if ((flags & TypeMarker_In) != 0)
-            argument = "in " + argument;
-        else if ((flags & TypeMarker_Out) != 0)
-            argument = "out " + argument;
-
-        return argument;
-    }).Prepend("thisPtr");
-
-    string fnPtrType = $"delegate* unmanaged[Stdcall]<{string.Join(", ", fnPtrParams)}>";
-#>
-        {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-<#
-    foreach (var parameter in parameters)
-    {
-        string type = parameter.strippedType;
-        int flags = parameter.flags;
-
-        // Don't check output or optional parameters
-        if ((flags & (TypeMarker_Out | TypeMarker_Nullable)) != 0)
-            continue;
-
-        // Verify input handle types
-        if (interfaceTypes.Contains(type))
-        {
-#>
-            ThrowHelper.CheckHandle(<#= parameter.name #>);
-<#
-        }
-        else if (lightInterfaceTypes.Contains(type))
-        {
-#>
-            ThrowHelper.CheckDisposed(<#= parameter.name #>.IsInvalid, nameof(<#= parameter.name #>));
-<#
-        }
-        // Verify pointer types
-        else if ((flags & TypeMarker_Pointer) != 0)
-        {
-#>
-            ThrowHelper.CheckNull(<#= parameter.name #>);
-<#
-        }
-    }
-#>
-
-            var thisPtr = handle;
-            var vtable = *(void***)thisPtr;
-            var fnPtr = (<#= fnPtrType #>)vtable[<#= IUnknownMethodCount + methodIndex++ #>];
-
-            <#= !isVoid ? "var result = " : "" #>fnPtr(
-                <#= string.Join(",\n                ", fnCallParams) #>
-            );
-
-<#
-    foreach (var parameter in parameters)
-    {
-        string type = parameter.strippedType;
-        int flags = parameter.flags;
-
-        if (interfaceTypes.Contains(type) || lightInterfaceTypes.Contains(type))
-        {
-            if ((flags & TypeMarker_Out) != 0)
-            {
-#>
-            <#= parameter.name #> = new(<#= parameter.name #>_handle, ownsHandle: true);
-<#
-            }
-        }
-    }
-
-    if (!isVoid)
-    {
-#>
-            return result;
-<#
-    }
-#>
-        }
-<#
-}
+LightInterfaceTypes = InterfaceTypes.Select((n) => "Light" + n).ToHashSet();
 #>
 namespace SharpGameInput
 {
 <#
-    DefineInterface("IGameInput", () =>
-    {
-        ForwardMethod("ulong", "GetCurrentTimestamp");
-
-        ForwardMethod("int", "GetCurrentReading", 
+    DefineInterface("IGameInput",
+        new("ulong", "GetCurrentTimestamp"),
+        new("int", "GetCurrentReading", 
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
             ("out LightIGameInputReading", "reading")
-        );
-        ForwardMethod("int", "GetNextReading", 
+        ),
+        new("int", "GetNextReading", 
             ("LightIGameInputReading", "referenceReading"),
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
             ("out LightIGameInputReading", "reading")
-        );
-        ForwardMethod("int", "GetPreviousReading",
+        ),
+        new("int", "GetPreviousReading",
             ("LightIGameInputReading", "referenceReading"),
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
             ("out LightIGameInputReading", "reading")
-        );
-        ForwardMethod("int", "GetTemporalReading",
+        ),
+        new("int", "GetTemporalReading",
             ("ulong", "timestamp"),
             ("IGameInputDevice", "device"),
             ("out LightIGameInputReading", "reading")
-        );
+        ),
 
-        ForwardMethodPrivately("int", "RegisterReadingCallback",
+        new(Visibility.Private, "int", "RegisterReadingCallback",
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("float", "analogThreshold"),
@@ -383,8 +64,8 @@ namespace SharpGameInput
             ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, bool, void>",
                 "callbackFunc"),
             ("out ulong", "callbackToken")
-        );
-        ForwardMethodPrivately("int", "RegisterDeviceCallback",
+        ),
+        new(Visibility.Private, "int", "RegisterDeviceCallback",
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("GameInputDeviceStatus", "statusFilter"),
@@ -393,62 +74,64 @@ namespace SharpGameInput
             ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputDeviceStatus, GameInputDeviceStatus, void>",
                 "callbackFunc"),
             ("out ulong", "callbackToken")
-        );
+        ),
         // gg Microsoft, ABI breakage
-        // ForwardMethodPrivately("int", "RegisterGuideButtonCallback",
+        // new(Visibility.Private, "int", "RegisterGuideButtonCallback",
         //     ("IGameInputDevice?", "device"),
         //     ("void*?", "context"),
         //     ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, bool, void>",
         //         "callbackFunc"),
         //     ("out ulong", "callbackToken")
-        // );
-        ForwardMethodPrivately("int", "RegisterSystemButtonCallback",
+        // ),
+        new(Visibility.Private, "int", "RegisterSystemButtonCallback",
             ("IGameInputDevice?", "device"),
             ("GameInputSystemButtons", "buttonFilter"),
             ("void*?", "context"),
             ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputSystemButtons, GameInputSystemButtons, void>",
                 "callbackFunc"),
             ("out ulong", "callbackToken")
-        );
-        ForwardMethodPrivately("int", "RegisterKeyboardLayoutCallback",
+        ),
+        new(Visibility.Private, "int", "RegisterKeyboardLayoutCallback",
             ("IGameInputDevice?", "device"),
             ("void*?", "context"),
             ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, uint, uint, void>",
                 "callbackFunc"),
             ("out ulong", "callbackToken")
-        );
-        ForwardMethod("void", "StopCallback",
+        ),
+        new("void", "StopCallback",
             ("ulong", "callbackToken")
-        );
-        ForwardMethodPrivately("bool", "_UnregisterCallback",
+        ),
+        new(Visibility.Private, "bool", "_UnregisterCallback",
             ("ulong", "callbackToken"),
             ("ulong", "timeoutInMicroseconds")
-        );
+        ),
 
-        ForwardMethod("int", "CreateDispatcher",
+        new("int", "CreateDispatcher",
             ("out IGameInputDispatcher", "dispatcher")
-        );
-        ForwardMethod("int", "CreateAggregateDevice",
+        ),
+        new("int", "CreateAggregateDevice",
             ("GameInputKind", "inputKind"),
             ("out IGameInputDevice", "device")
-        );
+        ),
 
-        ForwardMethod("int", "FindDeviceFromId",
+        new("int", "FindDeviceFromId",
             ("in APP_LOCAL_DEVICE_ID", "id"),
             ("out IGameInputDevice", "device")
-        );
-        ForwardMethod("int", "FindDeviceFromObject",
+        ),
+        new("int", "FindDeviceFromObject",
             ("IntPtr", "pUnknown"),
             ("out IGameInputDevice", "device")
-        );
-        ForwardMethod("int", "FindDeviceFromPlatformHandle",
+        ),
+        new("int", "FindDeviceFromPlatformHandle",
             ("IntPtr", "handle"),
             ("out IGameInputDevice", "device")
-        );
-        ForwardMethod("int", "FindDeviceFromPlatformString",
+        ),
+        new("int", "FindDeviceFromPlatformString",
             ("char*", "str"),
             ("out IGameInputDevice", "device")
-        );
+        ),
+        new(() =>
+        {
 #>
 
         public int FindDeviceFromPlatformString(string str, out IGameInputDevice device)
@@ -457,25 +140,24 @@ namespace SharpGameInput
                 return FindDeviceFromPlatformString(ptr, out device);
         }
 <#
+        }),
 
-        ForwardMethod("int", "EnableOemDeviceSupport",
+        new("int", "EnableOemDeviceSupport",
             ("ushort", "vendorId"),
             ("ushort", "productId"),
             ("byte", "interfaceNumber"),
             ("byte", "collectionNumber")
-        );
+        ),
 
-        ForwardMethod("void", "SetFocusPolicy",
+        new("void", "SetFocusPolicy",
             ("GameInputFocusPolicy", "policy")
-        );
-    });
+        )
+    );
 #>
 
 <#
-    DefineLightInterface("IGameInputReading", () =>
+    void MakeArrayWrappers(string returnType, string name, (string type, string name) array)
     {
-        void MakeArrayWrappers(string returnType, string name, (string type, string name) array)
-        {
 #>
 
         public <#= returnType #> <#= name #>(<#= array.type #>[] <#= array.name #>)
@@ -492,160 +174,175 @@ namespace SharpGameInput
         }
 #endif
 <#
-        }
+    }
 
-        ForwardMethod("GameInputKind", "GetInputKind");
-        ForwardMethod("ulong", "GetSequenceNumber",
+    DefineLightInterface("IGameInputReading",
+        new("GameInputKind", "GetInputKind"),
+        new("ulong", "GetSequenceNumber",
             ("GameInputKind", "inputKind")
-        );
-        ForwardMethod("ulong", "GetTimestamp");
-        ForwardMethod("void", "GetDevice",
+        ),
+        new("ulong", "GetTimestamp"),
+        new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
-        );
-        ForwardMethod("bool", "GetRawReport",
+        ),
+        new("bool", "GetRawReport",
             ("out LightIGameInputRawDeviceReport", "report")
-        );
+        ),
 
-        ForwardMethod("uint", "GetControllerAxisCount");
-        ForwardMethod("uint", "GetControllerAxisState",
+        new("uint", "GetControllerAxisCount"),
+        new("uint", "GetControllerAxisState",
             ("uint", "stateArrayCount"),
             ("float*", "stateArray")
-        );
-        MakeArrayWrappers("uint", "GetControllerAxisState", ("float", "stateArray"));
+        ),
+        new(() => MakeArrayWrappers("uint", "GetControllerAxisState",
+            ("float", "stateArray")
+        )),
 
-        ForwardMethod("uint", "GetControllerButtonCount");
-        ForwardMethod("uint", "GetControllerButtonState",
+        new("uint", "GetControllerButtonCount"),
+        new("uint", "GetControllerButtonState",
             ("uint", "stateArrayCount"),
             ("bool*", "stateArray")
-        );
-        MakeArrayWrappers("uint", "GetControllerButtonState", ("bool", "stateArray"));
+        ),
+        new(() => MakeArrayWrappers("uint", "GetControllerButtonState",
+            ("bool", "stateArray")
+        )),
 
-        ForwardMethod("uint", "GetControllerSwitchCount");
-        ForwardMethod("uint", "GetControllerSwitchState",
+        new("uint", "GetControllerSwitchCount"),
+        new("uint", "GetControllerSwitchState",
             ("uint", "stateArrayCount"),
             ("GameInputSwitchPosition*", "stateArray")
-        );
-        MakeArrayWrappers("uint", "GetControllerSwitchState", ("GameInputSwitchPosition", "stateArray"));
+        ),
+        new(() => MakeArrayWrappers("uint", "GetControllerSwitchState",
+            ("GameInputSwitchPosition", "stateArray")
+        )),
 
-        ForwardMethod("uint", "GetKeyCount");
-        ForwardMethod("uint", "GetKeyState",
+        new("uint", "GetKeyCount"),
+        new("uint", "GetKeyState",
             ("uint", "stateArrayCount"),
             ("GameInputKeyState*", "stateArray")
-        );
-        MakeArrayWrappers("uint", "GetKeyState", ("GameInputKeyState", "stateArray"));
+        ),
+        new(() => MakeArrayWrappers("uint", "GetKeyState",
+            ("GameInputKeyState", "stateArray")
+        )),
 
-        ForwardMethod("bool", "GetMouseState",
+        new("bool", "GetMouseState",
             ("out GameInputMouseState", "state")
-        );
+        ),
 
-        ForwardMethod("uint", "GetTouchCount");
-        ForwardMethod("uint", "GetTouchState",
+        new("uint", "GetTouchCount"),
+        new("uint", "GetTouchState",
             ("uint", "stateArrayCount"),
             ("GameInputTouchState*", "stateArray")
-        );
-        MakeArrayWrappers("uint", "GetTouchState", ("GameInputTouchState", "stateArray"));
+        ),
+        new(() => MakeArrayWrappers("uint", "GetTouchState",
+            ("GameInputTouchState", "stateArray")
+        )),
 
-        ForwardMethod("bool", "GetMotionState",
+        new("bool", "GetMotionState",
             ("out GameInputMotionState", "state")
-        );
+        ),
 
-        ForwardMethod("bool", "GetArcadeStickState",
+        new("bool", "GetArcadeStickState",
             ("out GameInputArcadeStickState", "state")
-        );
+        ),
 
-        ForwardMethod("bool", "GetFlightStickState",
+        new("bool", "GetFlightStickState",
             ("out GameInputFlightStickState", "state")
-        );
+        ),
 
-        ForwardMethod("bool", "GetGamepadState",
+        new("bool", "GetGamepadState",
             ("out GameInputGamepadState", "state")
-        );
+        ),
 
-        ForwardMethod("bool", "GetRacingWheelState",
+        new("bool", "GetRacingWheelState",
             ("out GameInputRacingWheelState", "state")
-        );
+        ),
 
-        ForwardMethod("bool", "GetUiNavigationState",
+        new("bool", "GetUiNavigationState",
             ("out GameInputUiNavigationState", "state")
-        );
-    });
+        )
+    );
 #>
 
 <#
-    DefineLightInterface("IGameInputDevice", () =>
-    {
-        ForwardMethodPrivately("GameInputDeviceInfo*", "GetDeviceInfo");
-        ForwardMethod("GameInputDeviceStatus", "GetDeviceStatus");
-        ForwardMethod("void", "GetBatteryState",
+    DefineLightInterface("IGameInputDevice",
+        new(Visibility.Private, "GameInputDeviceInfo*", "GetDeviceInfo"),
+        new("GameInputDeviceStatus", "GetDeviceStatus"),
+        new("void", "GetBatteryState",
             ("out GameInputBatteryState", "state")
-        );
+        ),
 
+        new(() =>
+        {
 #>
 
         public ref readonly GameInputDeviceInfo DeviceInfo => ref *GetDeviceInfo();
 <#
+        }),
 
-        ForwardMethod("int", "CreateForceFeedbackEffect",
+        new("int", "CreateForceFeedbackEffect",
             ("uint", "motorIndex"),
             ("in GameInputForceFeedbackParams", "ffbParams"),
             ("out LightIGameInputForceFeedbackEffect", "effect")
-        );
+        ),
 
-        ForwardMethod("bool", "IsForceFeedbackMotorPoweredOn",
+        new("bool", "IsForceFeedbackMotorPoweredOn",
             ("uint", "motorIndex")
-        );
+        ),
 
-        ForwardMethod("void", "SetForceFeedbackMotorGain",
+        new("void", "SetForceFeedbackMotorGain",
             ("uint", "motorIndex"),
             ("float", "masterGain")
-        );
-        ForwardMethod("int", "SetHapticMotorState",
+        ),
+        new("int", "SetHapticMotorState",
             ("uint", "motorIndex"),
             ("in GameInputHapticFeedbackParams", "hapticParams")
-        );
-        ForwardMethod("void", "SetRumbleState",
+        ),
+        new("void", "SetRumbleState",
             ("in GameInputRumbleParams", "rumbleParams")
-        );
+        ),
 
-        ForwardMethod("void", "SetInputSynchronizationState",
+        new("void", "SetInputSynchronizationState",
             ("bool", "enabled")
-        );
-        ForwardMethod("void", "SendInputSynchronizationHint");
+        ),
+        new("void", "SendInputSynchronizationHint"),
 
-        ForwardMethod("void", "PowerOff");
+        new("void", "PowerOff"),
 
-        ForwardMethod("int", "CreateRawDeviceReport",
+        new("int", "CreateRawDeviceReport",
             ("uint", "reportId"),
             ("GameInputRawDeviceReportKind", "reportKind"),
             ("out LightIGameInputRawDeviceReport", "report")
-        );
-        ForwardMethod("int", "GetRawDeviceFeature",
+        ),
+        new("int", "GetRawDeviceFeature",
             ("uint", "reportId"),
             ("out LightIGameInputRawDeviceReport", "report")
-        );
-        ForwardMethod("int", "SetRawDeviceFeature",
+        ),
+        new("int", "SetRawDeviceFeature",
             ("LightIGameInputRawDeviceReport", "report")
-        );
-        ForwardMethod("int", "SendRawDeviceOutput",
+        ),
+        new("int", "SendRawDeviceOutput",
             ("LightIGameInputRawDeviceReport", "report")
-        );
-        ForwardMethod("int", "SendRawDeviceOutputWithResponse",
+        ),
+        new("int", "SendRawDeviceOutputWithResponse",
             ("LightIGameInputRawDeviceReport", "requestReport"),
             ("out LightIGameInputRawDeviceReport", "responseReport")
-        );
+        ),
 
-        ForwardMethod("int", "ExecuteRawDeviceIoControl",
+        new("int", "ExecuteRawDeviceIoControl",
             ("uint", "controlCode"),
             ("nuint", "inputBufferSize"),
             ("void*?", "inputBuffer"),
             ("nuint", "outputBufferSize"),
             ("void*?", "outputBuffer"),
             ("out nuint", "bytesReturned")
-        );
-        ForwardMethod("bool", "AcquireExclusiveRawDeviceAccess",
+        ),
+        new("bool", "AcquireExclusiveRawDeviceAccess",
             ("ulong", "timeoutInMicroseconds")
-        );
-        ForwardMethod("void", "ReleaseExclusiveRawDeviceAccess");
+        ),
+        new("void", "ReleaseExclusiveRawDeviceAccess"),
+        new(() =>
+        {
 #>
 
         public int ExecuteRawDeviceIoControl(uint controlCode, byte[] inputBuffer, byte[] outputBuffer,
@@ -711,73 +408,76 @@ namespace SharpGameInput
                 );
         }
 <#
-    });
+        })
+    );
 #>
 
 <#
-    DefineInterface("IGameInputDispatcher", () =>
-    {
-        ForwardMethod("bool", "Dispatch",
+    DefineInterface("IGameInputDispatcher",
+        new("bool", "Dispatch",
             ("ulong", "quotaInMicroseconds")
-        );
-        ForwardMethod("int", "OpenWaitHandle",
+        ),
+        new("int", "OpenWaitHandle",
             ("out IntPtr", "waitHandle")
-        );
-    });
+        )
+    );
 #>
 
 <#
-    DefineLightInterface("IGameInputForceFeedbackEffect", () =>
-    {
-        ForwardMethod("void", "GetDevice",
+    DefineLightInterface("IGameInputForceFeedbackEffect",
+        new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
-        );
+        ),
 
-        ForwardMethod("uint", "GetMotorIndex");
+        new("uint", "GetMotorIndex"),
 
-        ForwardMethod("float", "GetGain");
-        ForwardMethod("void", "SetGain",
+        new("float", "GetGain"),
+        new("void", "SetGain",
             ("float", "gain")
-        );
+        ),
 
-        ForwardMethod("void", "GetParams",
+        new("void", "GetParams",
             ("out GameInputForceFeedbackParams", "ffbParams")
-        );
-        ForwardMethod("bool", "SetParams",
+        ),
+        new("bool", "SetParams",
             ("in GameInputForceFeedbackParams", "ffbParams")
-        );
+        ),
 
-        ForwardMethod("GameInputFeedbackEffectState", "GetState");
-        ForwardMethod("void", "SetState",
+        new("GameInputFeedbackEffectState", "GetState"),
+        new("void", "SetState",
             ("GameInputFeedbackEffectState", "state")
-        );
-    });
+        )
+    );
 #>
 
 <#
-    DefineLightInterface("IGameInputRawDeviceReport", () =>
-    {
-        ForwardMethod("void", "GetDevice",
+    DefineLightInterface("IGameInputRawDeviceReport",
+        new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
-        );
+        ),
 
-        ForwardMethodPrivately("GameInputRawDeviceReportInfo*", "GetReportInfo");
+        new(Visibility.Private, "GameInputRawDeviceReportInfo*", "GetReportInfo"),
 
+        new(() =>
+        {
 #>
 
         public ref readonly GameInputRawDeviceReportInfo ReportInfo => ref *GetReportInfo();
 <#
+        }),
 
-        ForwardMethod("nuint", "GetRawDataSize");
-        ForwardMethod("nuint", "GetRawData",
+        new("nuint", "GetRawDataSize"),
+        new("nuint", "GetRawData",
             ("nuint", "bufferSize"),
             ("void*", "buffer")
-        );
-        ForwardMethod("bool", "SetRawData",
+        ),
+        new("bool", "SetRawData",
             ("nuint", "bufferSize"),
             ("void*", "buffer")
-        );
+        ),
 
+        new(() =>
+        {
 #>
 
         public nuint GetRawData(byte[] buffer)
@@ -822,20 +522,21 @@ namespace SharpGameInput
                 return SetRawData((nuint)sizeof(T), ptr);
         }
 <#
+        }),
 
-        ForwardMethod("bool", "GetItemValue",
+        new("bool", "GetItemValue",
             ("uint", "itemIndex"),
             ("out long", "value")
-        );
-        ForwardMethod("bool", "SetItemValue",
+        ),
+        new("bool", "SetItemValue",
             ("uint", "itemIndex"),
             ("long", "value")
-        );
+        ),
 
-        ForwardMethod("bool", "ResetItemValue",
+        new("bool", "ResetItemValue",
             ("uint", "itemIndex")
-        );
-        ForwardMethod("bool", "ResetAllItems");
-    });
+        ),
+        new("bool", "ResetAllItems")
+    );
 #>
 }
