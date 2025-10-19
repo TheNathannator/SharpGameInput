@@ -1,0 +1,8 @@
+LoadLibrary
+GetProcAddress
+
+HKEY_LOCAL_MACHINE
+RegGetValueW
+
+HRESULT_FROM_WIN32
+S_OK
