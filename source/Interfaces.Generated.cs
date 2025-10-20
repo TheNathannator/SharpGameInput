@@ -318,7 +318,7 @@ namespace SharpGameInput
         }
 
         public int FindDeviceFromId(
-            in APP_LOCAL_DEVICE_ID id,
+            in APP_LOCAL_DEVICE_ID value,
             out IGameInputDevice device
         )
         {
@@ -330,7 +330,7 @@ namespace SharpGameInput
 
             var result = fnPtr(
                 thisPtr,
-                in id,
+                in value,
                 out IntPtr device_handle
             );
 
@@ -339,7 +339,7 @@ namespace SharpGameInput
         }
 
         public int FindDeviceFromObject(
-            IntPtr pUnknown,
+            IntPtr value,
             out IGameInputDevice device
         )
         {
@@ -351,7 +351,7 @@ namespace SharpGameInput
 
             var result = fnPtr(
                 thisPtr,
-                pUnknown,
+                value,
                 out IntPtr device_handle
             );
 
@@ -360,7 +360,7 @@ namespace SharpGameInput
         }
 
         public int FindDeviceFromPlatformHandle(
-            IntPtr handle,
+            IntPtr value,
             out IGameInputDevice device
         )
         {
@@ -372,7 +372,7 @@ namespace SharpGameInput
 
             var result = fnPtr(
                 thisPtr,
-                handle,
+                value,
                 out IntPtr device_handle
             );
 
@@ -381,12 +381,12 @@ namespace SharpGameInput
         }
 
         public int FindDeviceFromPlatformString(
-            char* str,
+            char* value,
             out IGameInputDevice device
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckNull(str);
+            ThrowHelper.CheckNull(value);
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -394,7 +394,7 @@ namespace SharpGameInput
 
             var result = fnPtr(
                 thisPtr,
-                str,
+                value,
                 out IntPtr device_handle
             );
 
@@ -402,9 +402,9 @@ namespace SharpGameInput
             return result;
         }
 
-        public int FindDeviceFromPlatformString(string str, out IGameInputDevice device)
+        public int FindDeviceFromPlatformString(string value, out IGameInputDevice device)
         {
-            fixed (char* ptr = str)
+            fixed (char* ptr = value)
                 return FindDeviceFromPlatformString(ptr, out device);
         }
 
@@ -1466,19 +1466,19 @@ namespace SharpGameInput
 
         protected override IGameInputDevice DuplicateImpl() => new(handle, true);
 
-        private GameInputDeviceInfo* GetDeviceInfo()
+        private ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputDeviceInfo*>)vtable[3];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ref readonly GameInputDeviceInfo>)vtable[3];
 
-            var result = fnPtr(
+            ref readonly var result = ref fnPtr(
                 thisPtr
             );
 
-            return result;
+            return ref result;
         }
 
         public GameInputDeviceStatus GetDeviceStatus()
@@ -1513,7 +1513,7 @@ namespace SharpGameInput
 
         }
 
-        public ref readonly GameInputDeviceInfo DeviceInfo => ref *GetDeviceInfo();
+        public ref readonly GameInputDeviceInfo DeviceInfo => ref GetDeviceInfo();
 
         public int CreateForceFeedbackEffect(
             uint motorIndex,
@@ -1965,19 +1965,19 @@ namespace SharpGameInput
         public override int GetHashCode()
             => handle.GetHashCode();
 
-        private GameInputDeviceInfo* GetDeviceInfo()
+        private ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputDeviceInfo*>)vtable[3];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ref readonly GameInputDeviceInfo>)vtable[3];
 
-            var result = fnPtr(
+            ref readonly var result = ref fnPtr(
                 thisPtr
             );
 
-            return result;
+            return ref result;
         }
 
         public GameInputDeviceStatus GetDeviceStatus()
@@ -2012,7 +2012,7 @@ namespace SharpGameInput
 
         }
 
-        public ref readonly GameInputDeviceInfo DeviceInfo => ref *GetDeviceInfo();
+        public ref readonly GameInputDeviceInfo DeviceInfo => ref GetDeviceInfo();
 
         public int CreateForceFeedbackEffect(
             uint motorIndex,

@@ -1,74 +1,93 @@
 <#@ template hostspecific="false" language="C#" #>
+<#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#@ output extension=".cs" #>
 <#+
-protected enum Visibility
+// Types that are identified as interfaces.
+public static HashSet<string> InterfaceTypes = new();
+public static HashSet<string> LightInterfaceTypes = new();
+
+// Type declarations to be entirely replaced before parsing them.
+// Replacements are performed recursively, so one replacement can alias directly to another.
+public static Dictionary<string, string> DeclarationReplacements = new()
+{
+    { "REFIID", "ref Guid" },
+    { "IUnknown*", "IntPtr" },
+};
+
+// Type names to be substituted for proper C# equivalents.
+// Replacements are performed recursively, so one replacement can alias directly to another.
+public static Dictionary<string, string> TypeNameReplacements = new()
+{
+    { "int8_t", "sbyte" },
+    { "uint8_t", "byte" },
+    { "int16_t", "short" },
+    { "uint16_t", "ushort" },
+    { "int32_t", "int" },
+    { "uint32_t", "uint" },
+    { "int64_t", "long" },
+    { "uint64_t", "ulong" },
+    { "size_t", "nuint" },
+    { "ssize_t", "nint" },
+
+    { "char_t", "byte" },
+    { "wchar_t", "char" },
+
+    { "ULONG", "uint" },
+
+    { "IID", "Guid" },
+    { "HRESULT", "int" },
+    { "HANDLE", "IntPtr" },
+};
+
+public enum Visibility
 {
     Public,
     Internal,
     Private,
 }
 
-protected enum ParameterIndirection
+public enum ParameterIndirection
 {
     None,
     In,
     Out,
     Ref,
+    RefReadonly,
 }
 
-[System.Flags]
-protected enum ParameterFlag
+[Flags]
+public enum ParameterFlag
 {
     None = 0,
 
     Nullable = 0x01,
     Pointer  = 0x02,
+
+    Interface = 0x10,
+    LightInterface = 0x20,
 }
 
-protected struct InterfaceParameter
+public struct InterfaceParameter
 {
     public string Name;
-    public string TypeDecl;
     public string TypeName;
 
-    public ParameterFlag Flags;
     public ParameterIndirection Indirection;
+    public ParameterFlag Flags;
 
     public InterfaceParameter(string typeDecl, string name)
     {
-        // Parse type declaration components
+        // Swap out full declarations for their underlying declarations
+        while (DeclarationReplacements.TryGetValue(typeDecl, out string declReplacement))
+        {
+            typeDecl = declReplacement;
+        }
+
         string typeName = typeDecl;
         var flags = ParameterFlag.None;
         var indirection = ParameterIndirection.None;
-
-        if (typeName.StartsWith("in "))
-        {
-            indirection = ParameterIndirection.In;
-            typeName = typeName[3..];
-        }
-        else if (typeName.StartsWith("out "))
-        {
-            indirection = ParameterIndirection.Out;
-            typeName = typeName[4..];
-        }
-        else if (typeName.StartsWith("ref "))
-        {
-            indirection = ParameterIndirection.Ref;
-            typeName = typeName[4..];
-        }
-
-        if (typeName.EndsWith("?"))
-        {
-            flags |= ParameterFlag.Nullable;
-            typeName = typeName[..^1];
-        }
-
-        if (typeName.EndsWith("*"))
-        {
-            flags |= ParameterFlag.Pointer;
-        }
 
         // Pseudo-syntax for allowing nullable pointer types;
         // not actually supported in C#
@@ -77,30 +96,142 @@ protected struct InterfaceParameter
             typeDecl = typeDecl[..^1];
         }
 
+        // Value indirection
+        if (typeName.StartsWith("in "))
+        {
+            indirection = ParameterIndirection.In;
+            typeName = typeName["in ".Length..];
+        }
+        else if (typeName.StartsWith("out "))
+        {
+            indirection = ParameterIndirection.Out;
+            typeName = typeName["out ".Length..];
+        }
+        else if (typeName.StartsWith("ref readonly "))
+        {
+            indirection = ParameterIndirection.RefReadonly;
+            typeName = typeName["ref readonly ".Length..];
+        }
+        else if (typeName.StartsWith("ref "))
+        {
+            indirection = ParameterIndirection.Ref;
+            typeName = typeName["ref ".Length..];
+        }
+
+        // Other modifiers
+        if (typeName.EndsWith("?"))
+        {
+            flags |= ParameterFlag.Nullable;
+            typeName = typeName[..^1];
+        }
+        if (typeName.EndsWith("*"))
+        {
+            flags |= ParameterFlag.Pointer;
+            typeName = typeName[..^1];
+        }
+
+        if (typeDecl.StartsWith("fn("))
+        {
+            // Pseudo-syntax for function pointer types
+            // fn(int, void*, Foo) -> void
+
+            int closeIndex = typeDecl.IndexOf(") -> ");
+            if (closeIndex < 0)
+            {
+                throw new Exception($"Function type '{typeDecl}' is missing its parameter list closing delimiter");
+            }
+
+            string parameterList = typeDecl[3..closeIndex];
+            string returnType = typeDecl[(closeIndex + 5)..];
+
+            string[] parameters = parameterList.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select((p) => new InterfaceParameter(p, "").ToFnPointerType())
+                .ToArray();
+
+            if (parameters.Length > 0)
+            {
+                typeName = $"delegate* unmanaged[Stdcall]<{string.Join(", ", parameters)}, {returnType}>";
+            }
+            else
+            {
+                typeName = $"delegate* unmanaged[Stdcall]<{returnType}>";
+            }
+        }
+        else
+        {
+            // Regular types
+
+            // Convert type names where needed
+            while (TypeNameReplacements.TryGetValue(typeName, out string nameReplacement))
+            {
+                typeName = nameReplacement;
+            }
+
+            if (InterfaceTypes.Contains(typeName))
+            {
+                flags |= ParameterFlag.Interface;
+                flags &= ~ParameterFlag.Pointer; // Interface pointers are wrapped
+
+                if (LightInterfaceTypes.Contains(typeName))
+                {
+                    flags |= ParameterFlag.LightInterface;
+                }
+            }
+        }
+
         Name = name;
-        TypeDecl = typeDecl;
         TypeName = typeName;
 
-        Flags = flags;
         Indirection = indirection;
+        Flags = flags;
+    }
+
+    private static string ToModifierPrefix(ParameterIndirection indirection) => indirection switch
+    {
+        ParameterIndirection.In => "in ",
+        ParameterIndirection.Out => "out ",
+        ParameterIndirection.Ref => "ref ",
+        ParameterIndirection.RefReadonly => "ref readonly ",
+        _ => "",
+    };
+
+    public string ToTypeDecl()
+    {
+        string typeDecl = TypeName;
+
+        // Re-apply type modifiers
+        if ((Flags & ParameterFlag.Pointer) != 0)
+        {
+            typeDecl += "*";
+        }
+        // Note that pointers cannot be nullable; the `else` is important here
+        else if ((Flags & ParameterFlag.Nullable) != 0)
+        {
+            typeDecl += "?";
+        }
+
+        typeDecl = $"{ToModifierPrefix(Indirection)}{typeDecl}";
+
+        return typeDecl;
     }
 
     public string ToFnPointerType()
     {
         string type = TypeName;
 
-        if (InterfaceTypes.Contains(type) || LightInterfaceTypes.Contains(type))
+        if ((Flags & ParameterFlag.Interface) != 0)
         {
+            // Interfaces must be marshalled as their pointer values
             type = "IntPtr";
         }
 
-        type = Indirection switch
+        type = ToModifierPrefix(Indirection) + type;
+
+        // Re-apply pointer modifier
+        if ((Flags & ParameterFlag.Pointer) != 0)
         {
-            ParameterIndirection.In => "in " + type,
-            ParameterIndirection.Out => "out " + type,
-            ParameterIndirection.Ref => "ref " + type,
-            _ => type,
-        };
+            type += '*';
+        }
 
         return type;
     }
@@ -109,30 +240,28 @@ protected struct InterfaceParameter
     {
         string argument = Name;
 
-        if (InterfaceTypes.Contains(TypeName) || LightInterfaceTypes.Contains(TypeName))
+        if ((Flags & ParameterFlag.Interface) != 0)
         {
+            // Handle interface marshalling
             if (Indirection == ParameterIndirection.Out)
             {
-                // out IntPtr name_handle
+                // Interface handle being returned
+                // Combines with modifier prefix to create `out IntPtr name_handle`
                 argument = $"IntPtr {Name}_handle";
             }
             else if ((Flags & ParameterFlag.Nullable) != 0)
             {
+                // Optional interface instance
                 argument = $"{Name}?.DangerousGetHandle() ?? IntPtr.Zero";
             }
             else
             {
+                // Required interface instance
                 argument = $"{Name}.DangerousGetHandle()";
             }
         }
 
-        argument = Indirection switch
-        {
-            ParameterIndirection.In => "in " + argument,
-            ParameterIndirection.Out => "out " + argument,
-            ParameterIndirection.Ref => "ref " + argument,
-            _ => argument,
-        };
+        argument = ToModifierPrefix(Indirection) + argument;
 
         return argument;
     }
@@ -141,11 +270,11 @@ protected struct InterfaceParameter
         => new(parameter.TypeDecl, parameter.Name);
 }
 
-protected struct InterfaceMethod
+public struct InterfaceMethod
 {
     public string Name;
     public Visibility Visibility;
-    public string ReturnType;
+    public InterfaceParameter ReturnType;
     public InterfaceParameter[] Parameters;
 
     public bool IsCustom;
@@ -159,7 +288,7 @@ protected struct InterfaceMethod
         _ => throw new System.Diagnostics.UnreachableException($"Invalid visibility {Visibility}")
     };
 
-    public bool IsVoid => ReturnType == "void";
+    public bool IsVoid => ReturnType.TypeName == "void";
 
     public InterfaceMethod(string returnType, string name, params InterfaceParameter[] parameters)
         : this(Visibility.Public, returnType, name, parameters)
@@ -170,7 +299,7 @@ protected struct InterfaceMethod
     {
         Name = name;
         Visibility = visibility;
-        ReturnType = returnType;
+        ReturnType = new(returnType, "<return>");
         Parameters = parameters;
 
         IsCustom = false;
@@ -181,7 +310,7 @@ protected struct InterfaceMethod
     {
         Name = "";
         Visibility = Visibility.Public;
-        ReturnType = "";
+        ReturnType = new("", "<return>");
         Parameters = Array.Empty<InterfaceParameter>();
 
         IsCustom = true;
@@ -189,10 +318,7 @@ protected struct InterfaceMethod
     }
 }
 
-public static HashSet<string> InterfaceTypes = new();
-public static HashSet<string> LightInterfaceTypes = new();
-
-protected void DefineInterface(string name, params InterfaceMethod[] methods)
+public void DefineInterface(string name, params InterfaceMethod[] methods)
 {
 #>
     public sealed unsafe partial class <#= name #> : GameInputComPtr<<#= name #>>
@@ -205,7 +331,7 @@ protected void DefineInterface(string name, params InterfaceMethod[] methods)
 <#+
 }
 
-protected void DefineLightInterface(string name, params InterfaceMethod[] methods)
+public void DefineLightInterface(string name, params InterfaceMethod[] methods)
 {
 #>
     public sealed unsafe partial class <#= name #> : GameInputComPtr<<#= name #>>
@@ -332,7 +458,7 @@ private void ForwardInterfaceMethods(InterfaceMethod[] methods)
 
 private void ForwardMethod(int vtableIndex, InterfaceMethod method)
 {
-    var fnPtrTypes = method.Parameters.Select((p) => p.ToFnPointerType()).Prepend("IntPtr").Append(method.ReturnType);
+    var fnPtrTypes = method.Parameters.Select((p) => p.ToFnPointerType()).Prepend("IntPtr").Append(method.ReturnType.ToTypeDecl());
     var fnCallArgs = method.Parameters.Select((p) => p.ToFnPointerArgument()).Prepend("thisPtr");
     string fnPtrType = $"delegate* unmanaged[Stdcall]<{string.Join(", ", fnPtrTypes)}>";
 
@@ -341,28 +467,29 @@ private void ForwardMethod(int vtableIndex, InterfaceMethod method)
     {
 #>
 
-        <#= method.VisModifier #> <#= method.ReturnType #> <#= method.Name #>()
+        <#= method.VisModifier #> <#= method.ReturnType.ToTypeDecl() #> <#= method.Name #>()
 <#+
     }
     else
     {
 #>
 
-        <#= method.VisModifier #> <#= method.ReturnType #> <#= method.Name #>(
+        <#= method.VisModifier #> <#= method.ReturnType.ToTypeDecl() #> <#= method.Name #>(
 <#+
         for (int i = 0; i < method.Parameters.Length; i++)
         {
             var parameter = method.Parameters[i];
+            // Can't use a comma on the last argument
             if (i < method.Parameters.Length - 1)
             {
 #>
-            <#= parameter.TypeDecl #> <#= parameter.Name #>,
+            <#= parameter.ToTypeDecl() #> <#= parameter.Name #>,
 <#+
             }
             else
             {
 #>
-            <#= parameter.TypeDecl #> <#= parameter.Name #>
+            <#= parameter.ToTypeDecl() #> <#= parameter.Name #>
 <#+
             }
         }
@@ -381,16 +508,16 @@ private void ForwardMethod(int vtableIndex, InterfaceMethod method)
             continue;
 
         // Verify input handle types
-        if (InterfaceTypes.Contains(parameter.TypeName))
-        {
-#>
-            ThrowHelper.CheckHandle(<#= parameter.Name #>);
-<#+
-        }
-        else if (LightInterfaceTypes.Contains(parameter.TypeName))
+        if ((parameter.Flags & ParameterFlag.LightInterface) != 0)
         {
 #>
             ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, nameof(<#= parameter.Name #>));
+<#+
+        }
+        else if ((parameter.Flags & ParameterFlag.Interface) != 0)
+        {
+#>
+            ThrowHelper.CheckHandle(<#= parameter.Name #>);
 <#+
         }
         // Verify pointer types
@@ -419,17 +546,39 @@ private void ForwardMethod(int vtableIndex, InterfaceMethod method)
     }
     else
     {
+        // Allow returning by indirection
+        if (method.ReturnType.Indirection is ParameterIndirection.Ref)
+        {
+#>
+            ref var result = ref fnPtr(
+                <#= string.Join(",\n                ", fnCallArgs) #>
+            );
+
+<#+
+        }
+        else if (method.ReturnType.Indirection is ParameterIndirection.RefReadonly)
+        {
+#>
+            ref readonly var result = ref fnPtr(
+                <#= string.Join(",\n                ", fnCallArgs) #>
+            );
+
+<#+
+        }
+        else
+        {
 #>
             var result = fnPtr(
                 <#= string.Join(",\n                ", fnCallArgs) #>
             );
 
 <#+
+        }
     }
 
     foreach (var parameter in method.Parameters)
     {
-        if (InterfaceTypes.Contains(parameter.TypeName) || LightInterfaceTypes.Contains(parameter.TypeName))
+        if ((parameter.Flags & ParameterFlag.Interface) != 0)
         {
             if (parameter.Indirection == ParameterIndirection.Out)
             {
@@ -442,9 +591,18 @@ private void ForwardMethod(int vtableIndex, InterfaceMethod method)
 
     if (!method.IsVoid)
     {
+        if (method.ReturnType.Indirection is ParameterIndirection.Ref or ParameterIndirection.RefReadonly)
+        {
+#>
+            return ref result;
+<#+
+        }
+        else
+        {
 #>
             return result;
 <#+
+        }
     }
 #>
         }

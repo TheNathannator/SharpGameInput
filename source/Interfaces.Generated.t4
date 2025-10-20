@@ -16,137 +16,140 @@ using System.Runtime.InteropServices;
 #nullable enable
 
 <#
-InterfaceTypes = new()
-{
+string[] interfaceTypes = [
     "IGameInput",
     "IGameInputReading",
     "IGameInputDevice",
     "IGameInputDispatcher",
     "IGameInputForceFeedbackEffect",
     "IGameInputRawDeviceReport",
-};
+];
 
-LightInterfaceTypes = InterfaceTypes.Select((n) => "Light" + n).ToHashSet();
+LightInterfaceTypes = interfaceTypes.Select((n) => "Light" + n).ToHashSet();
+InterfaceTypes = interfaceTypes.Concat(LightInterfaceTypes).ToHashSet();
+
+DeclarationReplacements.Add("GameInputReadingCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputReading, bool) -> void");
+DeclarationReplacements.Add("GameInputDeviceCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, GameInputDeviceStatus, GameInputDeviceStatus) -> void");
+// DeclarationReplacements.Add("GameInputGuideButtonCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, bool) -> void");
+DeclarationReplacements.Add("GameInputSystemButtonCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, GameInputSystemButtons, GameInputSystemButtons) -> void");
+DeclarationReplacements.Add("GameInputKeyboardLayoutCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, uint32_t, uint32_t) -> void");
+
+TypeNameReplacements.Add("GameInputCallbackToken", "uint64_t");
 #>
 namespace SharpGameInput
 {
 <#
     DefineInterface("IGameInput",
-        new("ulong", "GetCurrentTimestamp"),
-        new("int", "GetCurrentReading", 
+        new("uint64_t", "GetCurrentTimestamp"),
+        new("HRESULT", "GetCurrentReading", 
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
             ("out LightIGameInputReading", "reading")
         ),
-        new("int", "GetNextReading", 
+        new("HRESULT", "GetNextReading", 
             ("LightIGameInputReading", "referenceReading"),
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
             ("out LightIGameInputReading", "reading")
         ),
-        new("int", "GetPreviousReading",
+        new("HRESULT", "GetPreviousReading",
             ("LightIGameInputReading", "referenceReading"),
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
             ("out LightIGameInputReading", "reading")
         ),
-        new("int", "GetTemporalReading",
-            ("ulong", "timestamp"),
+        new("HRESULT", "GetTemporalReading",
+            ("uint64_t", "timestamp"),
             ("IGameInputDevice", "device"),
             ("out LightIGameInputReading", "reading")
         ),
 
-        new(Visibility.Private, "int", "RegisterReadingCallback",
+        new(Visibility.Private, "HRESULT", "RegisterReadingCallback",
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("float", "analogThreshold"),
             ("void*?", "context"),
-            ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, bool, void>",
-                "callbackFunc"),
-            ("out ulong", "callbackToken")
+            ("GameInputReadingCallback", "callbackFunc"),
+            ("out GameInputCallbackToken", "callbackToken")
         ),
-        new(Visibility.Private, "int", "RegisterDeviceCallback",
+        new(Visibility.Private, "HRESULT", "RegisterDeviceCallback",
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("GameInputDeviceStatus", "statusFilter"),
             ("GameInputEnumerationKind", "enumerationKind"),
             ("void*?", "context"),
-            ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputDeviceStatus, GameInputDeviceStatus, void>",
-                "callbackFunc"),
-            ("out ulong", "callbackToken")
+            ("GameInputDeviceCallback", "callbackFunc"),
+            ("out GameInputCallbackToken", "callbackToken")
         ),
         // gg Microsoft, ABI breakage
-        // new(Visibility.Private, "int", "RegisterGuideButtonCallback",
+        // new(Visibility.Private, "HRESULT", "RegisterGuideButtonCallback",
         //     ("IGameInputDevice?", "device"),
         //     ("void*?", "context"),
-        //     ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, bool, void>",
-        //         "callbackFunc"),
-        //     ("out ulong", "callbackToken")
+        //     ("GameInputGuideButtonCallback", "callbackFunc"),
+        //     ("out GameInputCallbackToken", "callbackToken")
         // ),
-        new(Visibility.Private, "int", "RegisterSystemButtonCallback",
+        new(Visibility.Private, "HRESULT", "RegisterSystemButtonCallback",
             ("IGameInputDevice?", "device"),
             ("GameInputSystemButtons", "buttonFilter"),
             ("void*?", "context"),
-            ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputSystemButtons, GameInputSystemButtons, void>",
-                "callbackFunc"),
-            ("out ulong", "callbackToken")
+            ("GameInputSystemButtonCallback", "callbackFunc"),
+            ("out GameInputCallbackToken", "callbackToken")
         ),
-        new(Visibility.Private, "int", "RegisterKeyboardLayoutCallback",
+        new(Visibility.Private, "HRESULT", "RegisterKeyboardLayoutCallback",
             ("IGameInputDevice?", "device"),
             ("void*?", "context"),
-            ("delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, uint, uint, void>",
-                "callbackFunc"),
-            ("out ulong", "callbackToken")
+            ("GameInputKeyboardLayoutCallback", "callbackFunc"),
+            ("out GameInputCallbackToken", "callbackToken")
         ),
         new("void", "StopCallback",
-            ("ulong", "callbackToken")
+            ("GameInputCallbackToken", "callbackToken")
         ),
         new(Visibility.Private, "bool", "_UnregisterCallback",
-            ("ulong", "callbackToken"),
-            ("ulong", "timeoutInMicroseconds")
+            ("GameInputCallbackToken", "callbackToken"),
+            ("uint64_t", "timeoutInMicroseconds")
         ),
 
-        new("int", "CreateDispatcher",
+        new("HRESULT", "CreateDispatcher",
             ("out IGameInputDispatcher", "dispatcher")
         ),
-        new("int", "CreateAggregateDevice",
+        new("HRESULT", "CreateAggregateDevice",
             ("GameInputKind", "inputKind"),
             ("out IGameInputDevice", "device")
         ),
 
-        new("int", "FindDeviceFromId",
-            ("in APP_LOCAL_DEVICE_ID", "id"),
+        new("HRESULT", "FindDeviceFromId",
+            ("in APP_LOCAL_DEVICE_ID", "value"),
             ("out IGameInputDevice", "device")
         ),
-        new("int", "FindDeviceFromObject",
-            ("IntPtr", "pUnknown"),
+        new("HRESULT", "FindDeviceFromObject",
+            ("IUnknown*", "value"),
             ("out IGameInputDevice", "device")
         ),
-        new("int", "FindDeviceFromPlatformHandle",
-            ("IntPtr", "handle"),
+        new("HRESULT", "FindDeviceFromPlatformHandle",
+            ("HANDLE", "value"),
             ("out IGameInputDevice", "device")
         ),
-        new("int", "FindDeviceFromPlatformString",
-            ("char*", "str"),
+        new("HRESULT", "FindDeviceFromPlatformString",
+            ("wchar_t*", "value"),
             ("out IGameInputDevice", "device")
         ),
         new(() =>
         {
 #>
 
-        public int FindDeviceFromPlatformString(string str, out IGameInputDevice device)
+        public int FindDeviceFromPlatformString(string value, out IGameInputDevice device)
         {
-            fixed (char* ptr = str)
+            fixed (char* ptr = value)
                 return FindDeviceFromPlatformString(ptr, out device);
         }
 <#
         }),
 
-        new("int", "EnableOemDeviceSupport",
-            ("ushort", "vendorId"),
-            ("ushort", "productId"),
-            ("byte", "interfaceNumber"),
-            ("byte", "collectionNumber")
+        new("HRESULT", "EnableOemDeviceSupport",
+            ("uint16_t", "vendorId"),
+            ("uint16_t", "productId"),
+            ("uint8_t", "interfaceNumber"),
+            ("uint8_t", "collectionNumber")
         ),
 
         new("void", "SetFocusPolicy",
@@ -156,21 +159,23 @@ namespace SharpGameInput
 #>
 
 <#
-    void MakeArrayWrappers(string returnType, string name, (string type, string name) array)
+    // InterfaceMethod is used here to perform type name replacement like everything else does
+    void MakeArrayWrappers(InterfaceMethod method)
     {
+        var array = method.Parameters[0];
 #>
 
-        public <#= returnType #> <#= name #>(<#= array.type #>[] <#= array.name #>)
+        public <#= method.ReturnType.ToTypeDecl() #> <#= method.Name #>(<#= array.TypeName #>[] <#= array.Name #>)
         {
-            fixed (<#= array.type #>* ptr = <#= array.name #>)
-                return <#= name #>((uint)<#= array.name #>.Length, ptr);
+            fixed (<#= array.TypeName #>* ptr = <#= array.Name #>)
+                return <#= method.Name #>((uint)<#= array.Name #>.Length, ptr);
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public <#= returnType #> <#= name #>(scoped Span<<#= array.type #>> <#= array.name #>)
+        public <#= method.ReturnType.ToTypeDecl() #> <#= method.Name #>(scoped Span<<#= array.TypeName #>> <#= array.Name #>)
         {
-            fixed (<#= array.type #>* ptr = <#= array.name #>)
-                return <#= name #>((uint)<#= array.name #>.Length, ptr);
+            fixed (<#= array.TypeName #>* ptr = <#= array.Name #>)
+                return <#= method.Name #>((uint)<#= array.Name #>.Length, ptr);
         }
 #endif
 <#
@@ -178,10 +183,10 @@ namespace SharpGameInput
 
     DefineLightInterface("IGameInputReading",
         new("GameInputKind", "GetInputKind"),
-        new("ulong", "GetSequenceNumber",
+        new("uint64_t", "GetSequenceNumber",
             ("GameInputKind", "inputKind")
         ),
-        new("ulong", "GetTimestamp"),
+        new("uint64_t", "GetTimestamp"),
         new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),
@@ -189,54 +194,54 @@ namespace SharpGameInput
             ("out LightIGameInputRawDeviceReport", "report")
         ),
 
-        new("uint", "GetControllerAxisCount"),
-        new("uint", "GetControllerAxisState",
-            ("uint", "stateArrayCount"),
+        new("uint32_t", "GetControllerAxisCount"),
+        new("uint32_t", "GetControllerAxisState",
+            ("uint32_t", "stateArrayCount"),
             ("float*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint", "GetControllerAxisState",
+        new(() => MakeArrayWrappers(new("uint32_t", "GetControllerAxisState",
             ("float", "stateArray")
-        )),
+        ))),
 
-        new("uint", "GetControllerButtonCount"),
-        new("uint", "GetControllerButtonState",
-            ("uint", "stateArrayCount"),
+        new("uint32_t", "GetControllerButtonCount"),
+        new("uint32_t", "GetControllerButtonState",
+            ("uint32_t", "stateArrayCount"),
             ("bool*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint", "GetControllerButtonState",
+        new(() => MakeArrayWrappers(new("uint32_t", "GetControllerButtonState",
             ("bool", "stateArray")
-        )),
+        ))),
 
-        new("uint", "GetControllerSwitchCount"),
-        new("uint", "GetControllerSwitchState",
-            ("uint", "stateArrayCount"),
+        new("uint32_t", "GetControllerSwitchCount"),
+        new("uint32_t", "GetControllerSwitchState",
+            ("uint32_t", "stateArrayCount"),
             ("GameInputSwitchPosition*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint", "GetControllerSwitchState",
+        new(() => MakeArrayWrappers(new("uint32_t", "GetControllerSwitchState",
             ("GameInputSwitchPosition", "stateArray")
-        )),
+        ))),
 
-        new("uint", "GetKeyCount"),
-        new("uint", "GetKeyState",
-            ("uint", "stateArrayCount"),
+        new("uint32_t", "GetKeyCount"),
+        new("uint32_t", "GetKeyState",
+            ("uint32_t", "stateArrayCount"),
             ("GameInputKeyState*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint", "GetKeyState",
+        new(() => MakeArrayWrappers(new("uint32_t", "GetKeyState",
             ("GameInputKeyState", "stateArray")
-        )),
+        ))),
 
         new("bool", "GetMouseState",
             ("out GameInputMouseState", "state")
         ),
 
-        new("uint", "GetTouchCount"),
-        new("uint", "GetTouchState",
-            ("uint", "stateArrayCount"),
+        new("uint32_t", "GetTouchCount"),
+        new("uint32_t", "GetTouchState",
+            ("uint32_t", "stateArrayCount"),
             ("GameInputTouchState*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint", "GetTouchState",
+        new(() => MakeArrayWrappers(new("uint32_t", "GetTouchState",
             ("GameInputTouchState", "stateArray")
-        )),
+        ))),
 
         new("bool", "GetMotionState",
             ("out GameInputMotionState", "state")
@@ -266,7 +271,7 @@ namespace SharpGameInput
 
 <#
     DefineLightInterface("IGameInputDevice",
-        new(Visibility.Private, "GameInputDeviceInfo*", "GetDeviceInfo"),
+        new(Visibility.Private, "ref readonly GameInputDeviceInfo", "GetDeviceInfo"),
         new("GameInputDeviceStatus", "GetDeviceStatus"),
         new("void", "GetBatteryState",
             ("out GameInputBatteryState", "state")
@@ -276,26 +281,26 @@ namespace SharpGameInput
         {
 #>
 
-        public ref readonly GameInputDeviceInfo DeviceInfo => ref *GetDeviceInfo();
+        public ref readonly GameInputDeviceInfo DeviceInfo => ref GetDeviceInfo();
 <#
         }),
 
-        new("int", "CreateForceFeedbackEffect",
-            ("uint", "motorIndex"),
+        new("HRESULT", "CreateForceFeedbackEffect",
+            ("uint32_t", "motorIndex"),
             ("in GameInputForceFeedbackParams", "ffbParams"),
             ("out LightIGameInputForceFeedbackEffect", "effect")
         ),
 
         new("bool", "IsForceFeedbackMotorPoweredOn",
-            ("uint", "motorIndex")
+            ("uint32_t", "motorIndex")
         ),
 
         new("void", "SetForceFeedbackMotorGain",
-            ("uint", "motorIndex"),
+            ("uint32_t", "motorIndex"),
             ("float", "masterGain")
         ),
-        new("int", "SetHapticMotorState",
-            ("uint", "motorIndex"),
+        new("HRESULT", "SetHapticMotorState",
+            ("uint32_t", "motorIndex"),
             ("in GameInputHapticFeedbackParams", "hapticParams")
         ),
         new("void", "SetRumbleState",
@@ -309,36 +314,36 @@ namespace SharpGameInput
 
         new("void", "PowerOff"),
 
-        new("int", "CreateRawDeviceReport",
-            ("uint", "reportId"),
+        new("HRESULT", "CreateRawDeviceReport",
+            ("uint32_t", "reportId"),
             ("GameInputRawDeviceReportKind", "reportKind"),
             ("out LightIGameInputRawDeviceReport", "report")
         ),
-        new("int", "GetRawDeviceFeature",
-            ("uint", "reportId"),
+        new("HRESULT", "GetRawDeviceFeature",
+            ("uint32_t", "reportId"),
             ("out LightIGameInputRawDeviceReport", "report")
         ),
-        new("int", "SetRawDeviceFeature",
+        new("HRESULT", "SetRawDeviceFeature",
             ("LightIGameInputRawDeviceReport", "report")
         ),
-        new("int", "SendRawDeviceOutput",
+        new("HRESULT", "SendRawDeviceOutput",
             ("LightIGameInputRawDeviceReport", "report")
         ),
-        new("int", "SendRawDeviceOutputWithResponse",
+        new("HRESULT", "SendRawDeviceOutputWithResponse",
             ("LightIGameInputRawDeviceReport", "requestReport"),
             ("out LightIGameInputRawDeviceReport", "responseReport")
         ),
 
-        new("int", "ExecuteRawDeviceIoControl",
-            ("uint", "controlCode"),
-            ("nuint", "inputBufferSize"),
+        new("HRESULT", "ExecuteRawDeviceIoControl",
+            ("uint32_t", "controlCode"),
+            ("size_t", "inputBufferSize"),
             ("void*?", "inputBuffer"),
-            ("nuint", "outputBufferSize"),
+            ("size_t", "outputBufferSize"),
             ("void*?", "outputBuffer"),
-            ("out nuint", "bytesReturned")
+            ("out size_t", "bytesReturned")
         ),
         new("bool", "AcquireExclusiveRawDeviceAccess",
-            ("ulong", "timeoutInMicroseconds")
+            ("uint64_t", "timeoutInMicroseconds")
         ),
         new("void", "ReleaseExclusiveRawDeviceAccess"),
         new(() =>
@@ -415,10 +420,10 @@ namespace SharpGameInput
 <#
     DefineInterface("IGameInputDispatcher",
         new("bool", "Dispatch",
-            ("ulong", "quotaInMicroseconds")
+            ("uint64_t", "quotaInMicroseconds")
         ),
         new("int", "OpenWaitHandle",
-            ("out IntPtr", "waitHandle")
+            ("out HANDLE", "waitHandle")
         )
     );
 #>
@@ -429,7 +434,7 @@ namespace SharpGameInput
             ("out LightIGameInputDevice", "device")
         ),
 
-        new("uint", "GetMotorIndex"),
+        new("uint32_t", "GetMotorIndex"),
 
         new("float", "GetGain"),
         new("void", "SetGain",
@@ -466,13 +471,13 @@ namespace SharpGameInput
 <#
         }),
 
-        new("nuint", "GetRawDataSize"),
-        new("nuint", "GetRawData",
-            ("nuint", "bufferSize"),
+        new("size_t", "GetRawDataSize"),
+        new("size_t", "GetRawData",
+            ("size_t", "bufferSize"),
             ("void*", "buffer")
         ),
         new("bool", "SetRawData",
-            ("nuint", "bufferSize"),
+            ("size_t", "bufferSize"),
             ("void*", "buffer")
         ),
 
@@ -525,16 +530,16 @@ namespace SharpGameInput
         }),
 
         new("bool", "GetItemValue",
-            ("uint", "itemIndex"),
-            ("out long", "value")
+            ("uint32_t", "itemIndex"),
+            ("out int64_t", "value")
         ),
         new("bool", "SetItemValue",
-            ("uint", "itemIndex"),
-            ("long", "value")
+            ("uint32_t", "itemIndex"),
+            ("int64_t", "value")
         ),
 
         new("bool", "ResetItemValue",
-            ("uint", "itemIndex")
+            ("uint32_t", "itemIndex")
         ),
         new("bool", "ResetAllItems")
     );
