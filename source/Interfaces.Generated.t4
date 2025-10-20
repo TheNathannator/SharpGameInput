@@ -271,19 +271,11 @@ namespace SharpGameInput
 
 <#
     DefineLightInterface("IGameInputDevice",
-        new(Visibility.Private, "ref readonly GameInputDeviceInfo", "GetDeviceInfo"),
+        new("ref readonly GameInputDeviceInfo", "GetDeviceInfo"),
         new("GameInputDeviceStatus", "GetDeviceStatus"),
         new("void", "GetBatteryState",
             ("out GameInputBatteryState", "state")
         ),
-
-        new(() =>
-        {
-#>
-
-        public ref readonly GameInputDeviceInfo DeviceInfo => ref GetDeviceInfo();
-<#
-        }),
 
         new("HRESULT", "CreateForceFeedbackEffect",
             ("uint32_t", "motorIndex"),

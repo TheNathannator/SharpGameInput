@@ -1466,7 +1466,7 @@ namespace SharpGameInput
 
         protected override IGameInputDevice DuplicateImpl() => new(handle, true);
 
-        private ref readonly GameInputDeviceInfo GetDeviceInfo()
+        public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
 
@@ -1512,8 +1512,6 @@ namespace SharpGameInput
             );
 
         }
-
-        public ref readonly GameInputDeviceInfo DeviceInfo => ref GetDeviceInfo();
 
         public int CreateForceFeedbackEffect(
             uint motorIndex,
@@ -1965,7 +1963,7 @@ namespace SharpGameInput
         public override int GetHashCode()
             => handle.GetHashCode();
 
-        private ref readonly GameInputDeviceInfo GetDeviceInfo()
+        public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
 
@@ -2011,8 +2009,6 @@ namespace SharpGameInput
             );
 
         }
-
-        public ref readonly GameInputDeviceInfo DeviceInfo => ref GetDeviceInfo();
 
         public int CreateForceFeedbackEffect(
             uint motorIndex,

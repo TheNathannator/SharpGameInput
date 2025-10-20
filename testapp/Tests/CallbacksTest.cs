@@ -94,7 +94,7 @@ namespace SharpGameInput.TestApp
             Program.PrintTimestamp(timestamp);
             Console.WriteLine(isConnected ? ": Device connected" : ": Device disconnected");
 
-            ref readonly var info = ref device.DeviceInfo;
+            ref readonly var info = ref device.GetDeviceInfo();
             if (info.displayName != null)
                 Console.WriteLine($"- Name: {info.displayName->ToString()}");
             Console.WriteLine($"- Hardware IDs: VID_{info.vendorId:X4}&PID_{info.productId:X4}&REV_{info.revisionNumber:X4}");

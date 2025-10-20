@@ -56,7 +56,7 @@ namespace SharpGameInput.TestApp
                     {
                         device = device.Duplicate();
 
-                        ref readonly var info = ref device.DeviceInfo;
+                        ref readonly var info = ref device.GetDeviceInfo();
                         Console.WriteLine($"Device {info.deviceId} connected.");
 
                         var stopHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -109,21 +109,17 @@ namespace SharpGameInput.TestApp
                 {
                     return true;
                 }
-                else if (result == (int)GameInputResult.DeviceDisconnected)
+                else if (device != null && result == (int)GameInputResult.DeviceDisconnected)
                 {
-                    if (device != null)
-                    {
-                        ref readonly var info = ref device.DeviceInfo;
-                        Console.WriteLine($"Device {info.deviceId} disconnected.");
-                    }
+                    Console.WriteLine($"Device {device.GetDeviceInfo().deviceId} disconnected.");
                     return false;
                 }
                 else
                 {
                     if (device != null)
                     {
-                        ref readonly var info = ref device.DeviceInfo;
-                        ConsoleUtility.WritePInvokeError($"Failed to get current reading for device {info.deviceId}", result);
+                        var deviceId = device.GetDeviceInfo().deviceId;
+                        ConsoleUtility.WritePInvokeError($"Failed to get current reading for device {deviceId}", result);
                     }
                     else
                     {
