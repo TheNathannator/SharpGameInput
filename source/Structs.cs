@@ -184,6 +184,16 @@ namespace SharpGameInput
         {
             return Encoding.UTF8.GetString(data, (int)sizeInBytes);
         }
+
+        public static unsafe string? ToString(GameInputString* str)
+        {
+            if (str == null)
+            {
+                return null;
+            }
+
+            return str->ToString();
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
