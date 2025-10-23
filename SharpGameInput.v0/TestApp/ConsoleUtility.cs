@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.v0.TestApp
 {
     internal static class ConsoleUtility
     {

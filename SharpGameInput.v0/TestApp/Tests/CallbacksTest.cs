@@ -1,6 +1,6 @@
 using System;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.v0.TestApp
 {
     internal class CallbacksTest
     {

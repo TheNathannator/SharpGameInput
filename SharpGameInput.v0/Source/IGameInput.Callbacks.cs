@@ -7,8 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using SharpGameInput.Common;
 
-namespace SharpGameInput
+namespace SharpGameInput.v0
 {
     using unsafe ReadingCallback_NativePtr = delegate* unmanaged[Stdcall]<
         ulong, // callbackToken

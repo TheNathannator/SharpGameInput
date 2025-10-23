@@ -1,5 +1,5 @@
 <#@ template hostspecific="false" language="C#" #>
-<#@ include file="InterfaceGeneration.t4" #>
+<#@ include file="../../SharpGameInput.Common/InterfaceGeneration.t4" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 <#@ output extension=".cs" #>
@@ -12,6 +12,7 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Runtime.InteropServices;
+using SharpGameInput.Common;
 
 #nullable enable
 
@@ -36,7 +37,7 @@ DeclarationReplacements.Add("GameInputKeyboardLayoutCallback", "fn(GameInputCall
 
 TypeNameReplacements.Add("GameInputCallbackToken", "uint64_t");
 #>
-namespace SharpGameInput
+namespace SharpGameInput.v0
 {
 <#
     DefineInterface("IGameInput",

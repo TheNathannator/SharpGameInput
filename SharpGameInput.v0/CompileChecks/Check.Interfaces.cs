@@ -1,5 +1,5 @@
 using System;
-using SharpGameInput;
+using SharpGameInput.v0;
 
 public static partial class Checks
 {

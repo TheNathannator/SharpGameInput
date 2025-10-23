@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.v0.TestApp
 {
     internal class Program
     {

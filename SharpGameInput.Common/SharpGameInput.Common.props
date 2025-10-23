@@ -1,4 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+
+  <!-- This is not a proper project file because SharpGameInput is designed to be a
+    single .dll with no dependencies. This design makes it easy to use in projects that
+    might not have proper access to NuGet, e.g. Unity. -->
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net8.0-windows</TargetFrameworks>
@@ -8,11 +12,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyName>SharpGameInput</AssemblyName>
+    <AssemblyName>SharpGameInput.v$(GameInputApiVersion)</AssemblyName>
     <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
     <Product>$(AssemblyName)</Product>
     <Version>0.2.0</Version>
-    <Description>C# interop bindings for GameInput.</Description>
+    <Description>C# interop bindings for GameInput v$(GameInputApiVersion).</Description>
     <Authors>Nathan Hurst</Authors>
     <Copyright>Copyright (c) 2024 $(Authors)</Copyright>
     <RepositoryUrl>https://github.com/TheNathannator/SharpGameInput</RepositoryUrl>
@@ -28,6 +32,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)/*.cs" LinkBase="Common" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)/NativeMethods.txt" LinkBase="Common" />
   </ItemGroup>
 
 </Project>

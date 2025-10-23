@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
-    <ProjectReference Include="../source/SharpGameInput.csproj" />
+    <ProjectReference Include="../Source/SharpGameInput.v0.csproj" />
   </ItemGroup>
 
 </Project>

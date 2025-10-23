@@ -1,0 +1,16 @@
+<Solution>
+
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+
+  <Folder Name="/SharpGameInput.v0/">
+    <Project Path="SharpGameInput.v0/CompileChecks/SharpGameInput.v0.CompileChecks.csproj" />
+    <Project Path="SharpGameInput.v0/Source/SharpGameInput.v0.csproj" />
+    <Project Path="SharpGameInput.v0/TestApp/SharpGameInput.v0.TestApp.csproj" />
+    <Project Path="SharpGameInput.v0/Tests/SharpGameInput.v0.Tests.csproj" />
+  </Folder>
+
+</Solution>

@@ -7,7 +7,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Registry;
 
-namespace SharpGameInput
+namespace SharpGameInput.Common
 {
     using static PInvoke;
 
@@ -22,57 +22,55 @@ namespace SharpGameInput
         int // <return>
     >;
 
-    public static partial class GameInput
+    internal static class GameInputModule
     {
-        public const int HResultFacility = 0x38A;
+        private static readonly Guid IID_IGameInput_v0 = new("11BE2A7E-4254-445A-9C09-FFC40F006918");
 
-        public const ulong CurrentCallbackToken = 0xFFFFFFFFFFFFFFFF;
-        public const ulong InvalidCallbackToken = 0x0000000000000000;
-
-        private static readonly Guid IID_IGameInput_v0 = new(0x11be2a7e, 0x4254, 0x445a, 0x9c, 0x09, 0xff, 0xc4, 0x0f, 0x00, 0x69, 0x18);
-        private static readonly Guid IID_IGameInput_v1 = new(0x40ffb7e4, 0x6150, 0x407a, 0xb4, 0x39, 0x13, 0x2b, 0xad, 0xc0, 0x8d, 0x2d);
-        private static readonly Guid IID_IGameInput_v2 = new(0xbbaa66d2, 0x837a, 0x40f7, 0xa3, 0x03, 0x91, 0x7d, 0x50, 0x09, 0x55, 0xf4);
-        private static readonly Guid IID_IGameInput_v3 = new(0x20efc1c7, 0x5d9a, 0x43ba, 0xb2, 0x6f, 0xb8, 0x07, 0xfa, 0x48, 0x60, 0x9c);
-
-        private static SafeHandle _gameInputDll = null!;
+        private static SafeHandle? _gameInputDll = null;
         private static unsafe GameInputCreate _gameInputCreate;
         private static unsafe GameInputInitialize _gameInputInitialize;
 
-        public static bool Create([NotNullWhen(true)] out IGameInput? gameInput)
+        public static bool Create(Guid iid, out IntPtr gameInput)
         {
-            return Create(out gameInput, out _);
+            return Create(iid, out gameInput, out _);
         }
 
-        public static unsafe bool Create([NotNullWhen(true)] out IGameInput? gameInput, out int result)
+        public static unsafe bool Create(Guid iid, out IntPtr gameInput, out int result)
         {
+            gameInput = IntPtr.Zero;
+
             if (_gameInputDll == null)
             {
                 var loadResult = LoadGameInputDll();
                 if (loadResult.Failed)
                 {
-                    gameInput = null;
                     result = loadResult;
                     return false;
                 }
             }
 
-            IntPtr handle;
             if (_gameInputInitialize != null)
             {
-                result = _gameInputInitialize(IID_IGameInput_v0, out handle);
+                result = _gameInputInitialize(iid, out gameInput);
             }
             else if (_gameInputCreate != null)
             {
-                result = _gameInputCreate(out handle);
+                if (iid == IID_IGameInput_v0)
+                {
+                    result = _gameInputCreate(out gameInput);
+                }
+                else
+                {
+                    result = HRESULT.E_NOINTERFACE;
+                }
             }
             else
             {
-                throw new Exception("!!UNREACHABLE!! No GameInput creation methods got loaded! This is a bug in the module loading code.");
+                Debug.WriteLine("(!!UNREACHABLE!!) No GameInput creation methods got loaded! This is a bug in the module loading code.");
+                result = HRESULT.E_FAIL;
             }
 
-            bool success = result >= 0 && handle != IntPtr.Zero;
-            gameInput = success ? new(handle, ownsHandle: true) : null;
-            return success;
+            return result >= 0 && gameInput != IntPtr.Zero;
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////

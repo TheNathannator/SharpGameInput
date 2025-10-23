@@ -1,4 +1,5 @@
-using SharpGameInput;
+using SharpGameInput.Common;
+using SharpGameInput.v0;
 
 public static partial class Checks
 {

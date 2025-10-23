@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.v0.TestApp
 {
     internal class RawReportTest
     {

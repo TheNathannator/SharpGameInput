@@ -1,6 +1,6 @@
 using System;
 
-namespace SharpGameInput
+namespace SharpGameInput.v0
 {
     public enum GameInputResult
     {

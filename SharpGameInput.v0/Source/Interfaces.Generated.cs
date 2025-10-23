@@ -7,10 +7,11 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Runtime.InteropServices;
+using SharpGameInput.Common;
 
 #nullable enable
 
-namespace SharpGameInput
+namespace SharpGameInput.v0
 {
     public sealed unsafe partial class IGameInput : GameInputComPtr<IGameInput>
     {

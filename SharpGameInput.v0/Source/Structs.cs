@@ -2,8 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
+using SharpGameInput.Common;
 
-namespace SharpGameInput
+namespace SharpGameInput.v0
 {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct APP_LOCAL_DEVICE_ID : IEquatable<APP_LOCAL_DEVICE_ID>
@@ -300,12 +301,12 @@ namespace SharpGameInput
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct GameInputControllerSwitchInfo
     {
-        public const int positionLabels_Size = 9;
+        public const int PositionLabelCount = 9;
 
         public GameInputKind mappedInputKinds;
         public GameInputLabel label;
-        // public fixed GameInputLabel positionLabels[positionLabels_Size];
-        internal fixed int _positionLabels[positionLabels_Size];
+        // public fixed GameInputLabel positionLabels[PositionLabelCount];
+        internal fixed int _positionLabels[PositionLabelCount];
         public GameInputSwitchKind kind;
         public ushort legacyDInputIndex;
         public ushort legacyHidIndex;
@@ -313,9 +314,9 @@ namespace SharpGameInput
         public GameInputRawDeviceReportInfo* inputReport;
         public GameInputRawDeviceReportItemInfo* inputReportItem;
 
-        public GameInputLabel positionLabel(int index)
+        public GameInputLabel GetPositionLabel(int index)
         {
-            ThrowHelper.CheckRange(index, positionLabels_Size);
+            ThrowHelper.CheckRange(index, PositionLabelCount);
             return (GameInputLabel)_positionLabels[index];
         }
     }

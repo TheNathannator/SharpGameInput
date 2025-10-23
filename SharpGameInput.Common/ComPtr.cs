@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 
-namespace SharpGameInput
+namespace SharpGameInput.Common
 {
     public abstract class GameInputComPtr<TInterface> : CriticalFinalizerObject,
         IDisposable,

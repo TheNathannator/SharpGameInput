@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-namespace SharpGameInput
+namespace SharpGameInput.Common
 {
     internal static class ThrowHelper
     {
