@@ -6,6 +6,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using SharpGameInput.Common;
 
@@ -13,8 +14,26 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
+    public static partial class GameInput
+    {
+        public static bool Create([NotNullWhen(true)] out IGameInput? gameInput)
+        {
+            return Create(out gameInput, out _);
+        }
+
+        public static unsafe bool Create([NotNullWhen(true)] out IGameInput? gameInput, out int result)
+        {
+            bool success = GameInputModule.Create(IGameInput.Iid, out var handle, out result);
+            gameInput = success ? new(handle, ownsHandle: true) : null;
+            return success;
+        }
+    }
+
+    [Guid("11BE2A7E-4254-445A-9C09-FFC40F006918")]
     public sealed unsafe partial class IGameInput : GameInputComPtr<IGameInput>
     {
+        internal static readonly Guid Iid = new("11BE2A7E-4254-445A-9C09-FFC40F006918");
+
         internal IGameInput(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
         protected override IGameInput DuplicateImpl() => new(handle, true);
@@ -451,8 +470,11 @@ namespace SharpGameInput.v0
         }
     }
 
+    [Guid("2156947A-E1FA-4DE0-A30B-D812931DBD8D")]
     public sealed unsafe partial class IGameInputReading : GameInputComPtr<IGameInputReading>
     {
+        internal static readonly Guid Iid = new("2156947A-E1FA-4DE0-A30B-D812931DBD8D");
+
         internal IGameInputReading(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
         protected override IGameInputReading DuplicateImpl() => new(handle, true);
@@ -1461,8 +1483,11 @@ namespace SharpGameInput.v0
         }
     }
 
+    [Guid("31DD86FB-4C1B-408A-868F-439B3CD47125")]
     public sealed unsafe partial class IGameInputDevice : GameInputComPtr<IGameInputDevice>
     {
+        internal static readonly Guid Iid = new("31DD86FB-4C1B-408A-868F-439B3CD47125");
+
         internal IGameInputDevice(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
         protected override IGameInputDevice DuplicateImpl() => new(handle, true);
@@ -2381,8 +2406,11 @@ namespace SharpGameInput.v0
         }
     }
 
+    [Guid("415EED2E-98CB-42C2-8F28-B94601074E31")]
     public sealed unsafe partial class IGameInputDispatcher : GameInputComPtr<IGameInputDispatcher>
     {
+        internal static readonly Guid Iid = new("415EED2E-98CB-42C2-8F28-B94601074E31");
+
         internal IGameInputDispatcher(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
         protected override IGameInputDispatcher DuplicateImpl() => new(handle, true);
@@ -2424,8 +2452,11 @@ namespace SharpGameInput.v0
         }
     }
 
+    [Guid("51BDA05E-F742-45D9-B085-9444AE48381D")]
     public sealed unsafe partial class IGameInputForceFeedbackEffect : GameInputComPtr<IGameInputForceFeedbackEffect>
     {
+        internal static readonly Guid Iid = new("51BDA05E-F742-45D9-B085-9444AE48381D");
+
         internal IGameInputForceFeedbackEffect(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
         protected override IGameInputForceFeedbackEffect DuplicateImpl() => new(handle, true);
@@ -2776,8 +2807,11 @@ namespace SharpGameInput.v0
         }
     }
 
+    [Guid("61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC")]
     public sealed unsafe partial class IGameInputRawDeviceReport : GameInputComPtr<IGameInputRawDeviceReport>
     {
+        internal static readonly Guid Iid = new("61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC");
+
         internal IGameInputRawDeviceReport(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
         protected override IGameInputRawDeviceReport DuplicateImpl() => new(handle, true);
