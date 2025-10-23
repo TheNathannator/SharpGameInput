@@ -1,0 +1,394 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ output extension=".cs" #>
+<#
+InterfaceTypes = new(Interfaces.Select(i => i.Name));
+LightInterfaceTypes = new(Interfaces.Where(i => i.IsLight).Select(i => "Light" + i.Name));
+
+foreach (var callback in Callbacks)
+{
+    TypeNameReplacements.Add(callback.Name, callback.ToDecl().ToFnPointerType());
+}
+#>
+<#+
+#region Type data
+
+public enum Visibility
+{
+    Public,
+    Internal,
+    Private,
+}
+
+public enum TypeIndirection
+{
+    None,
+    In,
+    Out,
+    Ref,
+    RefReadonly,
+}
+
+private static string ToModifierPrefix(TypeIndirection indirection) => indirection switch
+{
+    TypeIndirection.In => "in ",
+    TypeIndirection.Out => "out ",
+    TypeIndirection.Ref => "ref ",
+    TypeIndirection.RefReadonly => "ref readonly ",
+    _ => "",
+};
+
+[Flags]
+public enum TypeFlag
+{
+    None = 0,
+
+    Nullable = 0x01,
+    Pointer  = 0x02,
+
+    Interface = 0x10,
+    LightInterface = 0x20,
+}
+
+public struct TypeDecl
+{
+    public string Name;
+    public TypeIndirection Indirection;
+    public TypeFlag Flags;
+
+    public TypeDecl(string declaration)
+    {
+        // Swap out full declarations for their underlying declarations
+        while (TypeDeclReplacements.TryGetValue(declaration, out string declReplacement))
+        {
+            declaration = declReplacement;
+        }
+
+        string typeName = declaration;
+        var flags = TypeFlag.None;
+        var indirection = TypeIndirection.None;
+
+        // Pseudo-syntax for allowing nullable pointer types;
+        // not actually supported in C#
+        if (declaration.EndsWith("*?"))
+        {
+            declaration = declaration[..^1];
+        }
+
+        // Value indirection
+        if (typeName.StartsWith("in "))
+        {
+            indirection = TypeIndirection.In;
+            typeName = typeName["in ".Length..];
+        }
+        else if (typeName.StartsWith("out "))
+        {
+            indirection = TypeIndirection.Out;
+            typeName = typeName["out ".Length..];
+        }
+        else if (typeName.StartsWith("ref readonly "))
+        {
+            indirection = TypeIndirection.RefReadonly;
+            typeName = typeName["ref readonly ".Length..];
+        }
+        else if (typeName.StartsWith("ref "))
+        {
+            indirection = TypeIndirection.Ref;
+            typeName = typeName["ref ".Length..];
+        }
+
+        // Other modifiers
+        if (typeName.EndsWith("?"))
+        {
+            flags |= TypeFlag.Nullable;
+            typeName = typeName[..^1];
+        }
+        if (typeName.EndsWith("*"))
+        {
+            flags |= TypeFlag.Pointer;
+            typeName = typeName[..^1];
+        }
+
+        // Type name replacements
+        while (TypeNameReplacements.TryGetValue(typeName, out string nameReplacement))
+        {
+            typeName = nameReplacement;
+        }
+
+        if (LightInterfaceTypes.Contains(typeName))
+        {
+            flags |= TypeFlag.Interface | TypeFlag.LightInterface;
+            flags &= ~TypeFlag.Pointer; // Interface pointers are wrapped
+        }
+        else if (InterfaceTypes.Contains(typeName))
+        {
+            flags |= TypeFlag.Interface;
+            flags &= ~TypeFlag.Pointer; // Interface pointers are wrapped
+        }
+
+        Name = typeName;
+        Indirection = indirection;
+        Flags = flags;
+    }
+
+    public string ToTypeDecl()
+    {
+        string typeDecl = Name;
+
+        // Re-apply type modifiers
+        if ((Flags & TypeFlag.Pointer) != 0)
+        {
+            typeDecl += "*";
+        }
+        // Note that pointers cannot be nullable; the `else` is important here
+        else if ((Flags & TypeFlag.Nullable) != 0)
+        {
+            typeDecl += "?";
+        }
+
+        typeDecl = $"{ToModifierPrefix(Indirection)}{typeDecl}";
+
+        return typeDecl;
+    }
+
+    public string ToFnPointerType()
+    {
+        string type = Name;
+
+        if (type == "object")
+        {
+            return ToModifierPrefix(Indirection) + "void*";
+        }
+
+        if ((Flags & TypeFlag.Interface) != 0)
+        {
+            // Interfaces must be marshalled as their pointer values
+            type = "IntPtr";
+        }
+
+        type = ToModifierPrefix(Indirection) + type;
+
+        // Re-apply pointer modifier
+        if ((Flags & TypeFlag.Pointer) != 0)
+        {
+            type += '*';
+        }
+
+        return type;
+    }
+}
+
+public struct ParameterDecl
+{
+    public string Name;
+    public TypeDecl Type;
+
+    public ParameterDecl(string typeDecl, string name)
+    {
+        Name = name;
+        Type = new(typeDecl);
+    }
+
+    public string ToFnPointerArgument()
+    {
+        string argument = Name;
+
+        if ((Type.Flags & TypeFlag.Interface) != 0)
+        {
+            // Handle interface marshalling
+            if (Type.Indirection == TypeIndirection.Out)
+            {
+                // Interface handle being returned
+                // Combines with modifier prefix to create `out IntPtr name_handle`
+                argument = $"IntPtr {Name}_handle";
+            }
+            else if ((Type.Flags & TypeFlag.Nullable) != 0)
+            {
+                // Optional interface instance
+                argument = $"{Name}?.DangerousGetHandle() ?? IntPtr.Zero";
+            }
+            else
+            {
+                // Required interface instance
+                argument = $"{Name}.DangerousGetHandle()";
+            }
+        }
+
+        argument = ToModifierPrefix(Type.Indirection) + argument;
+
+        return argument;
+    }
+
+    public static implicit operator ParameterDecl((string TypeDecl, string Name) parameter)
+        => new(parameter.TypeDecl, parameter.Name);
+}
+
+public struct MethodDecl
+{
+    public string Name;
+    public Visibility Visibility;
+    public TypeDecl ReturnType;
+    public ParameterDecl[] Parameters;
+
+    public bool IsCustom;
+    public Action CustomAction;
+
+    public string VisModifier => Visibility switch
+    {
+        Visibility.Public => "public",
+        Visibility.Internal => "internal",
+        Visibility.Private => "private",
+        _ => throw new System.Diagnostics.UnreachableException($"Invalid visibility {Visibility}")
+    };
+
+    public bool IsVoid => ReturnType.Name == "void";
+
+    public MethodDecl(string returnType, string name, params ParameterDecl[] parameters)
+        : this(Visibility.Public, returnType, name, parameters)
+    {
+    }
+
+    public MethodDecl(Visibility visibility, string returnType, string name, params ParameterDecl[] parameters)
+    {
+        Name = name;
+        Visibility = visibility;
+        ReturnType = new(returnType);
+        Parameters = parameters;
+
+        IsCustom = false;
+        CustomAction = null;
+    }
+
+    public MethodDecl(Action customAction)
+    {
+        Name = "";
+        Visibility = Visibility.Public;
+        ReturnType = new("");
+        Parameters = Array.Empty<ParameterDecl>();
+
+        IsCustom = true;
+        CustomAction = customAction;
+    }
+
+    public string ToFnPointerType()
+    {
+        var args = Parameters.Select(p => p.Type.ToFnPointerType()).Append(ReturnType.ToFnPointerType());
+        return $"delegate* unmanaged[Stdcall]<{string.Join(", ", args)}>";
+    }
+}
+
+public struct InterfaceDecl(string name, string guid, bool light, params MethodDecl[] methods)
+{
+    public string Name = name;
+    public string Guid = guid;
+    public bool IsLight = light;
+    public MethodDecl[] Methods = methods;
+}
+
+#endregion
+
+#region Type listings
+
+public struct MethodListing
+{
+    public string Name;
+    public Visibility Visibility;
+    public string ReturnType;
+    public (string Type, string Name)[] Parameters;
+
+    public bool IsCustom;
+    public Action CustomAction;
+
+    public MethodListing(string returnType, string name, params (string Type, string Name)[] parameters)
+        : this(Visibility.Public, returnType, name, parameters)
+    {
+    }
+
+    public MethodListing(Visibility visibility, string returnType, string name, params (string Type, string Name)[] parameters)
+    {
+        Name = name;
+        Visibility = visibility;
+        ReturnType = returnType;
+        Parameters = parameters;
+
+        IsCustom = false;
+        CustomAction = null;
+    }
+
+    public MethodListing(Action customAction)
+    {
+        Name = "";
+        Visibility = Visibility.Public;
+        ReturnType = new("");
+        Parameters = Array.Empty<(string, string)>();
+
+        IsCustom = true;
+        CustomAction = customAction;
+    }
+
+    public MethodDecl ToDecl()
+    {
+        return IsCustom
+            ? new(CustomAction)
+            : new(Visibility, ReturnType, Name, Parameters.Select(p => new ParameterDecl(p.Type, p.Name)).ToArray());
+    }
+}
+
+public struct InterfaceListing(string name, string guid, bool light, params MethodListing[] methods)
+{
+    public string Name = name;
+    public string Guid = guid;
+    public bool IsLight = light;
+    public MethodListing[] Methods = methods;
+
+    public InterfaceDecl ToDecl()
+    {
+        return new(Name, Guid, IsLight, Methods.Select(m => m.ToDecl()).ToArray());
+    }
+}
+
+#endregion
+
+public string Namespace;
+public InterfaceListing[] Interfaces;
+public MethodListing[] Callbacks;
+
+// Types that are identified as interfaces.
+public static HashSet<string> InterfaceTypes;
+public static HashSet<string> LightInterfaceTypes;
+
+// Type declarations to be entirely replaced before parsing them.
+// Replacements are performed recursively, so one replacement can alias directly to another.
+public static Dictionary<string, string> TypeDeclReplacements = new()
+{
+    { "REFIID", "ref IID" },
+    { "IUnknown*", "IntPtr" },
+};
+
+// Type names to be substituted for proper C# equivalents.
+// Replacements are performed recursively, so one replacement can alias directly to another.
+public static Dictionary<string, string> TypeNameReplacements = new()
+{
+    { "int8_t", "sbyte" },
+    { "uint8_t", "byte" },
+    { "int16_t", "short" },
+    { "uint16_t", "ushort" },
+    { "int32_t", "int" },
+    { "uint32_t", "uint" },
+    { "int64_t", "long" },
+    { "uint64_t", "ulong" },
+    { "size_t", "nuint" },
+    { "ssize_t", "nint" },
+
+    { "char_t", "byte" },
+    { "wchar_t", "char" },
+
+    { "ULONG", "uint" },
+
+    { "IID", "Guid" },
+    { "HRESULT", "int" },
+    { "HANDLE", "IntPtr" },
+};
+#>

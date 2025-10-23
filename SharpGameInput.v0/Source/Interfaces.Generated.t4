@@ -3,29 +3,52 @@
 <#@ import namespace="System.Linq" #>
 <#@ output extension=".cs" #>
 <#
-string[] interfaceTypes = [
-    "IGameInput",
-    "IGameInputReading",
-    "IGameInputDevice",
-    "IGameInputDispatcher",
-    "IGameInputForceFeedbackEffect",
-    "IGameInputRawDeviceReport",
-];
-
-LightInterfaceTypes = interfaceTypes.Select((n) => "Light" + n).ToHashSet();
-InterfaceTypes = interfaceTypes.Concat(LightInterfaceTypes).ToHashSet();
-
-DeclarationReplacements.Add("GameInputReadingCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputReading, bool) -> void");
-DeclarationReplacements.Add("GameInputDeviceCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, GameInputDeviceStatus, GameInputDeviceStatus) -> void");
-// DeclarationReplacements.Add("GameInputGuideButtonCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, bool) -> void");
-DeclarationReplacements.Add("GameInputSystemButtonCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, GameInputSystemButtons, GameInputSystemButtons) -> void");
-DeclarationReplacements.Add("GameInputKeyboardLayoutCallback", "fn(GameInputCallbackToken, void*?, LightIGameInputDevice, uint64_t, uint32_t, uint32_t) -> void");
-
-TypeNameReplacements.Add("GameInputCallbackToken", "uint64_t");
-
 Namespace = "SharpGameInput.v0";
 AdditionalUsings = [
     ("System", "NETSTANDARD2_1_OR_GREATER") // For spans
+];
+
+TypeNameReplacements.Add("GameInputCallbackToken", "uint64_t");
+TypeNameReplacements.Add("LightGameInputCallbackToken", "uint64_t");
+
+Callbacks = [
+    new("void", "GameInputReadingCallback",
+        ("GameInputCallbackToken", "callbackToken"),
+        ("object?", "context"),
+        ("LightIGameInputReading", "reading"),
+        ("bool", "hasOverrunOccurred")
+    ),
+    new("void", "GameInputDeviceCallback",
+        ("LightGameInputCallbackToken", "callbackToken"),
+        ("object?", "context"),
+        ("LightIGameInputDevice", "device"),
+        ("ulong", "timestamp"),
+        ("GameInputDeviceStatus", "currentStatus"),
+        ("GameInputDeviceStatus", "previousStatus")
+    ),
+    // new("void", "GameInputGuideButtonCallback",
+    //     ("LightGameInputCallbackToken", "callbackToken"),
+    //     ("object?", "context"),
+    //     ("LightIGameInputDevice", "device"),
+    //     ("ulong", "timestamp"),
+    //     ("bool", "isPressed")
+    // ),
+    new("void", "GameInputSystemButtonCallback",
+        ("LightGameInputCallbackToken", "callbackToken"),
+        ("object?", "context"),
+        ("LightIGameInputDevice", "device"),
+        ("ulong", "timestamp"),
+        ("GameInputSystemButtons", "currentState"),
+        ("GameInputSystemButtons", "previousState")
+    ),
+    new("void", "GameInputKeyboardLayoutCallback",
+        ("LightGameInputCallbackToken", "callbackToken"),
+        ("object?", "context"),
+        ("LightIGameInputDevice", "device"),
+        ("ulong", "timestamp"),
+        ("uint", "currentLayout"),
+        ("uint", "previousLayout")
+    ),
 ];
 
 Interfaces = [
@@ -165,36 +188,36 @@ Interfaces = [
             ("uint32_t", "stateArrayCount"),
             ("float*", "stateArray")
         ),
-        new(() => MakeArrayWrappers(new("uint32_t", "GetControllerAxisState",
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerAxisState",
             ("float", "stateArray")
-        ))),
+        )),
 
         new("uint32_t", "GetControllerButtonCount"),
         new("uint32_t", "GetControllerButtonState",
             ("uint32_t", "stateArrayCount"),
             ("bool*", "stateArray")
         ),
-        new(() => MakeArrayWrappers(new("uint32_t", "GetControllerButtonState",
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
             ("bool", "stateArray")
-        ))),
+        )),
 
         new("uint32_t", "GetControllerSwitchCount"),
         new("uint32_t", "GetControllerSwitchState",
             ("uint32_t", "stateArrayCount"),
             ("GameInputSwitchPosition*", "stateArray")
         ),
-        new(() => MakeArrayWrappers(new("uint32_t", "GetControllerSwitchState",
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerSwitchState",
             ("GameInputSwitchPosition", "stateArray")
-        ))),
+        )),
 
         new("uint32_t", "GetKeyCount"),
         new("uint32_t", "GetKeyState",
             ("uint32_t", "stateArrayCount"),
             ("GameInputKeyState*", "stateArray")
         ),
-        new(() => MakeArrayWrappers(new("uint32_t", "GetKeyState",
+        new(() => MakeArrayWrappers("uint32_t", "GetKeyState",
             ("GameInputKeyState", "stateArray")
-        ))),
+        )),
 
         new("bool", "GetMouseState",
             ("out GameInputMouseState", "state")
@@ -205,9 +228,9 @@ Interfaces = [
             ("uint32_t", "stateArrayCount"),
             ("GameInputTouchState*", "stateArray")
         ),
-        new(() => MakeArrayWrappers(new("uint32_t", "GetTouchState",
+        new(() => MakeArrayWrappers("uint32_t", "GetTouchState",
             ("GameInputTouchState", "stateArray")
-        ))),
+        )),
 
         new("bool", "GetMotionState",
             ("out GameInputMotionState", "state")
@@ -495,23 +518,24 @@ Interfaces = [
     ),
 ];
 
-// InterfaceMethod is used here to perform type name replacement like everything else does
-void MakeArrayWrappers(InterfaceMethod method)
+void MakeArrayWrappers(string returnType, string name, params ParameterDecl[] parameters)
 {
-    var array = method.Parameters[0];
+    // MethodDecl is used here to perform type name replacement like everything else does
+    var decl = new MethodDecl(returnType, name, parameters);
+    var array = decl.Parameters[0];
 #>
 
-        public <#= method.ReturnType.ToTypeDecl() #> <#= method.Name #>(<#= array.TypeName #>[] <#= array.Name #>)
+        public <#= decl.ReturnType.ToTypeDecl() #> <#= decl.Name #>(<#= array.Type.Name #>[] <#= array.Name #>)
         {
-            fixed (<#= array.TypeName #>* ptr = <#= array.Name #>)
-                return <#= method.Name #>((uint)<#= array.Name #>.Length, ptr);
+            fixed (<#= array.Type.Name #>* ptr = <#= array.Name #>)
+                return <#= decl.Name #>((uint)<#= array.Name #>.Length, ptr);
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public <#= method.ReturnType.ToTypeDecl() #> <#= method.Name #>(scoped Span<<#= array.TypeName #>> <#= array.Name #>)
+        public <#= decl.ReturnType.ToTypeDecl() #> <#= decl.Name #>(scoped Span<<#= array.Type.Name #>> <#= array.Name #>)
         {
-            fixed (<#= array.TypeName #>* ptr = <#= array.Name #>)
-                return <#= method.Name #>((uint)<#= array.Name #>.Length, ptr);
+            fixed (<#= array.Type.Name #>* ptr = <#= array.Name #>)
+                return <#= decl.Name #>((uint)<#= array.Name #>.Length, ptr);
         }
 #endif
 <#
