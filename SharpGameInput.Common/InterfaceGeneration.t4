@@ -1,8 +1,14 @@
 <#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
-<#@ output extension=".cs" #>
+<#
+UsingDirectives.Add("System");
+UsingDirectives.Add("System.Diagnostics.CodeAnalysis");
+UsingDirectives.Add("System.Runtime.InteropServices");
+UsingDirectives.Add("SharpGameInput.Common");
+#>
 <#@ include file="GeneratedFileHeader.t4" once="true" #>
 <#@ include file="TypeParsing.t4" once="true" #>
 namespace <#= Namespace #>
@@ -183,18 +189,10 @@ void ForwardMethod(int vtableIndex, MethodDecl method)
         {
             var parameter = method.Parameters[i];
             // Can't use a comma on the last argument
-            if (i < method.Parameters.Length - 1)
-            {
+            string delimiter = i < method.Parameters.Length - 1 ? "," : "";
 #>
-            <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #>,
+            <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #><#= delimiter #>
 <#
-            }
-            else
-            {
-#>
-            <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #>
-<#
-            }
         }
 #>
         )

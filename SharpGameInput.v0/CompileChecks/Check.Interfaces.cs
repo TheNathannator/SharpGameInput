@@ -29,9 +29,6 @@ public static partial class Checks
         gameInput.RegisterKeyboardLayoutCallback(device, new object(), (a, b, c, d, e, f) => {}, out token, out result);
         gameInput.RegisterReadingCallback(device, GameInputKind.AnyKind, 0, new object(), (a, b, c, d) => {}, out token, out result);
         gameInput.RegisterSystemButtonCallback(device, GameInputSystemButtons.Guide, new object(), (a, b, c, d, e, f) => {}, out token, out result);
-
-        gameInput.StopCallback(0);
-        gameInput.UnregisterCallback(0, 5000);
     }
 
     public static void Check(IGameInputDispatcher dispatcher)

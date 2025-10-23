@@ -1,0 +1,309 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#
+UsingDirectives.Add("System.Diagnostics.CodeAnalysis");
+UsingDirectives.Add("SharpGameInput.Common");
+#>
+<#@ include file="GeneratedFileHeader.t4" once="true" #>
+<#@ include file="TypeParsing.t4" once="true" #>
+<#
+var callbacks = Callbacks.Select(c => c.ToDecl()).ToArray();
+#>
+namespace <#= Namespace #>
+{
+<#
+foreach (var callback in callbacks)
+{
+#>
+    using unsafe <#= callback.ShortName #>_NativePtr = delegate* unmanaged[Stdcall]<
+<#
+    foreach (var parameter in callback.Delegate.Parameters)
+    {
+#>
+        <#= parameter.Type.ToFnPointerType() #>, // <#= parameter.Name #>
+<#
+    }
+#>
+        <#= callback.Delegate.ReturnType.ToFnPointerType() #> // <return>
+    >;
+
+<#
+}
+
+foreach (var callback in callbacks)
+{
+    // Make the generated code look a little nicer if there's no parameters
+    if (callback.Delegate.Parameters.Length < 1)
+    {
+#>
+    <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToTypeDecl() #> <#= callback.Delegate.Name #>();
+
+<#
+    }
+    else
+    {
+#>
+    <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToTypeDecl() #> <#= callback.Delegate.Name #>(
+<#
+        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+        {
+            var parameter = callback.Delegate.Parameters[i];
+            // Can't use a comma on the last argument
+            string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
+#>
+        <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #><#= delimiter #>
+<#
+        }
+#>
+    );
+
+<#
+    }
+}
+#>
+    public unsafe partial class IGameInput
+    {
+<#
+foreach (var callback in callbacks)
+{
+    // Make the generated code look a little nicer if there's no parameters
+    if (callback.Delegate.Parameters.Length < 1)
+    {
+#>
+        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.ShortName #>_Native();
+
+<#
+    }
+    else
+    {
+#>
+        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.ShortName #>_Native(
+<#
+        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+        {
+            var parameter = callback.Delegate.Parameters[i];
+            // Can't use a comma on the last argument
+            if (i < callback.Delegate.Parameters.Length - 1)
+            {
+#>
+            <#= parameter.Type.ToFnPointerType() #> <#= parameter.Name #>,
+<#
+            }
+            else
+            {
+#>
+            <#= parameter.Type.ToFnPointerType() #> <#= parameter.Name #>
+<#
+            }
+        }
+#>
+        );
+
+<#
+    }
+}
+#>
+#if NET5_0_OR_GREATER
+<#
+foreach (var callback in callbacks)
+{
+#>
+        private static readonly <#= callback.ShortName #>_NativePtr _<#= callback.ShortName #>Ptr = &_<#= callback.ShortName #>;
+<#
+}
+#>
+#else
+<#
+foreach (var callback in callbacks)
+{
+#>
+        private static readonly <#= callback.ShortName #>_Native _<#= callback.ShortName #>Delegate = _<#= callback.ShortName #>;
+<#
+}
+#>
+
+<#
+foreach (var callback in callbacks)
+{
+#>
+        private static readonly <#= callback.ShortName #>_NativePtr _<#= callback.ShortName #>Ptr = (<#= callback.ShortName #>_NativePtr)
+            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_<#= callback.ShortName #>Delegate);
+<#
+}
+#>
+#endif
+<#
+foreach (var callback in callbacks)
+{
+#>
+
+        public bool Register<#= callback.ShortName #>(
+<#
+    foreach (var parameter in callback.RegisterParameters)
+    {
+#>
+            <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #>,
+<#
+    }
+#>
+            object? context,
+            <#= callback.Delegate.Name #> callbackFunc,
+            [NotNullWhen(true)] out GameInputCallbackToken? callbackToken,
+            out int result
+        )
+        {
+            ThrowHelper.CheckNull(callbackFunc);
+
+            using var scope = _callbacks.StartRegisteringCallback(callbackFunc, context);
+            result = _Register<#= callback.ShortName #>(
+<#
+    foreach (var parameter in callback.RegisterParameters)
+    {
+#>
+                <#= parameter.Name #>,
+<#
+    }
+#>
+                _callbacks.MakeCallbackContext(this),
+                _<#= callback.ShortName #>Ptr,
+                out ulong token
+            );
+
+            bool success = scope.Finish(result, token);
+            callbackToken = success ? new(this, token) : null;
+            return success;
+        }
+<#
+}
+
+foreach (var callback in callbacks)
+{
+#>
+
+#if NET5_0_OR_GREATER
+        [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+#endif
+#if UNITY_STANDALONE
+        [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
+#endif
+<#
+    // Make the generated code look a little nicer if there's no parameters
+    if (callback.Delegate.Parameters.Length < 1)
+    {
+#>
+        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.ShortName #>()
+<#
+    }
+    else
+    {
+#>
+        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.ShortName #>(
+<#
+        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+        {
+            var parameter = callback.Delegate.Parameters[i];
+            // Can't use a comma on the last argument
+            string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
+#>
+            <#= parameter.Type.ToFnPointerType() #> <#= parameter.Name #><#= delimiter #>
+<#
+        }
+#>
+        )
+<#
+    }
+#>
+        {
+            try
+            {
+                var gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
+                var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
+                var callbackFunc = (<#= callback.Delegate.Name #>)_callbackFunc;
+
+<#
+    if (callback.Delegate.Parameters.Length < 1)
+    {
+        if (callback.Delegate.IsVoid)
+        {
+#>
+                callbackFunc();
+<#
+        }
+        else
+        {
+#>
+                return callbackFunc();
+<#
+        }
+    }
+    else
+    {
+        if (callback.Delegate.IsVoid)
+        {
+#>
+                callbackFunc(
+<#
+        }
+        else
+        {
+#>
+                return callbackFunc(
+<#
+        }
+
+        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+        {
+            var parameter = callback.Delegate.Parameters[i];
+            string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
+            switch (parameter.Name)
+            {
+                case "callbackToken":
+                {
+#>
+                    new LightGameInputCallbackToken(gameInput, callbackToken)<#= delimiter #>
+<#
+                    break;
+                }
+                case "context":
+                {
+#>
+                    callbackContext<#= delimiter #>
+<#
+                    break;
+                }
+                default:
+                {
+                    if ((parameter.Type.Flags & (TypeFlag.LightInterface | TypeFlag.Interface)) != 0)
+                    {
+                        string owned = (parameter.Type.Flags & TypeFlag.OwnedInstance) != 0 ? "true" : "false";
+#>
+                    new <#= parameter.Type.Name #>(<#= parameter.Name #>, <#= owned #>)<#= delimiter #>
+<#
+                    }
+                    else
+                    {
+#>
+                    <#= parameter.Name #><#= delimiter #>
+<#
+                    }
+                    break;
+                }
+            }
+        }
+#>
+                );
+            }
+            catch (Exception ex)
+            {
+                OnUnhandledCallbackException(ex);
+            }
+        }
+<#
+    }
+}
+#>
+    }
+}

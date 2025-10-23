@@ -1,18 +1,11 @@
 <#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
-<#@ output extension=".cs" #>
 <#
-var usings = new SortedDictionary<string, string>(new NamespaceSorter())
-{
-    { "SharpGameInput.Common", null },
-    { "System", null },
-    { "System.Diagnostics.CodeAnalysis", null },
-    { "System.Runtime.InteropServices", null },
-};
-
-foreach (var ns in AdditionalUsings)
+var usings = new SortedDictionary<string, string>(new NamespaceSorter());
+foreach (var ns in UsingDirectives)
 {
     if (usings.TryGetValue(ns.Name, out string condition))
     {
@@ -57,7 +50,7 @@ using <#= ns #>;
 #nullable enable
 
 <#+
-public UsingNamespace[] AdditionalUsings;
+public List<UsingNamespace> UsingDirectives = new();
 
 public struct UsingNamespace
 {

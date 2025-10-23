@@ -5,60 +5,15 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
-    public delegate void GameInputReadingCallback(
-        LightGameInputCallbackToken callbackToken,
-        object? context,
-        LightIGameInputReading reading,
-        bool hasOverrunOccurred
-    );
-
-    public delegate void GameInputDeviceCallback(
-        LightGameInputCallbackToken callbackToken,
-        object? context,
-        LightIGameInputDevice device,
-        ulong timestamp,
-        GameInputDeviceStatus currentStatus,
-        GameInputDeviceStatus previousStatus
-    );
-
-    // public delegate void GameInputGuideButtonCallback(
-    //     LightGameInputCallbackToken callbackToken,
-    //     object? context,
-    //     LightIGameInputDevice device,
-    //     ulong timestamp,
-    //     bool isPressed
-    // );
-
-    public delegate void GameInputSystemButtonCallback(
-        LightGameInputCallbackToken callbackToken,
-        object? context,
-        LightIGameInputDevice device,
-        ulong timestamp,
-        GameInputSystemButtons currentState,
-        GameInputSystemButtons previousState
-    );
-
-    public delegate void GameInputKeyboardLayoutCallback(
-        LightGameInputCallbackToken callbackToken,
-        object? context,
-        LightIGameInputDevice device,
-        ulong timestamp,
-        uint currentLayout,
-        uint previousLayout
-    );
-
     public class GameInputCallbackToken : IEquatable<GameInputCallbackToken>
     {
-        internal const ulong CurrentCallbackToken = 0xFFFFFFFFFFFFFFFF;
-        internal const ulong InvalidCallbackToken = 0x0000000000000000;
-
         private IGameInput? _gameInput;
         internal readonly ulong _callbackToken;
 
         public GameInputCallbackToken(IGameInput gameInput, ulong callbackToken)
         {
             ThrowHelper.CheckNull(gameInput);
-            if (callbackToken is InvalidCallbackToken or CurrentCallbackToken)
+            if (callbackToken is InternalConstants.InvalidCallbackToken or InternalConstants.CurrentCallbackToken)
                 throw new ArgumentException("The given token is invalid.", nameof(callbackToken));
 
             _gameInput = gameInput;
@@ -145,7 +100,7 @@ namespace SharpGameInput.v0
             ThrowHelper.CheckNull(gameInput);
             // CurrentCallbackToken is not invalid here, as it's passed when doing
             // GameInputEnumerationKind.BlockingEnumeration on RegisterDeviceCallback
-            if (callbackToken is GameInputCallbackToken.InvalidCallbackToken /*or GameInputCallbackToken.CurrentCallbackToken*/)
+            if (callbackToken is InternalConstants.InvalidCallbackToken /*or InternalConstants.CurrentCallbackToken*/)
                 throw new ArgumentException("The given token is invalid.", nameof(callbackToken));
 
             _gameInput = gameInput;

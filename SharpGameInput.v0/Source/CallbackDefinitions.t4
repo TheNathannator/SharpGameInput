@@ -1,0 +1,79 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#
+UsingDirectives.Add("System");
+
+FnPointerTypeReplacements.Add("GameInputCallbackToken", "ulong");
+FnPointerTypeReplacements.Add("LightGameInputCallbackToken", "ulong");
+
+Callbacks = [
+    new(
+        "void", "GameInputReadingCallback", [
+            ("LightGameInputCallbackToken", "callbackToken"),
+            ("object?", "context"),
+            ("owned LightIGameInputReading", "reading"),
+            ("bool", "hasOverrunOccurred")
+        ],
+        "ReadingCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("float", "analogThreshold"),
+        ]
+    ),
+    new(
+        "void", "GameInputDeviceCallback", [
+            ("LightGameInputCallbackToken", "callbackToken"),
+            ("object?", "context"),
+            ("LightIGameInputDevice", "device"),
+            ("ulong", "timestamp"),
+            ("GameInputDeviceStatus", "currentStatus"),
+            ("GameInputDeviceStatus", "previousStatus")
+        ],
+        "DeviceCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("GameInputDeviceStatus", "statusFilter"),
+            ("GameInputEnumerationKind", "enumerationKind"),
+        ]
+    ),
+    // gg Microsoft, ABI breakage
+    // new("void", "GameInputGuideButtonCallback",
+    //     [
+    //         ("LightGameInputCallbackToken", "callbackToken"),
+    //         ("object?", "context"),
+    //         ("LightIGameInputDevice", "device"),
+    //         ("ulong", "timestamp"),
+    //         ("bool", "isPressed")
+    //     ],
+    //     "GuideButtonCallback", [
+    //     ]
+    // ),
+    new("void", "GameInputSystemButtonCallback", [
+            ("LightGameInputCallbackToken", "callbackToken"),
+            ("object?", "context"),
+            ("LightIGameInputDevice", "device"),
+            ("ulong", "timestamp"),
+            ("GameInputSystemButtons", "currentState"),
+            ("GameInputSystemButtons", "previousState")
+        ],
+        "SystemButtonCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputSystemButtons", "buttonFilter"),
+        ]
+    ),
+    new("void", "GameInputKeyboardLayoutCallback", [
+            ("LightGameInputCallbackToken", "callbackToken"),
+            ("object?", "context"),
+            ("LightIGameInputDevice", "device"),
+            ("ulong", "timestamp"),
+            ("uint", "currentLayout"),
+            ("uint", "previousLayout")
+        ],
+        "KeyboardLayoutCallback", [
+            ("IGameInputDevice?", "device"),
+        ]
+    ),
+];
+#>

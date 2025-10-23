@@ -1,15 +1,22 @@
 <#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
-<#@ output extension=".cs" #>
 <#
 InterfaceTypes = new(Interfaces.Select(i => i.Name));
 LightInterfaceTypes = new(Interfaces.Where(i => i.IsLight).Select(i => "Light" + i.Name));
 
-foreach (var callback in Callbacks)
+foreach (var iface in InterfaceTypes.Concat(LightInterfaceTypes))
 {
-    TypeNameReplacements.Add(callback.Name, callback.ToDecl().ToFnPointerType());
+    // Interfaces must be marshalled as their pointer values
+    FnPointerTypeReplacements.Add(iface, "IntPtr");
+}
+
+foreach (var _callback in Callbacks)
+{
+    var callback = _callback.ToDecl();
+    TypeNameReplacements.Add(callback.Delegate.Name, callback.Delegate.ToFnPointerType());
 }
 #>
 <#+
@@ -50,6 +57,7 @@ public enum TypeFlag
 
     Interface = 0x10,
     LightInterface = 0x20,
+    OwnedInstance = 0x40,
 }
 
 public struct TypeDecl
@@ -75,6 +83,13 @@ public struct TypeDecl
         if (declaration.EndsWith("*?"))
         {
             declaration = declaration[..^1];
+        }
+
+        // Pseudo-syntax for owned interface instances that need to be released
+        if (typeName.StartsWith("owned "))
+        {
+            flags |= TypeFlag.OwnedInstance;
+            typeName = typeName["owned ".Length..];
         }
 
         // Value indirection
@@ -157,15 +172,9 @@ public struct TypeDecl
     {
         string type = Name;
 
-        if (type == "object")
+        if (FnPointerTypeReplacements.TryGetValue(type, out string replacement))
         {
-            return ToModifierPrefix(Indirection) + "void*";
-        }
-
-        if ((Flags & TypeFlag.Interface) != 0)
-        {
-            // Interfaces must be marshalled as their pointer values
-            type = "IntPtr";
+            type = replacement;
         }
 
         type = ToModifierPrefix(Indirection) + type;
@@ -287,6 +296,20 @@ public struct InterfaceDecl(string name, string guid, bool light, params MethodD
     public MethodDecl[] Methods = methods;
 }
 
+public struct CallbackDecl
+{
+    public string ShortName;
+    public MethodDecl Delegate;
+    public ParameterDecl[] RegisterParameters;
+
+    public CallbackDecl(string shortName, MethodDecl @delegate, ParameterDecl[] registerParameters)
+    {
+        ShortName = shortName;
+        Delegate = @delegate;
+        RegisterParameters = registerParameters;
+    }
+}
+
 #endregion
 
 #region Type listings
@@ -349,11 +372,44 @@ public struct InterfaceListing(string name, string guid, bool light, params Meth
     }
 }
 
+public struct CallbackListing
+{
+    public string ShortName;
+    public MethodListing Delegate;
+    public (string Type, string Name)[] RegisterParameters;
+
+    public CallbackListing(
+        string returnType, string name, (string Type, string Name)[] parameters,
+        string shortName, (string Type, string Name)[] registerParameters
+    )
+        : this(
+            Visibility.Public, returnType, name, parameters,
+            shortName, registerParameters
+        )
+    {
+    }
+
+    public CallbackListing(
+        Visibility visibility, string returnType, string name, (string Type, string Name)[] parameters,
+        string shortName, (string Type, string Name)[] registerParameters
+    )
+    {
+        ShortName = shortName;
+        Delegate = new(visibility, returnType, name, parameters);
+        RegisterParameters = registerParameters;
+    }
+
+    public CallbackDecl ToDecl()
+    {
+        return new(ShortName, Delegate.ToDecl(), RegisterParameters.Select(p => new ParameterDecl(p.Type, p.Name)).ToArray());
+    }
+}
+
 #endregion
 
 public string Namespace;
 public InterfaceListing[] Interfaces;
-public MethodListing[] Callbacks;
+public CallbackListing[] Callbacks;
 
 // Types that are identified as interfaces.
 public static HashSet<string> InterfaceTypes;
@@ -390,5 +446,10 @@ public static Dictionary<string, string> TypeNameReplacements = new()
     { "IID", "Guid" },
     { "HRESULT", "int" },
     { "HANDLE", "IntPtr" },
+};
+
+public static Dictionary<string, string> FnPointerTypeReplacements = new()
+{
+    { "object", "void*" },
 };
 #>
