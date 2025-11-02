@@ -9,6 +9,10 @@
     <LangVersion>12</LangVersion> <!-- For function pointers, `scoped`, and `using` type aliases -->
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- `Missing reference to recommended package: "..."`
+      CsWin32 recommends System.Memory, but packages are deliberately not referenced to avoid dependencies -->
+    <NoWarn Condition="'$(TargetFramework)'=='netstandard2.0'">PInvoke009</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
