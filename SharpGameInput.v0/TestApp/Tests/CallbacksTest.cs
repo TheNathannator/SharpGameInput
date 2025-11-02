@@ -61,19 +61,17 @@ namespace SharpGameInput.v0.TestApp
         {
             using (reading)
             {
-                Program.PrintTimestamp(reading.GetTimestamp());
-                Console.Write(": ");
-
                 // Check report type
                 // We only read raw reports here for simplicity
                 var kind = reading.GetInputKind();
-                if ((kind & GameInputKind.RawDeviceReport) != 0)
+                if ((kind & GameInputKind.RawDeviceReport) == 0)
                 {
                     Console.WriteLine(kind.ToString());
                     return;
                 }
 
-                RawReportTest.PrintRawReport(reading);
+                byte[]? dummy = null;
+                ConsoleUtility.PrintRawReport(reading, ref dummy);
             }
         }
 

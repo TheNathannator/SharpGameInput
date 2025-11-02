@@ -29,10 +29,10 @@ namespace SharpGameInput.v0.TestApp
         {
             Console.WriteLine("Press any key to stop the test.");
 
-            ulong lastTimestamp = 0;
+            byte[] lastReport = Array.Empty<byte>();
             for (; !Console.KeyAvailable; Thread.Sleep(1))
             {
-                PollAndPrintReport(gameInput, null, ref lastTimestamp);
+                PollAndPrintReport(gameInput, null, ref lastReport);
             }
 
             // Consume keypress
@@ -64,8 +64,8 @@ namespace SharpGameInput.v0.TestApp
                         {
                             using (device)
                             {
-                                ulong lastTimestamp = 0;
-                                while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, device, ref lastTimestamp));
+                                byte[] lastReport = Array.Empty<byte>();
+                                while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, device, ref lastReport));
                             }
                         });
                         thread.Start();
@@ -100,7 +100,7 @@ namespace SharpGameInput.v0.TestApp
             deviceThreads.Clear();
         }
 
-        private static bool PollAndPrintReport(IGameInput gameInput, IGameInputDevice? device, ref ulong lastTimestamp)
+        private static bool PollAndPrintReport(IGameInput gameInput, IGameInputDevice? device, ref byte[] lastReport)
         {
             int result = gameInput.GetCurrentReading(GameInputKind.RawDeviceReport, device, out var reading);
             if (result < 0)
@@ -131,50 +131,17 @@ namespace SharpGameInput.v0.TestApp
 
             using (reading)
             {
-                // Ignore unchanged reports
-                ulong timestamp = reading.GetTimestamp();
-                if (lastTimestamp == timestamp)
-                    return true;
-                lastTimestamp = timestamp;
+                // GameInput does not update timestamps when only third-party-defined data changes,
+                // so we have to compare state memory manually to see when things actually change
+                // ulong timestamp = reading.GetTimestamp();
+                // if (lastTimestamp == timestamp)
+                //     return true;
+                // lastTimestamp = timestamp;
 
-                Program.PrintTimestamp(timestamp);
-                Console.Write(": ");
-                PrintRawReport(reading);
+                ConsoleUtility.PrintRawReport(reading, ref lastReport!);
             }
 
             return true;
-        }
-
-        public static void PrintRawReport(LightIGameInputReading reading)
-        {
-            if (!reading.GetRawReport(out var rawReport))
-            {
-                Console.WriteLine("Could not get raw report!");
-                return;
-            }
-
-            using (rawReport)
-            {
-                uint reportId = rawReport.GetReportInfo().id;
-                UIntPtr size = rawReport.GetRawDataSize();
-                Console.Write("Report ID: ");
-                Console.Write(reportId);
-                Console.Write(", size: ");
-                Console.Write(size);
-                Console.Write(", ");
-
-                unsafe
-                {
-                    Span<byte> buffer = stackalloc byte[(int)size];
-                    fixed (byte* ptr = buffer)
-                    {
-                        UIntPtr readSize = rawReport.GetRawData(size, ptr);
-                        Debug.Assert(size == readSize);
-                    }
-
-                    ConsoleUtility.WriteLine(buffer);
-                }
-            }
         }
     }
 }

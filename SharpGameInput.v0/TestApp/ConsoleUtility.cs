@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace SharpGameInput.v0.TestApp
 {
-    internal static class ConsoleUtility
+    internal static partial class ConsoleUtility
     {
         public static void WriteMenuHeader(string headerText, bool padHeader = true)
         {
