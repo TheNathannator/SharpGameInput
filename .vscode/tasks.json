@@ -1,0 +1,93 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/SharpGameInput.slnx",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "dependsOn": [
+                "publish_netstandard2.0",
+                "publish_netstandard2.1",
+                "publish_net8.0",
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish_netstandard2.0",
+            "hide": true,
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/source/SharpGameInput.csproj",
+                "/property:Configuration=Release",
+                "/property:TargetFramework=netstandard2.0",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish_netstandard2.1",
+            "hide": true,
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/source/SharpGameInput.csproj",
+                "/property:Configuration=Release",
+                "/property:TargetFramework=netstandard2.1",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish_net8.0",
+            "hide": true,
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/source/SharpGameInput.csproj",
+                "/property:Configuration=Release",
+                "/property:TargetFramework=net8.0",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/SharpGameInput.slnx"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "buildT4",
+            "command": "t4",
+            "type": "process",
+            "args": [
+                "${relativeFile}"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
