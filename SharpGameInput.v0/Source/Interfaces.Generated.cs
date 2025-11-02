@@ -2918,22 +2918,20 @@ namespace SharpGameInput.v0
             device = new(device_handle, ownsHandle: true);
         }
 
-        private GameInputRawDeviceReportInfo* GetReportInfo()
+        public ref readonly GameInputRawDeviceReportInfo GetReportInfo()
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputRawDeviceReportInfo*>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ref readonly GameInputRawDeviceReportInfo>)vtable[4];
 
-            var result = fnPtr(
+            ref readonly var result = ref fnPtr(
                 thisPtr
             );
 
-            return result;
+            return ref result;
         }
-
-        public ref readonly GameInputRawDeviceReportInfo ReportInfo => ref *GetReportInfo();
 
         public nuint GetRawDataSize()
         {
@@ -3218,22 +3216,20 @@ namespace SharpGameInput.v0
             device = new(device_handle, ownsHandle: true);
         }
 
-        private GameInputRawDeviceReportInfo* GetReportInfo()
+        public ref readonly GameInputRawDeviceReportInfo GetReportInfo()
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputRawDeviceReportInfo*>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ref readonly GameInputRawDeviceReportInfo>)vtable[4];
 
-            var result = fnPtr(
+            ref readonly var result = ref fnPtr(
                 thisPtr
             );
 
-            return result;
+            return ref result;
         }
-
-        public ref readonly GameInputRawDeviceReportInfo ReportInfo => ref *GetReportInfo();
 
         public nuint GetRawDataSize()
         {

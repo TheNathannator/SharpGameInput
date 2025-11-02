@@ -168,7 +168,7 @@ public static partial class Checks
     public static unsafe void Check(IGameInputRawDeviceReport left, IGameInputRawDeviceReport right,
         LightIGameInputRawDeviceReport lightLeft, LightIGameInputRawDeviceReport lightRight)
     {
-        ref readonly var info = ref left.ReportInfo;
+        ref readonly var info = ref left.GetReportInfo();
 
         left.GetDevice(out var device);
 

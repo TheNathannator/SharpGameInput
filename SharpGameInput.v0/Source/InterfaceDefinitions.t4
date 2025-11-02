@@ -411,15 +411,7 @@ Interfaces = [
             ("out LightIGameInputDevice", "device")
         ),
 
-        new(Visibility.Private, "GameInputRawDeviceReportInfo*", "GetReportInfo"),
-
-        new(() =>
-        {
-#>
-
-        public ref readonly GameInputRawDeviceReportInfo ReportInfo => ref *GetReportInfo();
-<#
-        }),
+        new("ref readonly GameInputRawDeviceReportInfo", "GetReportInfo"),
 
         new("size_t", "GetRawDataSize"),
         new("size_t", "GetRawData",

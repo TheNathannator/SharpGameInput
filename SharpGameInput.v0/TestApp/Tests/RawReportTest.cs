@@ -155,7 +155,7 @@ namespace SharpGameInput.v0.TestApp
 
             using (rawReport)
             {
-                uint reportId = rawReport.ReportInfo.id;
+                uint reportId = rawReport.GetReportInfo().id;
                 UIntPtr size = rawReport.GetRawDataSize();
                 Console.Write("Report ID: ");
                 Console.Write(reportId);
