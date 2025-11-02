@@ -5,4 +5,4 @@
 <# Namespace = "SharpGameInput.v0"; #>
 <#@ include file="CallbackDefinitions.t4" #>
 <#@ include file="InterfaceDefinitions.t4" #>
-<#@ include file="../../SharpGameInput.Common/InterfaceGeneration.t4" #>
+<#@ include file="../../SharpGameInput.Common/Source/InterfaceGeneration.t4" #>
