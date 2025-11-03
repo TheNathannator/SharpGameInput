@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using SharpGameInput.v0;
 
-namespace SharpGameInput.v0.TestApp
+namespace SharpGameInput.TestApp
 {
     internal class RawReportTest
     {
         public static void Run(IGameInput gameInput)
         {
-            ConsoleUtility.WriteMenuHeader("Read Raw Reports");
+            ConsoleMenu.WriteMenuHeader("Read Raw Reports");
 
             (string name, Action<IGameInput> func)[] subTests =
             {
@@ -18,7 +18,7 @@ namespace SharpGameInput.v0.TestApp
                 ("Polling with Device Callback", WithCallbacks),
             };
 
-            int choice = ConsoleUtility.PromptChoice("Select a sub-test", subTests.Select((i) => i.name));
+            int choice = ConsoleMenu.PromptChoice("Select a sub-test", subTests.Select((i) => i.name));
             if (choice < 0)
                 return;
 
@@ -85,11 +85,11 @@ namespace SharpGameInput.v0.TestApp
                 out int result
             ))
             {
-                ConsoleUtility.WritePInvokeError("Failed to register device callback", result);
+                ConsolePrinting.PrintPInvokeError("Failed to register device callback", result);
                 return;
             }
 
-            ConsoleUtility.WaitForKey("Press any key to stop the test.");
+            ConsoleMenu.WaitForKey("Press any key to stop the test.");
 
             foreach (var (thread, stopHandle) in deviceThreads.Values)
             {
@@ -119,11 +119,11 @@ namespace SharpGameInput.v0.TestApp
                     if (device != null)
                     {
                         var deviceId = device.GetDeviceInfo().deviceId;
-                        ConsoleUtility.WritePInvokeError($"Failed to get current reading for device {deviceId}", result);
+                        ConsolePrinting.PrintPInvokeError($"Failed to get current reading for device {deviceId}", result);
                     }
                     else
                     {
-                        ConsoleUtility.WritePInvokeError("Failed to get current reading", result);
+                        ConsolePrinting.PrintPInvokeError("Failed to get current reading", result);
                     }
                     return false;
                 }
@@ -131,14 +131,7 @@ namespace SharpGameInput.v0.TestApp
 
             using (reading)
             {
-                // GameInput does not update timestamps when only third-party-defined data changes,
-                // so we have to compare state memory manually to see when things actually change
-                // ulong timestamp = reading.GetTimestamp();
-                // if (lastTimestamp == timestamp)
-                //     return true;
-                // lastTimestamp = timestamp;
-
-                ConsoleUtility.PrintRawReport(reading, ref lastReport!);
+                ConsolePrinting.PrintRawReport(reading, ref lastReport!);
             }
 
             return true;

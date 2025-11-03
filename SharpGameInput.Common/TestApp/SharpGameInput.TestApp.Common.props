@@ -1,0 +1,25 @@
+<Project>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>8</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Source/SharpGameInput.v$(GameInputApiVersion).csproj" />
+
+    <PackageReference Condition="'$(TargetFramework)' == 'net48'" Include="System.Memory" Version="4.5.5" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net48'" Include="PolySharp" Version="1.14.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)/*.cs" LinkBase="Common" />
+  </ItemGroup>
+
+</Project>

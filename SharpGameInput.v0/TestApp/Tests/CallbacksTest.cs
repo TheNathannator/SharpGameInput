@@ -1,19 +1,21 @@
 using System;
+using SharpGameInput.v0;
 
-namespace SharpGameInput.v0.TestApp
+namespace SharpGameInput.TestApp
 {
     internal class CallbacksTest
     {
         public static void Run(IGameInput gameInput)
         {
-            ConsoleUtility.WriteMenuHeader("Callbacks");
+            ConsoleMenu.WriteMenuHeader("Callbacks");
 
             if (!gameInput.RegisterReadingCallback(
-                null, GameInputKind.Unknown, 0, null, ReadingCallback,
+                null, GameInputKind.Unknown, 0,
+                null, ReadingCallback,
                 out var readingToken, out int result
             ))
             {
-                ConsoleUtility.WritePInvokeError("Failed to register reading callback", result);
+                ConsolePrinting.PrintPInvokeError("Failed to register reading callback", result);
             }
 
             using var readingTokenDisposer = new CallbackTokenDisposer(readingToken, 5000);
@@ -24,32 +26,34 @@ namespace SharpGameInput.v0.TestApp
                 out var deviceToken, out result
             ))
             {
-                ConsoleUtility.WritePInvokeError("Failed to register device callback", result);
+                ConsolePrinting.PrintPInvokeError("Failed to register device callback", result);
             }
 
             using var deviceTokenDisposer = new CallbackTokenDisposer(deviceToken, 5000);
 
             if (!gameInput.RegisterSystemButtonCallback(
-                null, GameInputSystemButtons.Guide | GameInputSystemButtons.Share, null, SystemButtonCallback,
+                null, GameInputSystemButtons.Guide | GameInputSystemButtons.Share,
+                null, SystemButtonCallback,
                 out var systemButtonToken, out result
             ))
             {
-                ConsoleUtility.WritePInvokeError("Failed to register guide button callback", result);
+                ConsolePrinting.PrintPInvokeError("Failed to register guide button callback", result);
             }
 
             using var systemButtonTokenDisposer = new CallbackTokenDisposer(systemButtonToken, 5000);
 
             if (!gameInput.RegisterKeyboardLayoutCallback(
-                null, null, KeyboardLayoutCallback,
+                null,
+                null, KeyboardLayoutCallback,
                 out var keyboardLayoutToken, out result
             ))
             {
-                ConsoleUtility.WritePInvokeError("Failed to register keyboard layout callback", result);
+                ConsolePrinting.PrintPInvokeError("Failed to register keyboard layout callback", result);
             }
 
             using var keyboardLayoutTokenDisposer = new CallbackTokenDisposer(keyboardLayoutToken, 5000);
 
-            ConsoleUtility.WaitForKey("Press any key to stop this test and return to the main menu.");
+            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
         }
 
         private static void ReadingCallback(
@@ -71,7 +75,7 @@ namespace SharpGameInput.v0.TestApp
                 }
 
                 byte[]? dummy = null;
-                ConsoleUtility.PrintRawReport(reading, ref dummy);
+                ConsolePrinting.PrintRawReport(reading, ref dummy);
             }
         }
 
@@ -89,7 +93,7 @@ namespace SharpGameInput.v0.TestApp
             if (isConnected == wasConnected)
                 return;
 
-            Program.PrintTimestamp(timestamp);
+            ConsolePrinting.WriteTimestamp(timestamp);
             Console.WriteLine(isConnected ? ": Device connected" : ": Device disconnected");
 
             ref readonly var info = ref device.GetDeviceInfo();
@@ -122,7 +126,7 @@ namespace SharpGameInput.v0.TestApp
             if (info.deviceDescriptorData != null && info.deviceDescriptorSize > 0)
             {
                 var descriptor = new ReadOnlySpan<byte>(info.deviceDescriptorData, (int)info.deviceDescriptorSize);
-                ConsoleUtility.WriteWrapped(descriptor, indentAmount: 2, wrapCount: 32);
+                ConsolePrinting.PrintBufferWrapped(descriptor, indentAmount: 2, wrapCount: 32);
             }
         }
 
@@ -135,7 +139,7 @@ namespace SharpGameInput.v0.TestApp
             GameInputSystemButtons previousState
         )
         {
-            Program.PrintTimestamp(timestamp);
+            ConsolePrinting.WriteTimestamp(timestamp);
             Console.WriteLine($": System buttons changed. Old: {previousState}, new: {currentState}");
         }
 
@@ -148,7 +152,7 @@ namespace SharpGameInput.v0.TestApp
             uint previousLayout
         )
         {
-            Program.PrintTimestamp(timestamp);
+            ConsolePrinting.WriteTimestamp(timestamp);
             Console.Write($": Keyboard layout changed. Old: 0x{previousLayout:X8}, new: 0x{currentLayout:X8}");
         }
     }
