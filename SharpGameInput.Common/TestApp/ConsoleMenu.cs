@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SharpGameInput.TestApp
 {
@@ -26,6 +27,16 @@ namespace SharpGameInput.TestApp
         public static ConsoleKey WaitForKey(string message = "Press any key to continue...")
         {
             Console.WriteLine(message);
+
+            // Give the message a bit of time to be present before allowing it to be dismissed
+            Thread.Sleep(500);
+
+            // Flush out any keys that are already in the read buffer to prevent accidental skipping
+            while (Console.KeyAvailable)
+            {
+                Console.ReadKey(intercept: true);
+            }
+
             return Console.ReadKey(intercept: true).Key;
         }
 
