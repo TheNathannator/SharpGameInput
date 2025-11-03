@@ -378,27 +378,6 @@ public struct CallbackListing
     public MethodListing Delegate;
     public (string Type, string Name)[] RegisterParameters;
 
-    public CallbackListing(
-        string returnType, string name, (string Type, string Name)[] parameters,
-        string shortName, (string Type, string Name)[] registerParameters
-    )
-        : this(
-            Visibility.Public, returnType, name, parameters,
-            shortName, registerParameters
-        )
-    {
-    }
-
-    public CallbackListing(
-        Visibility visibility, string returnType, string name, (string Type, string Name)[] parameters,
-        string shortName, (string Type, string Name)[] registerParameters
-    )
-    {
-        ShortName = shortName;
-        Delegate = new(visibility, returnType, name, parameters);
-        RegisterParameters = registerParameters;
-    }
-
     public CallbackDecl ToDecl()
     {
         return new(ShortName, Delegate.ToDecl(), RegisterParameters.Select(p => new ParameterDecl(p.Type, p.Name)).ToArray());
