@@ -15,22 +15,20 @@ FnPointerTypeReplacements.Add("LightGameInputCallbackToken", "ulong");
 Callbacks = [
     new()
     {
-        ShortName = "ReadingCallback",
         Delegate = new("void", "GameInputReadingCallback", [
             ("LightGameInputCallbackToken", "callbackToken"),
             ("object?", "context"),
             ("owned LightIGameInputReading", "reading"),
             ("bool", "hasOverrunOccurred"),
         ]),
-        RegisterParameters = [
+        Register = new("ignored_t", "RegisterReadingCallback", [
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("float", "analogThreshold"),
-        ]
+        ]),
     },
     new()
     {
-        ShortName = "DeviceCallback",
         Delegate = new("void", "GameInputDeviceCallback", [
             ("LightGameInputCallbackToken", "callbackToken"),
             ("object?", "context"),
@@ -39,17 +37,16 @@ Callbacks = [
             ("GameInputDeviceStatus", "currentStatus"),
             ("GameInputDeviceStatus", "previousStatus"),
         ]),
-        RegisterParameters = [
+        Register = new("ignored_t", "RegisterDeviceCallback", [
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("GameInputDeviceStatus", "statusFilter"),
             ("GameInputEnumerationKind", "enumerationKind"),
-        ]
+        ]),
     },
     // gg Microsoft, ABI breakage
     // new()
     // {
-    //     ShortName = "GuideButtonCallback",
     //     Delegate = new("void", "GameInputGuideButtonCallback", [
     //         ("LightGameInputCallbackToken", "callbackToken"),
     //         ("object?", "context"),
@@ -57,11 +54,10 @@ Callbacks = [
     //         ("uint64_t", "timestamp"),
     //         ("bool", "isPressed"),
     //     ]),
-    //     RegisterParameters = []
+    //     Register = new("ignored_t", "RegisterGuideButtonCallback", []),
     // },
     new()
     {
-        ShortName = "SystemButtonCallback",
         Delegate = new("void", "GameInputSystemButtonCallback", [
             ("LightGameInputCallbackToken", "callbackToken"),
             ("object?", "context"),
@@ -70,14 +66,13 @@ Callbacks = [
             ("GameInputSystemButtons", "currentState"),
             ("GameInputSystemButtons", "previousState"),
         ]),
-        RegisterParameters = [
+        Register = new("ignored_t", "RegisterSystemButtonCallback", [
             ("IGameInputDevice?", "device"),
             ("GameInputSystemButtons", "buttonFilter"),
-        ]
+        ]),
     },
     new()
     {
-        ShortName = "KeyboardLayoutCallback",
         Delegate = new("void", "GameInputKeyboardLayoutCallback", [
             ("LightGameInputCallbackToken", "callbackToken"),
             ("object?", "context"),
@@ -86,9 +81,9 @@ Callbacks = [
             ("uint32_t", "currentLayout"),
             ("uint32_t", "previousLayout"),
         ]),
-        RegisterParameters = [
+        Register = new("ignored_t", "RegisterKeyboardLayoutCallback", [
             ("IGameInputDevice?", "device"),
-        ]
+        ]),
     },
 ];
 

@@ -18,7 +18,7 @@ namespace <#= Namespace #>
 foreach (var callback in callbacks)
 {
 #>
-    using unsafe <#= callback.ShortName #>_NativePtr = delegate* unmanaged[Stdcall]<
+    using unsafe <#= callback.Delegate.Name #>_NativePtr = delegate* unmanaged[Stdcall]<
 <#
     foreach (var parameter in callback.Delegate.Parameters)
     {
@@ -73,14 +73,14 @@ foreach (var callback in callbacks)
     if (callback.Delegate.Parameters.Length < 1)
     {
 #>
-        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.ShortName #>_Native();
+        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.Delegate.Name #>_Native();
 
 <#
     }
     else
     {
 #>
-        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.ShortName #>_Native(
+        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.Delegate.Name #>_Native(
 <#
         for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
         {
@@ -111,7 +111,7 @@ foreach (var callback in callbacks)
 foreach (var callback in callbacks)
 {
 #>
-        private static readonly <#= callback.ShortName #>_NativePtr _<#= callback.ShortName #>Ptr = &_<#= callback.ShortName #>;
+        private static readonly <#= callback.Delegate.Name #>_NativePtr _<#= callback.Delegate.Name #>Ptr = &_<#= callback.Delegate.Name #>;
 <#
 }
 #>
@@ -120,7 +120,7 @@ foreach (var callback in callbacks)
 foreach (var callback in callbacks)
 {
 #>
-        private static readonly <#= callback.ShortName #>_Native _<#= callback.ShortName #>Delegate = _<#= callback.ShortName #>;
+        private static readonly <#= callback.Delegate.Name #>_Native _<#= callback.Delegate.Name #>Delegate = _<#= callback.Delegate.Name #>;
 <#
 }
 #>
@@ -129,8 +129,8 @@ foreach (var callback in callbacks)
 foreach (var callback in callbacks)
 {
 #>
-        private static readonly <#= callback.ShortName #>_NativePtr _<#= callback.ShortName #>Ptr = (<#= callback.ShortName #>_NativePtr)
-            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_<#= callback.ShortName #>Delegate);
+        private static readonly <#= callback.Delegate.Name #>_NativePtr _<#= callback.Delegate.Name #>Ptr = (<#= callback.Delegate.Name #>_NativePtr)
+            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_<#= callback.Delegate.Name #>Delegate);
 <#
 }
 #>
@@ -140,9 +140,9 @@ foreach (var callback in callbacks)
 {
 #>
 
-        public bool Register<#= callback.ShortName #>(
+        public bool <#= callback.Register.Name #>(
 <#
-    foreach (var parameter in callback.RegisterParameters)
+    foreach (var parameter in callback.Register.Parameters)
     {
 #>
             <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #>,
@@ -158,9 +158,9 @@ foreach (var callback in callbacks)
             ThrowHelper.CheckNull(callbackFunc);
 
             using var scope = _callbacks.StartRegisteringCallback(callbackFunc, context);
-            result = _Register<#= callback.ShortName #>(
+            result = _<#= callback.Register.Name #>(
 <#
-    foreach (var parameter in callback.RegisterParameters)
+    foreach (var parameter in callback.Register.Parameters)
     {
 #>
                 <#= parameter.Name #>,
@@ -168,7 +168,7 @@ foreach (var callback in callbacks)
     }
 #>
                 _callbacks.MakeCallbackContext(this),
-                _<#= callback.ShortName #>Ptr,
+                _<#= callback.Delegate.Name #>Ptr,
                 out ulong token
             );
 
@@ -194,13 +194,13 @@ foreach (var callback in callbacks)
     if (callback.Delegate.Parameters.Length < 1)
     {
 #>
-        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.ShortName #>()
+        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.Delegate.Name #>()
 <#
     }
     else
     {
 #>
-        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.ShortName #>(
+        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.Delegate.Name #>(
 <#
         for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
         {

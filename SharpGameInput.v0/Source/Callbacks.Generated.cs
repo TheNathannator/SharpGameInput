@@ -13,7 +13,7 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
-    using unsafe ReadingCallback_NativePtr = delegate* unmanaged[Stdcall]<
+    using unsafe GameInputReadingCallback_NativePtr = delegate* unmanaged[Stdcall]<
         ulong, // callbackToken
         void*, // context
         IntPtr, // reading
@@ -21,7 +21,7 @@ namespace SharpGameInput.v0
         void // <return>
     >;
 
-    using unsafe DeviceCallback_NativePtr = delegate* unmanaged[Stdcall]<
+    using unsafe GameInputDeviceCallback_NativePtr = delegate* unmanaged[Stdcall]<
         ulong, // callbackToken
         void*, // context
         IntPtr, // device
@@ -31,7 +31,7 @@ namespace SharpGameInput.v0
         void // <return>
     >;
 
-    using unsafe SystemButtonCallback_NativePtr = delegate* unmanaged[Stdcall]<
+    using unsafe GameInputSystemButtonCallback_NativePtr = delegate* unmanaged[Stdcall]<
         ulong, // callbackToken
         void*, // context
         IntPtr, // device
@@ -41,7 +41,7 @@ namespace SharpGameInput.v0
         void // <return>
     >;
 
-    using unsafe KeyboardLayoutCallback_NativePtr = delegate* unmanaged[Stdcall]<
+    using unsafe GameInputKeyboardLayoutCallback_NativePtr = delegate* unmanaged[Stdcall]<
         ulong, // callbackToken
         void*, // context
         IntPtr, // device
@@ -87,14 +87,14 @@ namespace SharpGameInput.v0
 
     public unsafe partial class IGameInput
     {
-        public delegate void ReadingCallback_Native(
+        public delegate void GameInputReadingCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr reading,
             bool hasOverrunOccurred
         );
 
-        public delegate void DeviceCallback_Native(
+        public delegate void GameInputDeviceCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -103,7 +103,7 @@ namespace SharpGameInput.v0
             GameInputDeviceStatus previousStatus
         );
 
-        public delegate void SystemButtonCallback_Native(
+        public delegate void GameInputSystemButtonCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -112,7 +112,7 @@ namespace SharpGameInput.v0
             GameInputSystemButtons previousState
         );
 
-        public delegate void KeyboardLayoutCallback_Native(
+        public delegate void GameInputKeyboardLayoutCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -122,24 +122,24 @@ namespace SharpGameInput.v0
         );
 
 #if NET5_0_OR_GREATER
-        private static readonly ReadingCallback_NativePtr _ReadingCallbackPtr = &_ReadingCallback;
-        private static readonly DeviceCallback_NativePtr _DeviceCallbackPtr = &_DeviceCallback;
-        private static readonly SystemButtonCallback_NativePtr _SystemButtonCallbackPtr = &_SystemButtonCallback;
-        private static readonly KeyboardLayoutCallback_NativePtr _KeyboardLayoutCallbackPtr = &_KeyboardLayoutCallback;
+        private static readonly GameInputReadingCallback_NativePtr _GameInputReadingCallbackPtr = &_GameInputReadingCallback;
+        private static readonly GameInputDeviceCallback_NativePtr _GameInputDeviceCallbackPtr = &_GameInputDeviceCallback;
+        private static readonly GameInputSystemButtonCallback_NativePtr _GameInputSystemButtonCallbackPtr = &_GameInputSystemButtonCallback;
+        private static readonly GameInputKeyboardLayoutCallback_NativePtr _GameInputKeyboardLayoutCallbackPtr = &_GameInputKeyboardLayoutCallback;
 #else
-        private static readonly ReadingCallback_Native _ReadingCallbackDelegate = _ReadingCallback;
-        private static readonly DeviceCallback_Native _DeviceCallbackDelegate = _DeviceCallback;
-        private static readonly SystemButtonCallback_Native _SystemButtonCallbackDelegate = _SystemButtonCallback;
-        private static readonly KeyboardLayoutCallback_Native _KeyboardLayoutCallbackDelegate = _KeyboardLayoutCallback;
+        private static readonly GameInputReadingCallback_Native _GameInputReadingCallbackDelegate = _GameInputReadingCallback;
+        private static readonly GameInputDeviceCallback_Native _GameInputDeviceCallbackDelegate = _GameInputDeviceCallback;
+        private static readonly GameInputSystemButtonCallback_Native _GameInputSystemButtonCallbackDelegate = _GameInputSystemButtonCallback;
+        private static readonly GameInputKeyboardLayoutCallback_Native _GameInputKeyboardLayoutCallbackDelegate = _GameInputKeyboardLayoutCallback;
 
-        private static readonly ReadingCallback_NativePtr _ReadingCallbackPtr = (ReadingCallback_NativePtr)
-            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_ReadingCallbackDelegate);
-        private static readonly DeviceCallback_NativePtr _DeviceCallbackPtr = (DeviceCallback_NativePtr)
-            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_DeviceCallbackDelegate);
-        private static readonly SystemButtonCallback_NativePtr _SystemButtonCallbackPtr = (SystemButtonCallback_NativePtr)
-            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_SystemButtonCallbackDelegate);
-        private static readonly KeyboardLayoutCallback_NativePtr _KeyboardLayoutCallbackPtr = (KeyboardLayoutCallback_NativePtr)
-            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_KeyboardLayoutCallbackDelegate);
+        private static readonly GameInputReadingCallback_NativePtr _GameInputReadingCallbackPtr = (GameInputReadingCallback_NativePtr)
+            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_GameInputReadingCallbackDelegate);
+        private static readonly GameInputDeviceCallback_NativePtr _GameInputDeviceCallbackPtr = (GameInputDeviceCallback_NativePtr)
+            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_GameInputDeviceCallbackDelegate);
+        private static readonly GameInputSystemButtonCallback_NativePtr _GameInputSystemButtonCallbackPtr = (GameInputSystemButtonCallback_NativePtr)
+            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_GameInputSystemButtonCallbackDelegate);
+        private static readonly GameInputKeyboardLayoutCallback_NativePtr _GameInputKeyboardLayoutCallbackPtr = (GameInputKeyboardLayoutCallback_NativePtr)
+            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_GameInputKeyboardLayoutCallbackDelegate);
 #endif
 
         public bool RegisterReadingCallback(
@@ -160,7 +160,7 @@ namespace SharpGameInput.v0
                 inputKind,
                 analogThreshold,
                 _callbacks.MakeCallbackContext(this),
-                _ReadingCallbackPtr,
+                _GameInputReadingCallbackPtr,
                 out ulong token
             );
 
@@ -189,7 +189,7 @@ namespace SharpGameInput.v0
                 statusFilter,
                 enumerationKind,
                 _callbacks.MakeCallbackContext(this),
-                _DeviceCallbackPtr,
+                _GameInputDeviceCallbackPtr,
                 out ulong token
             );
 
@@ -214,7 +214,7 @@ namespace SharpGameInput.v0
                 device,
                 buttonFilter,
                 _callbacks.MakeCallbackContext(this),
-                _SystemButtonCallbackPtr,
+                _GameInputSystemButtonCallbackPtr,
                 out ulong token
             );
 
@@ -237,7 +237,7 @@ namespace SharpGameInput.v0
             result = _RegisterKeyboardLayoutCallback(
                 device,
                 _callbacks.MakeCallbackContext(this),
-                _KeyboardLayoutCallbackPtr,
+                _GameInputKeyboardLayoutCallbackPtr,
                 out ulong token
             );
 
@@ -252,7 +252,7 @@ namespace SharpGameInput.v0
 #if UNITY_STANDALONE
         [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
 #endif
-        private static void _ReadingCallback(
+        private static void _GameInputReadingCallback(
             ulong callbackToken,
             void* context,
             IntPtr reading,
@@ -284,7 +284,7 @@ namespace SharpGameInput.v0
 #if UNITY_STANDALONE
         [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
 #endif
-        private static void _DeviceCallback(
+        private static void _GameInputDeviceCallback(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -320,7 +320,7 @@ namespace SharpGameInput.v0
 #if UNITY_STANDALONE
         [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
 #endif
-        private static void _SystemButtonCallback(
+        private static void _GameInputSystemButtonCallback(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -356,7 +356,7 @@ namespace SharpGameInput.v0
 #if UNITY_STANDALONE
         [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
 #endif
-        private static void _KeyboardLayoutCallback(
+        private static void _GameInputKeyboardLayoutCallback(
             ulong callbackToken,
             void* context,
             IntPtr device,

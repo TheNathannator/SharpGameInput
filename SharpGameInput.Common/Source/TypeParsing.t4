@@ -298,15 +298,13 @@ public struct InterfaceDecl(string name, string guid, bool light, params MethodD
 
 public struct CallbackDecl
 {
-    public string ShortName;
     public MethodDecl Delegate;
-    public ParameterDecl[] RegisterParameters;
+    public MethodDecl Register;
 
-    public CallbackDecl(string shortName, MethodDecl @delegate, ParameterDecl[] registerParameters)
+    public CallbackDecl(MethodDecl @delegate, MethodDecl register)
     {
-        ShortName = shortName;
         Delegate = @delegate;
-        RegisterParameters = registerParameters;
+        Register = register;
     }
 }
 
@@ -374,13 +372,12 @@ public struct InterfaceListing(string name, string guid, bool light, params Meth
 
 public struct CallbackListing
 {
-    public string ShortName;
     public MethodListing Delegate;
-    public (string Type, string Name)[] RegisterParameters;
+    public MethodListing Register;
 
     public CallbackDecl ToDecl()
     {
-        return new(ShortName, Delegate.ToDecl(), RegisterParameters.Select(p => new ParameterDecl(p.Type, p.Name)).ToArray());
+        return new(Delegate.ToDecl(), Register.ToDecl());
     }
 }
 
