@@ -1,8 +1,4 @@
 <#@ template hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#@ import namespace="System.Linq" #>
-<# Namespace = "SharpGameInput.v0"; #>
-<#@ include file="CallbackDefinitions.t4" #>
-<#@ include file="InterfaceDefinitions.t4" #>
+<#@ include file="TypeDefinitions.t4" #>
 <#@ include file="../../SharpGameInput.Common/Source/InterfaceGeneration.t4" #>
