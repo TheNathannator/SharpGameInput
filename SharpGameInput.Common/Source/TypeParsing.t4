@@ -13,8 +13,18 @@ foreach (var iface in InterfaceTypes.Concat(LightInterfaceTypes))
     FnPointerTypeReplacements.Add(iface, "IntPtr");
 }
 
-foreach (var _callback in Callbacks)
+for (int i = 0; i < Callbacks.Length; i++)
 {
+    var _callback = Callbacks[i];
+
+    // Shared parameters on all callbacks, which are also depended on by the generated code
+    _callback.Delegate.Parameters = [
+        ("LightGameInputCallbackToken", "callbackToken"),
+        ("object?", "context"),
+        .._callback.Delegate.Parameters
+    ];
+    Callbacks[i] = _callback;
+
     var callback = _callback.ToDecl();
     TypeNameReplacements.Add(callback.Delegate.Name, callback.Delegate.ToFnPointerType());
 }

@@ -87,14 +87,14 @@ namespace SharpGameInput.v0
 
     public unsafe partial class IGameInput
     {
-        public delegate void GameInputReadingCallback_Native(
+        private delegate void GameInputReadingCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr reading,
             bool hasOverrunOccurred
         );
 
-        public delegate void GameInputDeviceCallback_Native(
+        private delegate void GameInputDeviceCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -103,7 +103,7 @@ namespace SharpGameInput.v0
             GameInputDeviceStatus previousStatus
         );
 
-        public delegate void GameInputSystemButtonCallback_Native(
+        private delegate void GameInputSystemButtonCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -112,7 +112,7 @@ namespace SharpGameInput.v0
             GameInputSystemButtons previousState
         );
 
-        public delegate void GameInputKeyboardLayoutCallback_Native(
+        private delegate void GameInputKeyboardLayoutCallback_Native(
             ulong callbackToken,
             void* context,
             IntPtr device,
@@ -250,7 +250,7 @@ namespace SharpGameInput.v0
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
 #if UNITY_STANDALONE
-        [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
+        [AOT.MonoPInvokeCallback(typeof(GameInputReadingCallback_Native))]
 #endif
         private static void _GameInputReadingCallback(
             ulong callbackToken,
@@ -282,7 +282,7 @@ namespace SharpGameInput.v0
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
 #if UNITY_STANDALONE
-        [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
+        [AOT.MonoPInvokeCallback(typeof(GameInputDeviceCallback_Native))]
 #endif
         private static void _GameInputDeviceCallback(
             ulong callbackToken,
@@ -318,7 +318,7 @@ namespace SharpGameInput.v0
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
 #if UNITY_STANDALONE
-        [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
+        [AOT.MonoPInvokeCallback(typeof(GameInputSystemButtonCallback_Native))]
 #endif
         private static void _GameInputSystemButtonCallback(
             ulong callbackToken,
@@ -354,7 +354,7 @@ namespace SharpGameInput.v0
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
 #if UNITY_STANDALONE
-        [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
+        [AOT.MonoPInvokeCallback(typeof(GameInputKeyboardLayoutCallback_Native))]
 #endif
         private static void _GameInputKeyboardLayoutCallback(
             ulong callbackToken,

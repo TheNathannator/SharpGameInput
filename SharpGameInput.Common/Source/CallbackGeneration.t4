@@ -35,33 +35,22 @@ foreach (var callback in callbacks)
 
 foreach (var callback in callbacks)
 {
-    // Make the generated code look a little nicer if there's no parameters
-    if (callback.Delegate.Parameters.Length < 1)
-    {
-#>
-    <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToTypeDecl() #> <#= callback.Delegate.Name #>();
-
-<#
-    }
-    else
-    {
 #>
     <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToTypeDecl() #> <#= callback.Delegate.Name #>(
 <#
-        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
-        {
-            var parameter = callback.Delegate.Parameters[i];
-            // Can't use a comma on the last argument
-            string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
+    for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+    {
+        var parameter = callback.Delegate.Parameters[i];
+        // Can't use a comma on the last argument
+        string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
 #>
         <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #><#= delimiter #>
 <#
-        }
+    }
 #>
     );
 
 <#
-    }
 }
 #>
     public unsafe partial class IGameInput
@@ -69,41 +58,30 @@ foreach (var callback in callbacks)
 <#
 foreach (var callback in callbacks)
 {
-    // Make the generated code look a little nicer if there's no parameters
-    if (callback.Delegate.Parameters.Length < 1)
-    {
 #>
-        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.Delegate.Name #>_Native();
-
+        private delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.Delegate.Name #>_Native(
 <#
-    }
-    else
+    for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
     {
-#>
-        <#= callback.Delegate.VisModifier #> delegate <#= callback.Delegate.ReturnType.ToFnPointerType() #> <#= callback.Delegate.Name #>_Native(
-<#
-        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+        var parameter = callback.Delegate.Parameters[i];
+        // Can't use a comma on the last argument
+        if (i < callback.Delegate.Parameters.Length - 1)
         {
-            var parameter = callback.Delegate.Parameters[i];
-            // Can't use a comma on the last argument
-            if (i < callback.Delegate.Parameters.Length - 1)
-            {
 #>
             <#= parameter.Type.ToFnPointerType() #> <#= parameter.Name #>,
 <#
-            }
-            else
-            {
+        }
+        else
+        {
 #>
             <#= parameter.Type.ToFnPointerType() #> <#= parameter.Name #>
 <#
-            }
         }
+    }
 #>
         );
 
 <#
-    }
 }
 #>
 #if NET5_0_OR_GREATER
@@ -187,35 +165,21 @@ foreach (var callback in callbacks)
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
 #if UNITY_STANDALONE
-        [AOT.MonoPInvokeCallback(typeof(ReadingCallback_Native))]
+        [AOT.MonoPInvokeCallback(typeof(<#= callback.Delegate.Name #>_Native))]
 #endif
-<#
-    // Make the generated code look a little nicer if there's no parameters
-    if (callback.Delegate.Parameters.Length < 1)
-    {
-#>
-        private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.Delegate.Name #>()
-<#
-    }
-    else
-    {
-#>
         private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.Delegate.Name #>(
 <#
-        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
-        {
-            var parameter = callback.Delegate.Parameters[i];
-            // Can't use a comma on the last argument
-            string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
+    for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+    {
+        var parameter = callback.Delegate.Parameters[i];
+        // Can't use a comma on the last argument
+        string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
 #>
             <#= parameter.Type.ToFnPointerType() #> <#= parameter.Name #><#= delimiter #>
 <#
-        }
-#>
-        )
-<#
     }
 #>
+        )
         {
             try
             {
@@ -224,75 +188,58 @@ foreach (var callback in callbacks)
                 var callbackFunc = (<#= callback.Delegate.Name #>)_callbackFunc;
 
 <#
-    if (callback.Delegate.Parameters.Length < 1)
+    if (callback.Delegate.IsVoid)
     {
-        if (callback.Delegate.IsVoid)
-        {
-#>
-                callbackFunc();
-<#
-        }
-        else
-        {
-#>
-                return callbackFunc();
-<#
-        }
-    }
-    else
-    {
-        if (callback.Delegate.IsVoid)
-        {
 #>
                 callbackFunc(
 <#
-        }
-        else
-        {
+    }
+    else
+    {
 #>
                 return callbackFunc(
 <#
-        }
+    }
 
-        for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+    for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
+    {
+        var parameter = callback.Delegate.Parameters[i];
+        string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
+        switch (parameter.Name)
         {
-            var parameter = callback.Delegate.Parameters[i];
-            string delimiter = i < callback.Delegate.Parameters.Length - 1 ? "," : "";
-            switch (parameter.Name)
+            case "callbackToken":
             {
-                case "callbackToken":
-                {
 #>
                     new LightGameInputCallbackToken(gameInput, callbackToken)<#= delimiter #>
 <#
-                    break;
-                }
-                case "context":
-                {
+                break;
+            }
+            case "context":
+            {
 #>
                     callbackContext<#= delimiter #>
 <#
-                    break;
-                }
-                default:
+                break;
+            }
+            default:
+            {
+                if ((parameter.Type.Flags & (TypeFlag.LightInterface | TypeFlag.Interface)) != 0)
                 {
-                    if ((parameter.Type.Flags & (TypeFlag.LightInterface | TypeFlag.Interface)) != 0)
-                    {
-                        string owned = (parameter.Type.Flags & TypeFlag.OwnedInstance) != 0 ? "true" : "false";
+                    string owned = (parameter.Type.Flags & TypeFlag.OwnedInstance) != 0 ? "true" : "false";
 #>
                     new <#= parameter.Type.Name #>(<#= parameter.Name #>, <#= owned #>)<#= delimiter #>
 <#
-                    }
-                    else
-                    {
+                }
+                else
+                {
 #>
                     <#= parameter.Name #><#= delimiter #>
 <#
-                    }
-                    break;
                 }
+                break;
             }
         }
+    }
 #>
                 );
             }
@@ -302,7 +249,6 @@ foreach (var callback in callbacks)
             }
         }
 <#
-    }
 }
 #>
     }

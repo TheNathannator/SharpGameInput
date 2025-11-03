@@ -16,8 +16,6 @@ Callbacks = [
     new()
     {
         Delegate = new("void", "GameInputReadingCallback", [
-            ("LightGameInputCallbackToken", "callbackToken"),
-            ("object?", "context"),
             ("owned LightIGameInputReading", "reading"),
             ("bool", "hasOverrunOccurred"),
         ]),
@@ -30,8 +28,6 @@ Callbacks = [
     new()
     {
         Delegate = new("void", "GameInputDeviceCallback", [
-            ("LightGameInputCallbackToken", "callbackToken"),
-            ("object?", "context"),
             ("LightIGameInputDevice", "device"),
             ("uint64_t", "timestamp"),
             ("GameInputDeviceStatus", "currentStatus"),
@@ -48,8 +44,6 @@ Callbacks = [
     // new()
     // {
     //     Delegate = new("void", "GameInputGuideButtonCallback", [
-    //         ("LightGameInputCallbackToken", "callbackToken"),
-    //         ("object?", "context"),
     //         ("LightIGameInputDevice", "device"),
     //         ("uint64_t", "timestamp"),
     //         ("bool", "isPressed"),
@@ -59,8 +53,6 @@ Callbacks = [
     new()
     {
         Delegate = new("void", "GameInputSystemButtonCallback", [
-            ("LightGameInputCallbackToken", "callbackToken"),
-            ("object?", "context"),
             ("LightIGameInputDevice", "device"),
             ("uint64_t", "timestamp"),
             ("GameInputSystemButtons", "currentState"),
@@ -74,8 +66,6 @@ Callbacks = [
     new()
     {
         Delegate = new("void", "GameInputKeyboardLayoutCallback", [
-            ("LightGameInputCallbackToken", "callbackToken"),
-            ("object?", "context"),
             ("LightIGameInputDevice", "device"),
             ("uint64_t", "timestamp"),
             ("uint32_t", "currentLayout"),
