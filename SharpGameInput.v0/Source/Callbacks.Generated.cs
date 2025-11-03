@@ -259,9 +259,10 @@ namespace SharpGameInput.v0
             bool hasOverrunOccurred
         )
         {
+            IGameInput gameInput = null!;
             try
             {
-                var gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
+                gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
                 var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
                 var callbackFunc = (GameInputReadingCallback)_callbackFunc;
 
@@ -274,7 +275,7 @@ namespace SharpGameInput.v0
             }
             catch (Exception ex)
             {
-                OnUnhandledCallbackException(ex);
+                CallbackRegistrar<IGameInput>.OnUnhandledCallbackException(gameInput?._callbacks, ex);
             }
         }
 
@@ -293,9 +294,10 @@ namespace SharpGameInput.v0
             GameInputDeviceStatus previousStatus
         )
         {
+            IGameInput gameInput = null!;
             try
             {
-                var gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
+                gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
                 var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
                 var callbackFunc = (GameInputDeviceCallback)_callbackFunc;
 
@@ -310,7 +312,7 @@ namespace SharpGameInput.v0
             }
             catch (Exception ex)
             {
-                OnUnhandledCallbackException(ex);
+                CallbackRegistrar<IGameInput>.OnUnhandledCallbackException(gameInput?._callbacks, ex);
             }
         }
 
@@ -329,9 +331,10 @@ namespace SharpGameInput.v0
             GameInputSystemButtons previousState
         )
         {
+            IGameInput gameInput = null!;
             try
             {
-                var gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
+                gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
                 var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
                 var callbackFunc = (GameInputSystemButtonCallback)_callbackFunc;
 
@@ -346,7 +349,7 @@ namespace SharpGameInput.v0
             }
             catch (Exception ex)
             {
-                OnUnhandledCallbackException(ex);
+                CallbackRegistrar<IGameInput>.OnUnhandledCallbackException(gameInput?._callbacks, ex);
             }
         }
 
@@ -365,9 +368,10 @@ namespace SharpGameInput.v0
             uint previousLayout
         )
         {
+            IGameInput gameInput = null!;
             try
             {
-                var gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
+                gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
                 var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
                 var callbackFunc = (GameInputKeyboardLayoutCallback)_callbackFunc;
 
@@ -382,7 +386,7 @@ namespace SharpGameInput.v0
             }
             catch (Exception ex)
             {
-                OnUnhandledCallbackException(ex);
+                CallbackRegistrar<IGameInput>.OnUnhandledCallbackException(gameInput?._callbacks, ex);
             }
         }
     }

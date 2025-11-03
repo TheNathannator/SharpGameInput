@@ -181,9 +181,10 @@ foreach (var callback in callbacks)
 #>
         )
         {
+            IGameInput gameInput = null!;
             try
             {
-                var gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
+                gameInput = CallbackRegistrar<IGameInput>.ContextToInstance(context);
                 var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
                 var callbackFunc = (<#= callback.Delegate.Name #>)_callbackFunc;
 
@@ -245,7 +246,7 @@ foreach (var callback in callbacks)
             }
             catch (Exception ex)
             {
-                OnUnhandledCallbackException(ex);
+                CallbackRegistrar<IGameInput>.OnUnhandledCallbackException(gameInput?._callbacks, ex);
             }
         }
 <#

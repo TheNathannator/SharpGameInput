@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 
@@ -84,6 +83,8 @@ namespace SharpGameInput.Common
         private readonly object _registrationLock = new();
         private (object? callback, object? context) _callbackBeingRegistered;
 
+        public event Action<Exception>? UnhandledCallbackException;
+
         public void Dispose()
         {
             _instances.TryRemove(_instanceId, out _);
@@ -139,8 +140,16 @@ namespace SharpGameInput.Common
             }
         }
 
-        private static void OnUnhandledCallbackException(Exception exception)
+        public static void OnUnhandledCallbackException(CallbackRegistrar<T>? registrar, Exception exception)
         {
+            // Give an opportunity for the exception to be intercepted and logged
+            // before we propogate the exception further
+            if (registrar?.UnhandledCallbackException is {} handler)
+            {
+                handler(exception);
+                return;
+            }
+
             // Stripped down from:
             // https://github.com/dotnet/runtime/blob/0d20f9ad3e0fd58a510062757b34f76a3c122b25/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/Task.cs#L1900
             // Synchronization context is not handled since callbacks are run from unmanaged code,
