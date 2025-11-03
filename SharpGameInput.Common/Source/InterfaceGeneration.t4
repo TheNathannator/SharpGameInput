@@ -13,26 +13,11 @@ UsingDirectives.Add("SharpGameInput.Common");
 <#@ include file="TypeParsing.t4" once="true" #>
 namespace <#= Namespace #>
 {
-    public static partial class GameInput
-    {
-        public static bool Create([NotNullWhen(true)] out IGameInput? gameInput)
-        {
-            return Create(out gameInput, out _);
-        }
-
-        public static unsafe bool Create([NotNullWhen(true)] out IGameInput? gameInput, out int result)
-        {
-            bool success = GameInputModule.Create(IGameInput.Iid, out var handle, out result);
-            gameInput = success ? new(handle, ownsHandle: true) : null;
-            return success;
-        }
-    }
 <#
 foreach (var _iface in Interfaces)
 {
     var iface = _iface.ToDecl();
 #>
-
     [Guid("<#= iface.Guid #>")]
     public sealed unsafe partial class <#= iface.Name #> : GameInputComPtr<<#= iface.Name #>>
     {
@@ -132,6 +117,7 @@ foreach (var _iface in Interfaces)
     }
 #>
     }
+
 <#
 }
 
