@@ -1,4 +1,601 @@
 <#@ template hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
-<#@ include file="TypeDefinitions.t4" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#
+Namespace = "SharpGameInput.v0";
+
+UsingDirectives.Add("System");
+
+TypeNameReplacements.Add("GameInputCallbackToken_t", "uint64_t");
+
+FnPointerTypeReplacements.Add("GameInputCallbackToken", "ulong");
+FnPointerTypeReplacements.Add("LightGameInputCallbackToken", "ulong");
+
+Callbacks = [
+    new()
+    {
+        Delegate = new("void", "GameInputReadingCallback", [
+            ("owned LightIGameInputReading", "reading"),
+            ("bool", "hasOverrunOccurred"),
+        ]),
+        Register = new("ignored_t", "RegisterReadingCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("float", "analogThreshold"),
+        ]),
+    },
+    new()
+    {
+        Delegate = new("void", "GameInputDeviceCallback", [
+            ("LightIGameInputDevice", "device"),
+            ("uint64_t", "timestamp"),
+            ("GameInputDeviceStatus", "currentStatus"),
+            ("GameInputDeviceStatus", "previousStatus"),
+        ]),
+        Register = new("ignored_t", "RegisterDeviceCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("GameInputDeviceStatus", "statusFilter"),
+            ("GameInputEnumerationKind", "enumerationKind"),
+        ]),
+    },
+    // gg Microsoft, ABI breakage
+    // new()
+    // {
+    //     Delegate = new("void", "GameInputGuideButtonCallback", [
+    //         ("LightIGameInputDevice", "device"),
+    //         ("uint64_t", "timestamp"),
+    //         ("bool", "isPressed"),
+    //     ]),
+    //     Register = new("ignored_t", "RegisterGuideButtonCallback", []),
+    // },
+    new()
+    {
+        Delegate = new("void", "GameInputSystemButtonCallback", [
+            ("LightIGameInputDevice", "device"),
+            ("uint64_t", "timestamp"),
+            ("GameInputSystemButtons", "currentState"),
+            ("GameInputSystemButtons", "previousState"),
+        ]),
+        Register = new("ignored_t", "RegisterSystemButtonCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputSystemButtons", "buttonFilter"),
+        ]),
+    },
+    new()
+    {
+        Delegate = new("void", "GameInputKeyboardLayoutCallback", [
+            ("LightIGameInputDevice", "device"),
+            ("uint64_t", "timestamp"),
+            ("uint32_t", "currentLayout"),
+            ("uint32_t", "previousLayout"),
+        ]),
+        Register = new("ignored_t", "RegisterKeyboardLayoutCallback", [
+            ("IGameInputDevice?", "device"),
+        ]),
+    },
+];
+
+Interfaces = [
+    new("IGameInput", "11BE2A7E-4254-445A-9C09-FFC40F006918", light: false,
+        new("uint64_t", "GetCurrentTimestamp"),
+        new("HRESULT", "GetCurrentReading", 
+            ("GameInputKind", "inputKind"),
+            ("IGameInputDevice?", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+        new("HRESULT", "GetNextReading", 
+            ("LightIGameInputReading", "referenceReading"),
+            ("GameInputKind", "inputKind"),
+            ("IGameInputDevice?", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+        new("HRESULT", "GetPreviousReading",
+            ("LightIGameInputReading", "referenceReading"),
+            ("GameInputKind", "inputKind"),
+            ("IGameInputDevice?", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+        new("HRESULT", "GetTemporalReading",
+            ("uint64_t", "timestamp"),
+            ("IGameInputDevice", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+
+        new(Visibility.Private, "HRESULT", "_RegisterReadingCallback",
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("float", "analogThreshold"),
+            ("void*?", "context"),
+            ("GameInputReadingCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "HRESULT", "_RegisterDeviceCallback",
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("GameInputDeviceStatus", "statusFilter"),
+            ("GameInputEnumerationKind", "enumerationKind"),
+            ("void*?", "context"),
+            ("GameInputDeviceCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        // gg Microsoft, ABI breakage
+        // new(Visibility.Private, "HRESULT", "_RegisterGuideButtonCallback",
+        //     ("IGameInputDevice?", "device"),
+        //     ("void*?", "context"),
+        //     ("GameInputGuideButtonCallback", "callbackFunc"),
+        //     ("out GameInputCallbackToken_t", "callbackToken")
+        // ),
+        new(Visibility.Private, "HRESULT", "_RegisterSystemButtonCallback",
+            ("IGameInputDevice?", "device"),
+            ("GameInputSystemButtons", "buttonFilter"),
+            ("void*?", "context"),
+            ("GameInputSystemButtonCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "HRESULT", "_RegisterKeyboardLayoutCallback",
+            ("IGameInputDevice?", "device"),
+            ("void*?", "context"),
+            ("GameInputKeyboardLayoutCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Internal, "void", "StopCallback",
+            ("GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "bool", "_UnregisterCallback",
+            ("GameInputCallbackToken_t", "callbackToken"),
+            ("uint64_t", "timeoutInMicroseconds")
+        ),
+
+        new("HRESULT", "CreateDispatcher",
+            ("out IGameInputDispatcher", "dispatcher")
+        ),
+        new("HRESULT", "CreateAggregateDevice",
+            ("GameInputKind", "inputKind"),
+            ("out IGameInputDevice", "device")
+        ),
+
+        new("HRESULT", "FindDeviceFromId",
+            ("in APP_LOCAL_DEVICE_ID", "value"),
+            ("out IGameInputDevice", "device")
+        ),
+        new("HRESULT", "FindDeviceFromObject",
+            ("IUnknown*", "value"),
+            ("out IGameInputDevice", "device")
+        ),
+        new("HRESULT", "FindDeviceFromPlatformHandle",
+            ("HANDLE", "value"),
+            ("out IGameInputDevice", "device")
+        ),
+        new("HRESULT", "FindDeviceFromPlatformString",
+            ("wchar_t*", "value"),
+            ("out IGameInputDevice", "device")
+        ),
+        new(() =>
+        {
+#>
+
+        public int FindDeviceFromPlatformString(string value, out IGameInputDevice device)
+        {
+            fixed (char* ptr = value)
+            {
+                return FindDeviceFromPlatformString(ptr, out device);
+            }
+        }
+<#
+        }),
+
+        new("HRESULT", "EnableOemDeviceSupport",
+            ("uint16_t", "vendorId"),
+            ("uint16_t", "productId"),
+            ("uint8_t", "interfaceNumber"),
+            ("uint8_t", "collectionNumber")
+        ),
+
+        new("void", "SetFocusPolicy",
+            ("GameInputFocusPolicy", "policy")
+        )
+    ),
+
+    new("IGameInputReading", "2156947A-E1FA-4DE0-A30B-D812931DBD8D", light: true,
+        new("GameInputKind", "GetInputKind"),
+        new("uint64_t", "GetSequenceNumber",
+            ("GameInputKind", "inputKind")
+        ),
+        new("uint64_t", "GetTimestamp"),
+        new("void", "GetDevice",
+            ("out LightIGameInputDevice", "device")
+        ),
+        new("bool", "GetRawReport",
+            ("out LightIGameInputRawDeviceReport", "report")
+        ),
+
+        new("uint32_t", "GetControllerAxisCount"),
+        new("uint32_t", "GetControllerAxisState",
+            ("uint32_t", "stateArrayCount"),
+            ("float*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerAxisState",
+            ("float", "stateArray")
+        )),
+
+        new("uint32_t", "GetControllerButtonCount"),
+        new("uint32_t", "GetControllerButtonState",
+            ("uint32_t", "stateArrayCount"),
+            ("bool*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
+            ("bool", "stateArray")
+        )),
+
+        new("uint32_t", "GetControllerSwitchCount"),
+        new("uint32_t", "GetControllerSwitchState",
+            ("uint32_t", "stateArrayCount"),
+            ("GameInputSwitchPosition*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerSwitchState",
+            ("GameInputSwitchPosition", "stateArray")
+        )),
+
+        new("uint32_t", "GetKeyCount"),
+        new("uint32_t", "GetKeyState",
+            ("uint32_t", "stateArrayCount"),
+            ("GameInputKeyState*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetKeyState",
+            ("GameInputKeyState", "stateArray")
+        )),
+
+        new("bool", "GetMouseState",
+            ("out GameInputMouseState", "state")
+        ),
+
+        new("uint32_t", "GetTouchCount"),
+        new("uint32_t", "GetTouchState",
+            ("uint32_t", "stateArrayCount"),
+            ("GameInputTouchState*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetTouchState",
+            ("GameInputTouchState", "stateArray")
+        )),
+
+        new("bool", "GetMotionState",
+            ("out GameInputMotionState", "state")
+        ),
+
+        new("bool", "GetArcadeStickState",
+            ("out GameInputArcadeStickState", "state")
+        ),
+
+        new("bool", "GetFlightStickState",
+            ("out GameInputFlightStickState", "state")
+        ),
+
+        new("bool", "GetGamepadState",
+            ("out GameInputGamepadState", "state")
+        ),
+
+        new("bool", "GetRacingWheelState",
+            ("out GameInputRacingWheelState", "state")
+        ),
+
+        new("bool", "GetUiNavigationState",
+            ("out GameInputUiNavigationState", "state")
+        )
+    ),
+
+    new("IGameInputDevice", "31DD86FB-4C1B-408A-868F-439B3CD47125", light: true,
+        new("ref readonly GameInputDeviceInfo", "GetDeviceInfo"),
+        new("GameInputDeviceStatus", "GetDeviceStatus"),
+        new("void", "GetBatteryState",
+            ("out GameInputBatteryState", "state")
+        ),
+
+        new("HRESULT", "CreateForceFeedbackEffect",
+            ("uint32_t", "motorIndex"),
+            ("in GameInputForceFeedbackParams", "ffbParams"),
+            ("out LightIGameInputForceFeedbackEffect", "effect")
+        ),
+
+        new("bool", "IsForceFeedbackMotorPoweredOn",
+            ("uint32_t", "motorIndex")
+        ),
+
+        new("void", "SetForceFeedbackMotorGain",
+            ("uint32_t", "motorIndex"),
+            ("float", "masterGain")
+        ),
+        new("HRESULT", "SetHapticMotorState",
+            ("uint32_t", "motorIndex"),
+            ("in GameInputHapticFeedbackParams", "hapticParams")
+        ),
+        new("void", "SetRumbleState",
+            ("in GameInputRumbleParams", "rumbleParams")
+        ),
+
+        new("void", "SetInputSynchronizationState",
+            ("bool", "enabled")
+        ),
+        new("void", "SendInputSynchronizationHint"),
+
+        new("void", "PowerOff"),
+
+        new("HRESULT", "CreateRawDeviceReport",
+            ("uint32_t", "reportId"),
+            ("GameInputRawDeviceReportKind", "reportKind"),
+            ("out LightIGameInputRawDeviceReport", "report")
+        ),
+        new("HRESULT", "GetRawDeviceFeature",
+            ("uint32_t", "reportId"),
+            ("out LightIGameInputRawDeviceReport", "report")
+        ),
+        new("HRESULT", "SetRawDeviceFeature",
+            ("LightIGameInputRawDeviceReport", "report")
+        ),
+        new("HRESULT", "SendRawDeviceOutput",
+            ("LightIGameInputRawDeviceReport", "report")
+        ),
+        new("HRESULT", "SendRawDeviceOutputWithResponse",
+            ("LightIGameInputRawDeviceReport", "requestReport"),
+            ("out LightIGameInputRawDeviceReport", "responseReport")
+        ),
+
+        new("HRESULT", "ExecuteRawDeviceIoControl",
+            ("uint32_t", "controlCode"),
+            ("size_t", "inputBufferSize"),
+            ("void*?", "inputBuffer"),
+            ("size_t", "outputBufferSize"),
+            ("void*?", "outputBuffer"),
+            ("out size_t", "bytesReturned")
+        ),
+        new("bool", "AcquireExclusiveRawDeviceAccess",
+            ("uint64_t", "timeoutInMicroseconds")
+        ),
+        new("void", "ReleaseExclusiveRawDeviceAccess"),
+        new(() =>
+        {
+#>
+
+        public int ExecuteRawDeviceIoControl(
+            uint controlCode,
+            byte[] inputBuffer,
+            byte[] outputBuffer,
+            out nuint bytesReturned
+        )
+        {
+            fixed (byte* inputPtr = inputBuffer)
+            fixed (byte* outputPtr = outputBuffer)
+            {
+                return ExecuteRawDeviceIoControl(controlCode,
+                    (nuint)inputBuffer.Length, inputPtr,
+                    (nuint)outputBuffer.Length, outputPtr,
+                    out bytesReturned
+                );
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public int ExecuteRawDeviceIoControl(
+            uint controlCode,
+            scoped System.ReadOnlySpan<byte> inputBuffer,
+            scoped System.Span<byte> outputBuffer,
+            out nuint bytesReturned
+        )
+        {
+            fixed (byte* inputPtr = inputBuffer)
+            fixed (byte* outputPtr = outputBuffer)
+            {
+                return ExecuteRawDeviceIoControl(controlCode,
+                    (nuint)inputBuffer.Length, inputPtr,
+                    (nuint)outputBuffer.Length, outputPtr,
+                    out bytesReturned
+                );
+            }
+        }
+#endif
+
+        public int ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
+            where TIn : unmanaged
+        {
+            fixed (TIn* inputPtr = &input)
+            {
+                return ExecuteRawDeviceIoControl(controlCode,
+                    (nuint)sizeof(TIn), inputPtr,
+                    0, null,
+                    out _
+                );
+            }
+        }
+
+        public int ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out nuint bytesReturned)
+            where TOut : unmanaged
+        {
+            fixed (TOut* outputPtr = &output)
+            {
+                return ExecuteRawDeviceIoControl(controlCode,
+                    0, null,
+                    (nuint)sizeof(TOut), outputPtr,
+                    out bytesReturned
+                );
+            }
+        }
+
+        public int ExecuteRawDeviceIoControl<TIn, TOut>(
+            uint controlCode,
+            in TIn input,
+            out TOut output,
+            out nuint bytesReturned
+        )
+            where TIn : unmanaged
+            where TOut : unmanaged
+        {
+            fixed (TIn* inputPtr = &input)
+            fixed (TOut* outputPtr = &output)
+            {
+                return ExecuteRawDeviceIoControl(controlCode,
+                    (nuint)sizeof(TIn), inputPtr,
+                    (nuint)sizeof(TOut), outputPtr,
+                    out bytesReturned
+                );
+            }
+        }
+<#
+        })
+    ),
+
+    new("IGameInputDispatcher", "415EED2E-98CB-42C2-8F28-B94601074E31", light: false,
+        new("bool", "Dispatch",
+            ("uint64_t", "quotaInMicroseconds")
+        ),
+        new("int", "OpenWaitHandle",
+            ("out HANDLE", "waitHandle")
+        )
+    ),
+
+    new("IGameInputForceFeedbackEffect", "51BDA05E-F742-45D9-B085-9444AE48381D", light: true,
+        new("void", "GetDevice",
+            ("out LightIGameInputDevice", "device")
+        ),
+
+        new("uint32_t", "GetMotorIndex"),
+
+        new("float", "GetGain"),
+        new("void", "SetGain",
+            ("float", "gain")
+        ),
+
+        new("void", "GetParams",
+            ("out GameInputForceFeedbackParams", "ffbParams")
+        ),
+        new("bool", "SetParams",
+            ("in GameInputForceFeedbackParams", "ffbParams")
+        ),
+
+        new("GameInputFeedbackEffectState", "GetState"),
+        new("void", "SetState",
+            ("GameInputFeedbackEffectState", "state")
+        )
+    ),
+
+    new("IGameInputRawDeviceReport", "61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC", light: true,
+        new("void", "GetDevice",
+            ("out LightIGameInputDevice", "device")
+        ),
+
+        new("ref readonly GameInputRawDeviceReportInfo", "GetReportInfo"),
+
+        new("size_t", "GetRawDataSize"),
+        new("size_t", "GetRawData",
+            ("size_t", "bufferSize"),
+            ("void*", "buffer")
+        ),
+        new("bool", "SetRawData",
+            ("size_t", "bufferSize"),
+            ("void*", "buffer")
+        ),
+
+        new(() =>
+        {
+#>
+
+        public nuint GetRawData(byte[] buffer)
+        {
+            fixed (byte* ptr = buffer)
+            {
+                return GetRawData((nuint)buffer.Length, ptr);
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public nuint GetRawData(scoped System.Span<byte> buffer)
+        {
+            fixed (byte* ptr = buffer)
+            {
+                return GetRawData((nuint)buffer.Length, ptr);
+            }
+        }
+#endif
+
+        public nuint GetRawData<T>(out T data)
+            where T : unmanaged
+        {
+            fixed (T* ptr = &data)
+            {
+                return GetRawData((nuint)sizeof(T), ptr);
+            }
+        }
+
+        public bool SetRawData(byte[] buffer)
+        {
+            fixed (byte* ptr = buffer)
+            {
+                return SetRawData((nuint)buffer.Length, ptr);
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public bool SetRawData(scoped System.ReadOnlySpan<byte> buffer)
+        {
+            fixed (byte* ptr = buffer)
+            {
+                return SetRawData((nuint)buffer.Length, ptr);
+            }
+        }
+#endif
+
+        public bool SetRawData<T>(in T data)
+            where T : unmanaged
+        {
+            fixed (T* ptr = &data)
+            {
+                return SetRawData((nuint)sizeof(T), ptr);
+            }
+        }
+<#
+        }),
+
+        new("bool", "GetItemValue",
+            ("uint32_t", "itemIndex"),
+            ("out int64_t", "value")
+        ),
+        new("bool", "SetItemValue",
+            ("uint32_t", "itemIndex"),
+            ("int64_t", "value")
+        ),
+
+        new("bool", "ResetItemValue",
+            ("uint32_t", "itemIndex")
+        ),
+        new("bool", "ResetAllItems")
+    ),
+];
+
+void MakeArrayWrappers(string returnType, string name, params ParameterDecl[] parameters)
+{
+    // MethodDecl is used here to perform type name replacement like everything else does
+    var decl = new MethodDecl(returnType, name, parameters);
+    var array = decl.Parameters[0];
+#>
+
+        public <#= decl.ReturnType.ToTypeDecl() #> <#= decl.Name #>(<#= array.Type.Name #>[] <#= array.Name #>)
+        {
+            fixed (<#= array.Type.Name #>* ptr = <#= array.Name #>)
+            {
+                return <#= decl.Name #>((uint)<#= array.Name #>.Length, ptr);
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public <#= decl.ReturnType.ToTypeDecl() #> <#= decl.Name #>(scoped System.Span<<#= array.Type.Name #>> <#= array.Name #>)
+        {
+            fixed (<#= array.Type.Name #>* ptr = <#= array.Name #>)
+            {
+                return <#= decl.Name #>((uint)<#= array.Name #>.Length, ptr);
+            }
+        }
+#endif
+<#
+}
+#>
 <#@ include file="../../SharpGameInput.Common/Source/InterfaceGeneration.t4" #>

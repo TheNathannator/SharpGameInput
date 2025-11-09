@@ -1,4 +1,0 @@
-<#@ template hostspecific="false" language="C#" #>
-<#@ output extension=".cs" #>
-<#@ include file="TypeDefinitions.t4" #>
-<#@ include file="../../SharpGameInput.Common/Source/CallbackGeneration.t4" #>
