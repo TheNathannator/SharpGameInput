@@ -14,6 +14,20 @@ UsingDirectives.Add("SharpGameInput.Common");
 <#@ include file="TypeParsing.t4" once="true" #>
 namespace <#= Namespace #>
 {
+<#
+foreach (var (type, _replacement) in TypeNameReplacements)
+{
+    string replacement = _replacement;
+    while (TypeNameReplacements.TryGetValue(replacement, out string extraReplacement))
+    {
+        replacement = extraReplacement;
+    }
+#>
+    using <#= type #> = <#= replacement #>;
+<#
+}
+#>
+
     #region Callback definitions
 
 <#

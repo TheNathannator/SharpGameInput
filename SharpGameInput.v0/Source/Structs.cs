@@ -63,9 +63,9 @@ namespace SharpGameInput.v0
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputKeyState
     {
-        public uint scanCode;
-        public uint codePoint;
-        public byte virtualKey;
+        public uint32_t scanCode;
+        public uint32_t codePoint;
+        public uint8_t virtualKey;
         [MarshalAs(UnmanagedType.U1)]
         public bool isDeadKey;
     }
@@ -74,17 +74,17 @@ namespace SharpGameInput.v0
     public struct GameInputMouseState
     {
         public GameInputMouseButtons buttons;
-        public long positionX;
-        public long positionY;
-        public long wheelX;
-        public long wheelY;
+        public int64_t positionX;
+        public int64_t positionY;
+        public int64_t wheelX;
+        public int64_t wheelY;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputTouchState
     {
-        public ulong touchId;
-        public uint sensorIndex;
+        public uint64_t touchId;
+        public uint32_t sensorIndex;
         public float positionX;
         public float positionY;
         public float pressure;
@@ -150,7 +150,7 @@ namespace SharpGameInput.v0
     public struct GameInputRacingWheelState
     {
         public GameInputRacingWheelButtons buttons;
-        public int patternShifterGear;
+        public int32_t patternShifterGear;
         public float wheel;
         public float throttle;
         public float brake;
@@ -177,9 +177,9 @@ namespace SharpGameInput.v0
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct GameInputString
     {
-        public uint sizeInBytes;
-        public uint codePointCount;
-        public byte* data;
+        public uint32_t sizeInBytes;
+        public uint32_t codePointCount;
+        public char_t* data;
 
         public readonly override string ToString()
         {
@@ -200,17 +200,17 @@ namespace SharpGameInput.v0
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputUsage
     {
-        public ushort page;
-        public ushort id;
+        public uint16_t page;
+        public uint16_t id;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputVersion
     {
-        public ushort major;
-        public ushort minor;
-        public ushort build;
-        public ushort revision;
+        public uint16_t major;
+        public uint16_t minor;
+        public uint16_t build;
+        public uint16_t revision;
 
         public readonly override string ToString()
         {
@@ -222,9 +222,9 @@ namespace SharpGameInput.v0
     public unsafe struct GameInputRawDeviceItemCollectionInfo
     {
         public GameInputRawDeviceItemCollectionKind kind;
-        public uint childCount;
-        public uint siblingCount;
-        public uint usageCount;
+        public uint32_t childCount;
+        public uint32_t siblingCount;
+        public uint32_t usageCount;
         public GameInputUsage* usages;
         public GameInputRawDeviceItemCollectionInfo* parent;
         public GameInputRawDeviceItemCollectionInfo* firstSibling;
@@ -238,17 +238,17 @@ namespace SharpGameInput.v0
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct GameInputRawDeviceReportItemInfo
     {
-        public uint bitOffset;
-        public uint bitSize;
-        public long logicalMin;
-        public long logicalMax;
+        public uint32_t bitOffset;
+        public uint32_t bitSize;
+        public int64_t logicalMin;
+        public int64_t logicalMax;
         public double physicalMin;
         public double physicalMax;
         public GameInputRawDevicePhysicalUnitKind physicalUnits;
-        public uint rawPhysicalUnits;
-        public int rawPhysicalUnitsExponent;
+        public uint32_t rawPhysicalUnits;
+        public int32_t rawPhysicalUnitsExponent;
         public GameInputRawDeviceReportItemFlags flags;
-        public uint usageCount;
+        public uint32_t usageCount;
         public GameInputUsage* usages;
         public GameInputRawDeviceItemCollectionInfo* collection;
         public GameInputString* itemString;
@@ -258,9 +258,9 @@ namespace SharpGameInput.v0
     public unsafe struct GameInputRawDeviceReportInfo
     {
         public GameInputRawDeviceReportKind kind;
-        public uint id;
-        public uint size;
-        public uint itemCount;
+        public uint32_t id;
+        public uint32_t size;
+        public uint32_t itemCount;
         public GameInputRawDeviceReportItemInfo* items;
     }
 
@@ -278,10 +278,10 @@ namespace SharpGameInput.v0
         [MarshalAs(UnmanagedType.U1)]
         public bool hasRestValue;
         public float restValue;
-        public ulong resolution;
-        public ushort legacyDInputIndex;
-        public ushort legacyHidIndex;
-        public uint rawReportIndex;
+        public uint64_t resolution;
+        public uint16_t legacyDInputIndex;
+        public uint16_t legacyHidIndex;
+        public uint32_t rawReportIndex;
         public GameInputRawDeviceReportInfo* inputReport;
         public GameInputRawDeviceReportItemInfo* inputReportItem;
     }
@@ -291,9 +291,9 @@ namespace SharpGameInput.v0
     {
         public GameInputKind mappedInputKinds;
         public GameInputLabel label;
-        public ushort legacyDInputIndex;
-        public ushort legacyHidIndex;
-        public uint rawReportIndex;
+        public uint16_t legacyDInputIndex;
+        public uint16_t legacyHidIndex;
+        public uint32_t rawReportIndex;
         public GameInputRawDeviceReportInfo* inputReport;
         public GameInputRawDeviceReportItemInfo* inputReportItem;
     }
@@ -308,9 +308,9 @@ namespace SharpGameInput.v0
         // public fixed GameInputLabel positionLabels[PositionLabelCount];
         internal fixed int _positionLabels[PositionLabelCount];
         public GameInputSwitchKind kind;
-        public ushort legacyDInputIndex;
-        public ushort legacyHidIndex;
-        public uint rawReportIndex;
+        public uint16_t legacyDInputIndex;
+        public uint16_t legacyHidIndex;
+        public uint32_t rawReportIndex;
         public GameInputRawDeviceReportInfo* inputReport;
         public GameInputRawDeviceReportItemInfo* inputReportItem;
 
@@ -325,12 +325,12 @@ namespace SharpGameInput.v0
     public unsafe struct GameInputKeyboardInfo
     {
         public GameInputKeyboardKind kind;
-        public uint layout;
-        public uint keyCount;
-        public uint functionKeyCount;
-        public uint maxSimultaneousKeys;
-        public uint platformType;
-        public uint platformSubtype;
+        public uint32_t layout;
+        public uint32_t keyCount;
+        public uint32_t functionKeyCount;
+        public uint32_t maxSimultaneousKeys;
+        public uint32_t platformType;
+        public uint32_t platformSubtype;
         public GameInputString* nativeLanguage;
     }
 
@@ -338,8 +338,8 @@ namespace SharpGameInput.v0
     public struct GameInputMouseInfo
     {
         public GameInputMouseButtons supportedButtons;
-        public uint sampleRate;
-        public uint sensorDpi;
+        public uint32_t sampleRate;
+        public uint32_t sensorDpi;
         [MarshalAs(UnmanagedType.U1)]
         public bool hasWheelX;
         [MarshalAs(UnmanagedType.U1)]
@@ -352,9 +352,9 @@ namespace SharpGameInput.v0
         public GameInputKind mappedInputKinds;
         public GameInputLabel label;
         public GameInputLocation location;
-        public uint locationId;
-        public ulong resolutionX;
-        public ulong resolutionY;
+        public uint32_t locationId;
+        public uint64_t resolutionX;
+        public uint64_t resolutionY;
         public GameInputTouchShape shape;
         public float aspectRatio;
         public float orientation;
@@ -362,7 +362,7 @@ namespace SharpGameInput.v0
         public float physicalHeight;
         public float maxPressure;
         public float maxProximity;
-        public uint maxTouchPoints;
+        public uint32_t maxTouchPoints;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -438,8 +438,8 @@ namespace SharpGameInput.v0
         public bool hasHandbrake;
         [MarshalAs(UnmanagedType.U1)]
         public bool hasPatternShifter;
-        public int minPatternShifterGear;
-        public int maxPatternShifterGear;
+        public int32_t minPatternShifterGear;
+        public int32_t maxPatternShifterGear;
         public float maxWheelAngle;
     }
 
@@ -474,8 +474,8 @@ namespace SharpGameInput.v0
     {
         public GameInputFeedbackAxes supportedAxes;
         public GameInputLocation location;
-        public uint locationId;
-        public uint maxSimultaneousEffects;
+        public uint32_t locationId;
+        public uint32_t maxSimultaneousEffects;
         [MarshalAs(UnmanagedType.U1)]
         public bool isConstantEffectSupported;
         [MarshalAs(UnmanagedType.U1)]
@@ -512,7 +512,7 @@ namespace SharpGameInput.v0
         public bool isRepeatSupported;
         [MarshalAs(UnmanagedType.U1)]
         public bool isRepeatDelaySupported;
-        public ulong defaultDuration;
+        public uint64_t defaultDuration;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -520,20 +520,20 @@ namespace SharpGameInput.v0
     {
         public GameInputRumbleMotors mappedRumbleMotors;
         public GameInputLocation location;
-        public uint locationId;
-        public uint waveformCount;
+        public uint32_t locationId;
+        public uint32_t waveformCount;
         public GameInputHapticWaveformInfo* waveformInfo;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct GameInputDeviceInfo
     {
-        public uint infoSize;
-        public ushort vendorId;
-        public ushort productId;
-        public ushort revisionNumber;
-        public byte interfaceNumber;
-        public byte collectionNumber;
+        public uint32_t infoSize;
+        public uint16_t vendorId;
+        public uint16_t productId;
+        public uint16_t revisionNumber;
+        public uint8_t interfaceNumber;
+        public uint8_t collectionNumber;
         public GameInputUsage usage;
         public GameInputVersion hardwareVersion;
         public GameInputVersion firmwareVersion;
@@ -543,18 +543,18 @@ namespace SharpGameInput.v0
         public GameInputDeviceCapabilities capabilities;
         public GameInputKind supportedInput;
         public GameInputRumbleMotors supportedRumbleMotors;
-        public uint inputReportCount;
-        public uint outputReportCount;
-        public uint featureReportCount;
-        public uint controllerAxisCount;
-        public uint controllerButtonCount;
-        public uint controllerSwitchCount;
-        public uint touchPointCount;
-        public uint touchSensorCount;
-        public uint forceFeedbackMotorCount;
-        public uint hapticFeedbackMotorCount;
-        public uint deviceStringCount;
-        public uint deviceDescriptorSize;
+        public uint32_t inputReportCount;
+        public uint32_t outputReportCount;
+        public uint32_t featureReportCount;
+        public uint32_t controllerAxisCount;
+        public uint32_t controllerButtonCount;
+        public uint32_t controllerSwitchCount;
+        public uint32_t touchPointCount;
+        public uint32_t touchSensorCount;
+        public uint32_t forceFeedbackMotorCount;
+        public uint32_t hapticFeedbackMotorCount;
+        public uint32_t deviceStringCount;
+        public uint32_t deviceDescriptorSize;
         public GameInputRawDeviceReportInfo* inputReportInfo;
         public GameInputRawDeviceReportInfo* outputReportInfo;
         public GameInputRawDeviceReportInfo* featureReportInfo;
@@ -580,14 +580,14 @@ namespace SharpGameInput.v0
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputForceFeedbackEnvelope
     {
-        public ulong attackDuration;
-        public ulong sustainDuration;
-        public ulong releaseDuration;
+        public uint64_t attackDuration;
+        public uint64_t sustainDuration;
+        public uint64_t releaseDuration;
         public float attackGain;
         public float sustainGain;
         public float releaseGain;
-        public uint playCount;
-        public ulong repeatDelay;
+        public uint32_t playCount;
+        public uint64_t repeatDelay;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -739,11 +739,11 @@ namespace SharpGameInput.v0
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputHapticFeedbackParams
     {
-        public uint waveformIndex;
-        public ulong duration;
+        public uint32_t waveformIndex;
+        public uint64_t duration;
         public float intensity;
-        public uint playCount;
-        public ulong repeatDelay;
+        public uint32_t playCount;
+        public uint64_t repeatDelay;
     }
 
     [StructLayout(LayoutKind.Sequential)]

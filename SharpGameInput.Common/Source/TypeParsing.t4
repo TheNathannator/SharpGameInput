@@ -15,18 +15,17 @@ foreach (var iface in InterfaceTypes.Concat(LightInterfaceTypes))
 
 for (int i = 0; i < Callbacks.Length; i++)
 {
-    var _callback = Callbacks[i];
+    var callback = Callbacks[i];
 
     // Shared parameters on all callbacks, which are also depended on by the generated code
-    _callback.Delegate.Parameters = [
+    callback.Delegate.Parameters = [
         ("LightGameInputCallbackToken", "callbackToken"),
         ("object?", "context"),
-        .._callback.Delegate.Parameters
+        ..callback.Delegate.Parameters
     ];
-    Callbacks[i] = _callback;
+    Callbacks[i] = callback;
 
-    var callback = _callback.ToDecl();
-    TypeNameReplacements.Add(callback.Delegate.Name, callback.Delegate.ToFnPointerType());
+    TypeDeclReplacements.Add(callback.Delegate.Name, callback.Delegate.Name + "_NativePtr");
 }
 #>
 <#+
@@ -134,12 +133,6 @@ public struct TypeDecl
         {
             flags |= TypeFlag.Pointer;
             typeName = typeName[..^1];
-        }
-
-        // Type name replacements
-        while (TypeNameReplacements.TryGetValue(typeName, out string nameReplacement))
-        {
-            typeName = nameReplacement;
         }
 
         if (LightInterfaceTypes.Contains(typeName))
@@ -413,25 +406,8 @@ public static Dictionary<string, string> TypeDeclReplacements = new()
 // Replacements are performed recursively, so one replacement can alias directly to another.
 public static Dictionary<string, string> TypeNameReplacements = new()
 {
-    { "int8_t", "sbyte" },
-    { "uint8_t", "byte" },
-    { "int16_t", "short" },
-    { "uint16_t", "ushort" },
-    { "int32_t", "int" },
-    { "uint32_t", "uint" },
-    { "int64_t", "long" },
-    { "uint64_t", "ulong" },
-    { "size_t", "nuint" },
-    { "ssize_t", "nint" },
-
-    { "char_t", "byte" },
-    { "wchar_t", "char" },
-
-    { "ULONG", "uint" },
-
-    { "IID", "Guid" },
     { "HRESULT", "int" },
-    { "HANDLE", "IntPtr" },
+    { "HANDLE", "System.IntPtr" },
 };
 
 public static Dictionary<string, string> FnPointerTypeReplacements = new()

@@ -15,7 +15,11 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
-    #region Callback type definitions
+    using HRESULT = int;
+    using HANDLE = System.IntPtr;
+    using GameInputCallbackToken_t = uint64_t;
+
+    #region Callback definitions
 
     using unsafe GameInputReadingCallback_NativePtr = delegate* unmanaged[Stdcall]<
         ulong, // callbackToken
@@ -29,7 +33,7 @@ namespace SharpGameInput.v0
         ulong, // callbackToken
         void*, // context
         IntPtr, // device
-        ulong, // timestamp
+        uint64_t, // timestamp
         GameInputDeviceStatus, // currentStatus
         GameInputDeviceStatus, // previousStatus
         void // <return>
@@ -39,7 +43,7 @@ namespace SharpGameInput.v0
         ulong, // callbackToken
         void*, // context
         IntPtr, // device
-        ulong, // timestamp
+        uint64_t, // timestamp
         GameInputSystemButtons, // currentState
         GameInputSystemButtons, // previousState
         void // <return>
@@ -49,9 +53,9 @@ namespace SharpGameInput.v0
         ulong, // callbackToken
         void*, // context
         IntPtr, // device
-        ulong, // timestamp
-        uint, // currentLayout
-        uint, // previousLayout
+        uint64_t, // timestamp
+        uint32_t, // currentLayout
+        uint32_t, // previousLayout
         void // <return>
     >;
 
@@ -66,7 +70,7 @@ namespace SharpGameInput.v0
         LightGameInputCallbackToken callbackToken,
         object? context,
         LightIGameInputDevice device,
-        ulong timestamp,
+        uint64_t timestamp,
         GameInputDeviceStatus currentStatus,
         GameInputDeviceStatus previousStatus
     );
@@ -75,7 +79,7 @@ namespace SharpGameInput.v0
         LightGameInputCallbackToken callbackToken,
         object? context,
         LightIGameInputDevice device,
-        ulong timestamp,
+        uint64_t timestamp,
         GameInputSystemButtons currentState,
         GameInputSystemButtons previousState
     );
@@ -84,14 +88,14 @@ namespace SharpGameInput.v0
         LightGameInputCallbackToken callbackToken,
         object? context,
         LightIGameInputDevice device,
-        ulong timestamp,
-        uint currentLayout,
-        uint previousLayout
+        uint64_t timestamp,
+        uint32_t currentLayout,
+        uint32_t previousLayout
     );
 
     #endregion
 
-    #region Interfaces
+    #region Interface definitions
 
     public abstract class GameInputComPtr : CriticalFinalizerObject,
         IDisposable,
@@ -177,13 +181,13 @@ namespace SharpGameInput.v0
             return new(handle, ownsHandle: true);
         }
 
-        public ulong GetCurrentTimestamp()
+        public uint64_t GetCurrentTimestamp()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong>)vtable[3];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t>)vtable[3];
 
             var result = fnPtr(
                 thisPtr
@@ -192,7 +196,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int GetCurrentReading(
+        public HRESULT GetCurrentReading(
             GameInputKind inputKind,
             IGameInputDevice? device,
             out LightIGameInputReading reading
@@ -202,7 +206,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, IntPtr, out IntPtr, int>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, IntPtr, out IntPtr, HRESULT>)vtable[4];
 
             var result = fnPtr(
                 thisPtr,
@@ -215,7 +219,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int GetNextReading(
+        public HRESULT GetNextReading(
             LightIGameInputReading referenceReading,
             GameInputKind inputKind,
             IGameInputDevice? device,
@@ -227,7 +231,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, IntPtr, out IntPtr, int>)vtable[5];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, IntPtr, out IntPtr, HRESULT>)vtable[5];
 
             var result = fnPtr(
                 thisPtr,
@@ -241,7 +245,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int GetPreviousReading(
+        public HRESULT GetPreviousReading(
             LightIGameInputReading referenceReading,
             GameInputKind inputKind,
             IGameInputDevice? device,
@@ -253,7 +257,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, IntPtr, out IntPtr, int>)vtable[6];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, IntPtr, out IntPtr, HRESULT>)vtable[6];
 
             var result = fnPtr(
                 thisPtr,
@@ -267,8 +271,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int GetTemporalReading(
-            ulong timestamp,
+        public HRESULT GetTemporalReading(
+            uint64_t timestamp,
             IGameInputDevice device,
             out LightIGameInputReading reading
         )
@@ -279,7 +283,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong, IntPtr, out IntPtr, int>)vtable[7];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t, IntPtr, out IntPtr, HRESULT>)vtable[7];
 
             var result = fnPtr(
                 thisPtr,
@@ -292,20 +296,20 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        private int _RegisterReadingCallback(
+        private HRESULT _RegisterReadingCallback(
             IGameInputDevice? device,
             GameInputKind inputKind,
             float analogThreshold,
             void* context,
-            delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, bool, void> callbackFunc,
-            out ulong callbackToken
+            GameInputReadingCallback_NativePtr callbackFunc,
+            out GameInputCallbackToken_t callbackToken
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, float, void*, delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, bool, void>, out ulong, int>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, float, void*, GameInputReadingCallback_NativePtr, out GameInputCallbackToken_t, HRESULT>)vtable[8];
 
             var result = fnPtr(
                 thisPtr,
@@ -320,21 +324,21 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        private int _RegisterDeviceCallback(
+        private HRESULT _RegisterDeviceCallback(
             IGameInputDevice? device,
             GameInputKind inputKind,
             GameInputDeviceStatus statusFilter,
             GameInputEnumerationKind enumerationKind,
             void* context,
-            delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputDeviceStatus, GameInputDeviceStatus, void> callbackFunc,
-            out ulong callbackToken
+            GameInputDeviceCallback_NativePtr callbackFunc,
+            out GameInputCallbackToken_t callbackToken
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, GameInputDeviceStatus, GameInputEnumerationKind, void*, delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputDeviceStatus, GameInputDeviceStatus, void>, out ulong, int>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputKind, GameInputDeviceStatus, GameInputEnumerationKind, void*, GameInputDeviceCallback_NativePtr, out GameInputCallbackToken_t, HRESULT>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -350,19 +354,19 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        private int _RegisterSystemButtonCallback(
+        private HRESULT _RegisterSystemButtonCallback(
             IGameInputDevice? device,
             GameInputSystemButtons buttonFilter,
             void* context,
-            delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputSystemButtons, GameInputSystemButtons, void> callbackFunc,
-            out ulong callbackToken
+            GameInputSystemButtonCallback_NativePtr callbackFunc,
+            out GameInputCallbackToken_t callbackToken
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputSystemButtons, void*, delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, GameInputSystemButtons, GameInputSystemButtons, void>, out ulong, int>)vtable[10];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, GameInputSystemButtons, void*, GameInputSystemButtonCallback_NativePtr, out GameInputCallbackToken_t, HRESULT>)vtable[10];
 
             var result = fnPtr(
                 thisPtr,
@@ -376,18 +380,18 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        private int _RegisterKeyboardLayoutCallback(
+        private HRESULT _RegisterKeyboardLayoutCallback(
             IGameInputDevice? device,
             void* context,
-            delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, uint, uint, void> callbackFunc,
-            out ulong callbackToken
+            GameInputKeyboardLayoutCallback_NativePtr callbackFunc,
+            out GameInputCallbackToken_t callbackToken
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, void*, delegate* unmanaged[Stdcall]<ulong, void*, IntPtr, ulong, uint, uint, void>, out ulong, int>)vtable[11];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, void*, GameInputKeyboardLayoutCallback_NativePtr, out GameInputCallbackToken_t, HRESULT>)vtable[11];
 
             var result = fnPtr(
                 thisPtr,
@@ -401,14 +405,14 @@ namespace SharpGameInput.v0
         }
 
         internal void StopCallback(
-            ulong callbackToken
+            GameInputCallbackToken_t callbackToken
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong, void>)vtable[12];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputCallbackToken_t, void>)vtable[12];
 
             fnPtr(
                 thisPtr,
@@ -418,15 +422,15 @@ namespace SharpGameInput.v0
         }
 
         private bool _UnregisterCallback(
-            ulong callbackToken,
-            ulong timeoutInMicroseconds
+            GameInputCallbackToken_t callbackToken,
+            uint64_t timeoutInMicroseconds
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong, ulong, bool>)vtable[13];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputCallbackToken_t, uint64_t, bool>)vtable[13];
 
             var result = fnPtr(
                 thisPtr,
@@ -437,7 +441,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int CreateDispatcher(
+        public HRESULT CreateDispatcher(
             out IGameInputDispatcher dispatcher
         )
         {
@@ -445,7 +449,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out IntPtr, int>)vtable[14];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out IntPtr, HRESULT>)vtable[14];
 
             var result = fnPtr(
                 thisPtr,
@@ -456,7 +460,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int CreateAggregateDevice(
+        public HRESULT CreateAggregateDevice(
             GameInputKind inputKind,
             out IGameInputDevice device
         )
@@ -465,7 +469,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, out IntPtr, int>)vtable[15];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, out IntPtr, HRESULT>)vtable[15];
 
             var result = fnPtr(
                 thisPtr,
@@ -477,7 +481,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int FindDeviceFromId(
+        public HRESULT FindDeviceFromId(
             in APP_LOCAL_DEVICE_ID value,
             out IGameInputDevice device
         )
@@ -486,7 +490,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, in APP_LOCAL_DEVICE_ID, out IntPtr, int>)vtable[16];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, in APP_LOCAL_DEVICE_ID, out IntPtr, HRESULT>)vtable[16];
 
             var result = fnPtr(
                 thisPtr,
@@ -498,7 +502,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int FindDeviceFromObject(
+        public HRESULT FindDeviceFromObject(
             IntPtr value,
             out IGameInputDevice device
         )
@@ -507,7 +511,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, int>)vtable[17];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, HRESULT>)vtable[17];
 
             var result = fnPtr(
                 thisPtr,
@@ -519,8 +523,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int FindDeviceFromPlatformHandle(
-            IntPtr value,
+        public HRESULT FindDeviceFromPlatformHandle(
+            HANDLE value,
             out IGameInputDevice device
         )
         {
@@ -528,7 +532,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, int>)vtable[18];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, HANDLE, out IntPtr, HRESULT>)vtable[18];
 
             var result = fnPtr(
                 thisPtr,
@@ -540,8 +544,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int FindDeviceFromPlatformString(
-            char* value,
+        public HRESULT FindDeviceFromPlatformString(
+            wchar_t* value,
             out IGameInputDevice device
         )
         {
@@ -550,7 +554,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, char*, out IntPtr, int>)vtable[19];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, wchar_t*, out IntPtr, HRESULT>)vtable[19];
 
             var result = fnPtr(
                 thisPtr,
@@ -570,18 +574,18 @@ namespace SharpGameInput.v0
             }
         }
 
-        public int EnableOemDeviceSupport(
-            ushort vendorId,
-            ushort productId,
-            byte interfaceNumber,
-            byte collectionNumber
+        public HRESULT EnableOemDeviceSupport(
+            uint16_t vendorId,
+            uint16_t productId,
+            uint8_t interfaceNumber,
+            uint8_t collectionNumber
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ushort, ushort, byte, byte, int>)vtable[20];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint16_t, uint16_t, uint8_t, uint8_t, HRESULT>)vtable[20];
 
             var result = fnPtr(
                 thisPtr,
@@ -644,7 +648,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public ulong GetSequenceNumber(
+        public uint64_t GetSequenceNumber(
             GameInputKind inputKind
         )
         {
@@ -652,7 +656,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, ulong>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, uint64_t>)vtable[4];
 
             var result = fnPtr(
                 thisPtr,
@@ -662,13 +666,13 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public ulong GetTimestamp()
+        public uint64_t GetTimestamp()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong>)vtable[5];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t>)vtable[5];
 
             var result = fnPtr(
                 thisPtr
@@ -714,13 +718,13 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerAxisCount()
+        public uint32_t GetControllerAxisCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[8];
 
             var result = fnPtr(
                 thisPtr
@@ -729,8 +733,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerAxisState(
-            uint stateArrayCount,
+        public uint32_t GetControllerAxisState(
+            uint32_t stateArrayCount,
             float* stateArray
         )
         {
@@ -739,7 +743,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, float*, uint>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, float*, uint32_t>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -750,7 +754,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerAxisState(float[] stateArray)
+        public uint32_t GetControllerAxisState(float[] stateArray)
         {
             fixed (float* ptr = stateArray)
             {
@@ -759,7 +763,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetControllerAxisState(scoped System.Span<float> stateArray)
+        public uint32_t GetControllerAxisState(scoped System.Span<float> stateArray)
         {
             fixed (float* ptr = stateArray)
             {
@@ -768,13 +772,13 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public uint GetControllerButtonCount()
+        public uint32_t GetControllerButtonCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[10];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[10];
 
             var result = fnPtr(
                 thisPtr
@@ -783,8 +787,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerButtonState(
-            uint stateArrayCount,
+        public uint32_t GetControllerButtonState(
+            uint32_t stateArrayCount,
             bool* stateArray
         )
         {
@@ -793,7 +797,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, bool*, uint>)vtable[11];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, bool*, uint32_t>)vtable[11];
 
             var result = fnPtr(
                 thisPtr,
@@ -804,7 +808,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerButtonState(bool[] stateArray)
+        public uint32_t GetControllerButtonState(bool[] stateArray)
         {
             fixed (bool* ptr = stateArray)
             {
@@ -813,7 +817,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetControllerButtonState(scoped System.Span<bool> stateArray)
+        public uint32_t GetControllerButtonState(scoped System.Span<bool> stateArray)
         {
             fixed (bool* ptr = stateArray)
             {
@@ -822,13 +826,13 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public uint GetControllerSwitchCount()
+        public uint32_t GetControllerSwitchCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[12];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[12];
 
             var result = fnPtr(
                 thisPtr
@@ -837,8 +841,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerSwitchState(
-            uint stateArrayCount,
+        public uint32_t GetControllerSwitchState(
+            uint32_t stateArrayCount,
             GameInputSwitchPosition* stateArray
         )
         {
@@ -847,7 +851,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputSwitchPosition*, uint>)vtable[13];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputSwitchPosition*, uint32_t>)vtable[13];
 
             var result = fnPtr(
                 thisPtr,
@@ -858,7 +862,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerSwitchState(GameInputSwitchPosition[] stateArray)
+        public uint32_t GetControllerSwitchState(GameInputSwitchPosition[] stateArray)
         {
             fixed (GameInputSwitchPosition* ptr = stateArray)
             {
@@ -867,7 +871,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetControllerSwitchState(scoped System.Span<GameInputSwitchPosition> stateArray)
+        public uint32_t GetControllerSwitchState(scoped System.Span<GameInputSwitchPosition> stateArray)
         {
             fixed (GameInputSwitchPosition* ptr = stateArray)
             {
@@ -876,13 +880,13 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public uint GetKeyCount()
+        public uint32_t GetKeyCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[14];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[14];
 
             var result = fnPtr(
                 thisPtr
@@ -891,8 +895,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetKeyState(
-            uint stateArrayCount,
+        public uint32_t GetKeyState(
+            uint32_t stateArrayCount,
             GameInputKeyState* stateArray
         )
         {
@@ -901,7 +905,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputKeyState*, uint>)vtable[15];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputKeyState*, uint32_t>)vtable[15];
 
             var result = fnPtr(
                 thisPtr,
@@ -912,7 +916,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetKeyState(GameInputKeyState[] stateArray)
+        public uint32_t GetKeyState(GameInputKeyState[] stateArray)
         {
             fixed (GameInputKeyState* ptr = stateArray)
             {
@@ -921,7 +925,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetKeyState(scoped System.Span<GameInputKeyState> stateArray)
+        public uint32_t GetKeyState(scoped System.Span<GameInputKeyState> stateArray)
         {
             fixed (GameInputKeyState* ptr = stateArray)
             {
@@ -948,13 +952,13 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetTouchCount()
+        public uint32_t GetTouchCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[17];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[17];
 
             var result = fnPtr(
                 thisPtr
@@ -963,8 +967,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetTouchState(
-            uint stateArrayCount,
+        public uint32_t GetTouchState(
+            uint32_t stateArrayCount,
             GameInputTouchState* stateArray
         )
         {
@@ -973,7 +977,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputTouchState*, uint>)vtable[18];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputTouchState*, uint32_t>)vtable[18];
 
             var result = fnPtr(
                 thisPtr,
@@ -984,7 +988,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetTouchState(GameInputTouchState[] stateArray)
+        public uint32_t GetTouchState(GameInputTouchState[] stateArray)
         {
             fixed (GameInputTouchState* ptr = stateArray)
             {
@@ -993,7 +997,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetTouchState(scoped System.Span<GameInputTouchState> stateArray)
+        public uint32_t GetTouchState(scoped System.Span<GameInputTouchState> stateArray)
         {
             fixed (GameInputTouchState* ptr = stateArray)
             {
@@ -1209,7 +1213,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public ulong GetSequenceNumber(
+        public uint64_t GetSequenceNumber(
             GameInputKind inputKind
         )
         {
@@ -1217,7 +1221,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, ulong>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, GameInputKind, uint64_t>)vtable[4];
 
             var result = fnPtr(
                 thisPtr,
@@ -1227,13 +1231,13 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public ulong GetTimestamp()
+        public uint64_t GetTimestamp()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong>)vtable[5];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t>)vtable[5];
 
             var result = fnPtr(
                 thisPtr
@@ -1279,13 +1283,13 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerAxisCount()
+        public uint32_t GetControllerAxisCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[8];
 
             var result = fnPtr(
                 thisPtr
@@ -1294,8 +1298,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerAxisState(
-            uint stateArrayCount,
+        public uint32_t GetControllerAxisState(
+            uint32_t stateArrayCount,
             float* stateArray
         )
         {
@@ -1304,7 +1308,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, float*, uint>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, float*, uint32_t>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -1315,7 +1319,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerAxisState(float[] stateArray)
+        public uint32_t GetControllerAxisState(float[] stateArray)
         {
             fixed (float* ptr = stateArray)
             {
@@ -1324,7 +1328,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetControllerAxisState(scoped System.Span<float> stateArray)
+        public uint32_t GetControllerAxisState(scoped System.Span<float> stateArray)
         {
             fixed (float* ptr = stateArray)
             {
@@ -1333,13 +1337,13 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public uint GetControllerButtonCount()
+        public uint32_t GetControllerButtonCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[10];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[10];
 
             var result = fnPtr(
                 thisPtr
@@ -1348,8 +1352,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerButtonState(
-            uint stateArrayCount,
+        public uint32_t GetControllerButtonState(
+            uint32_t stateArrayCount,
             bool* stateArray
         )
         {
@@ -1358,7 +1362,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, bool*, uint>)vtable[11];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, bool*, uint32_t>)vtable[11];
 
             var result = fnPtr(
                 thisPtr,
@@ -1369,7 +1373,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerButtonState(bool[] stateArray)
+        public uint32_t GetControllerButtonState(bool[] stateArray)
         {
             fixed (bool* ptr = stateArray)
             {
@@ -1378,7 +1382,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetControllerButtonState(scoped System.Span<bool> stateArray)
+        public uint32_t GetControllerButtonState(scoped System.Span<bool> stateArray)
         {
             fixed (bool* ptr = stateArray)
             {
@@ -1387,13 +1391,13 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public uint GetControllerSwitchCount()
+        public uint32_t GetControllerSwitchCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[12];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[12];
 
             var result = fnPtr(
                 thisPtr
@@ -1402,8 +1406,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerSwitchState(
-            uint stateArrayCount,
+        public uint32_t GetControllerSwitchState(
+            uint32_t stateArrayCount,
             GameInputSwitchPosition* stateArray
         )
         {
@@ -1412,7 +1416,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputSwitchPosition*, uint>)vtable[13];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputSwitchPosition*, uint32_t>)vtable[13];
 
             var result = fnPtr(
                 thisPtr,
@@ -1423,7 +1427,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetControllerSwitchState(GameInputSwitchPosition[] stateArray)
+        public uint32_t GetControllerSwitchState(GameInputSwitchPosition[] stateArray)
         {
             fixed (GameInputSwitchPosition* ptr = stateArray)
             {
@@ -1432,7 +1436,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetControllerSwitchState(scoped System.Span<GameInputSwitchPosition> stateArray)
+        public uint32_t GetControllerSwitchState(scoped System.Span<GameInputSwitchPosition> stateArray)
         {
             fixed (GameInputSwitchPosition* ptr = stateArray)
             {
@@ -1441,13 +1445,13 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public uint GetKeyCount()
+        public uint32_t GetKeyCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[14];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[14];
 
             var result = fnPtr(
                 thisPtr
@@ -1456,8 +1460,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetKeyState(
-            uint stateArrayCount,
+        public uint32_t GetKeyState(
+            uint32_t stateArrayCount,
             GameInputKeyState* stateArray
         )
         {
@@ -1466,7 +1470,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputKeyState*, uint>)vtable[15];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputKeyState*, uint32_t>)vtable[15];
 
             var result = fnPtr(
                 thisPtr,
@@ -1477,7 +1481,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetKeyState(GameInputKeyState[] stateArray)
+        public uint32_t GetKeyState(GameInputKeyState[] stateArray)
         {
             fixed (GameInputKeyState* ptr = stateArray)
             {
@@ -1486,7 +1490,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetKeyState(scoped System.Span<GameInputKeyState> stateArray)
+        public uint32_t GetKeyState(scoped System.Span<GameInputKeyState> stateArray)
         {
             fixed (GameInputKeyState* ptr = stateArray)
             {
@@ -1513,13 +1517,13 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetTouchCount()
+        public uint32_t GetTouchCount()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[17];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[17];
 
             var result = fnPtr(
                 thisPtr
@@ -1528,8 +1532,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetTouchState(
-            uint stateArrayCount,
+        public uint32_t GetTouchState(
+            uint32_t stateArrayCount,
             GameInputTouchState* stateArray
         )
         {
@@ -1538,7 +1542,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputTouchState*, uint>)vtable[18];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputTouchState*, uint32_t>)vtable[18];
 
             var result = fnPtr(
                 thisPtr,
@@ -1549,7 +1553,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint GetTouchState(GameInputTouchState[] stateArray)
+        public uint32_t GetTouchState(GameInputTouchState[] stateArray)
         {
             fixed (GameInputTouchState* ptr = stateArray)
             {
@@ -1558,7 +1562,7 @@ namespace SharpGameInput.v0
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint GetTouchState(scoped System.Span<GameInputTouchState> stateArray)
+        public uint32_t GetTouchState(scoped System.Span<GameInputTouchState> stateArray)
         {
             fixed (GameInputTouchState* ptr = stateArray)
             {
@@ -1737,8 +1741,8 @@ namespace SharpGameInput.v0
 
         }
 
-        public int CreateForceFeedbackEffect(
-            uint motorIndex,
+        public HRESULT CreateForceFeedbackEffect(
+            uint32_t motorIndex,
             in GameInputForceFeedbackParams ffbParams,
             out LightIGameInputForceFeedbackEffect effect
         )
@@ -1747,7 +1751,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, in GameInputForceFeedbackParams, out IntPtr, int>)vtable[6];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, in GameInputForceFeedbackParams, out IntPtr, HRESULT>)vtable[6];
 
             var result = fnPtr(
                 thisPtr,
@@ -1761,14 +1765,14 @@ namespace SharpGameInput.v0
         }
 
         public bool IsForceFeedbackMotorPoweredOn(
-            uint motorIndex
+            uint32_t motorIndex
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, bool>)vtable[7];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, bool>)vtable[7];
 
             var result = fnPtr(
                 thisPtr,
@@ -1779,7 +1783,7 @@ namespace SharpGameInput.v0
         }
 
         public void SetForceFeedbackMotorGain(
-            uint motorIndex,
+            uint32_t motorIndex,
             float masterGain
         )
         {
@@ -1787,7 +1791,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, float, void>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, float, void>)vtable[8];
 
             fnPtr(
                 thisPtr,
@@ -1797,8 +1801,8 @@ namespace SharpGameInput.v0
 
         }
 
-        public int SetHapticMotorState(
-            uint motorIndex,
+        public HRESULT SetHapticMotorState(
+            uint32_t motorIndex,
             in GameInputHapticFeedbackParams hapticParams
         )
         {
@@ -1806,7 +1810,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, in GameInputHapticFeedbackParams, int>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, in GameInputHapticFeedbackParams, HRESULT>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -1879,8 +1883,8 @@ namespace SharpGameInput.v0
 
         }
 
-        public int CreateRawDeviceReport(
-            uint reportId,
+        public HRESULT CreateRawDeviceReport(
+            uint32_t reportId,
             GameInputRawDeviceReportKind reportKind,
             out LightIGameInputRawDeviceReport report
         )
@@ -1889,7 +1893,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputRawDeviceReportKind, out IntPtr, int>)vtable[14];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputRawDeviceReportKind, out IntPtr, HRESULT>)vtable[14];
 
             var result = fnPtr(
                 thisPtr,
@@ -1902,8 +1906,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int GetRawDeviceFeature(
-            uint reportId,
+        public HRESULT GetRawDeviceFeature(
+            uint32_t reportId,
             out LightIGameInputRawDeviceReport report
         )
         {
@@ -1911,7 +1915,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, out IntPtr, int>)vtable[15];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, out IntPtr, HRESULT>)vtable[15];
 
             var result = fnPtr(
                 thisPtr,
@@ -1923,7 +1927,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int SetRawDeviceFeature(
+        public HRESULT SetRawDeviceFeature(
             LightIGameInputRawDeviceReport report
         )
         {
@@ -1932,7 +1936,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, int>)vtable[16];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, HRESULT>)vtable[16];
 
             var result = fnPtr(
                 thisPtr,
@@ -1942,7 +1946,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int SendRawDeviceOutput(
+        public HRESULT SendRawDeviceOutput(
             LightIGameInputRawDeviceReport report
         )
         {
@@ -1951,7 +1955,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, int>)vtable[17];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, HRESULT>)vtable[17];
 
             var result = fnPtr(
                 thisPtr,
@@ -1961,7 +1965,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int SendRawDeviceOutputWithResponse(
+        public HRESULT SendRawDeviceOutputWithResponse(
             LightIGameInputRawDeviceReport requestReport,
             out LightIGameInputRawDeviceReport responseReport
         )
@@ -1971,7 +1975,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, int>)vtable[18];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, HRESULT>)vtable[18];
 
             var result = fnPtr(
                 thisPtr,
@@ -1983,20 +1987,20 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
-            nuint inputBufferSize,
+        public HRESULT ExecuteRawDeviceIoControl(
+            uint32_t controlCode,
+            size_t inputBufferSize,
             void* inputBuffer,
-            nuint outputBufferSize,
+            size_t outputBufferSize,
             void* outputBuffer,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, nuint, void*, nuint, void*, out nuint, int>)vtable[19];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, size_t, void*, size_t, void*, out size_t, HRESULT>)vtable[19];
 
             var result = fnPtr(
                 thisPtr,
@@ -2012,14 +2016,14 @@ namespace SharpGameInput.v0
         }
 
         public bool AcquireExclusiveRawDeviceAccess(
-            ulong timeoutInMicroseconds
+            uint64_t timeoutInMicroseconds
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong, bool>)vtable[20];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t, bool>)vtable[20];
 
             var result = fnPtr(
                 thisPtr,
@@ -2258,8 +2262,8 @@ namespace SharpGameInput.v0
 
         }
 
-        public int CreateForceFeedbackEffect(
-            uint motorIndex,
+        public HRESULT CreateForceFeedbackEffect(
+            uint32_t motorIndex,
             in GameInputForceFeedbackParams ffbParams,
             out LightIGameInputForceFeedbackEffect effect
         )
@@ -2268,7 +2272,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, in GameInputForceFeedbackParams, out IntPtr, int>)vtable[6];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, in GameInputForceFeedbackParams, out IntPtr, HRESULT>)vtable[6];
 
             var result = fnPtr(
                 thisPtr,
@@ -2282,14 +2286,14 @@ namespace SharpGameInput.v0
         }
 
         public bool IsForceFeedbackMotorPoweredOn(
-            uint motorIndex
+            uint32_t motorIndex
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, bool>)vtable[7];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, bool>)vtable[7];
 
             var result = fnPtr(
                 thisPtr,
@@ -2300,7 +2304,7 @@ namespace SharpGameInput.v0
         }
 
         public void SetForceFeedbackMotorGain(
-            uint motorIndex,
+            uint32_t motorIndex,
             float masterGain
         )
         {
@@ -2308,7 +2312,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, float, void>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, float, void>)vtable[8];
 
             fnPtr(
                 thisPtr,
@@ -2318,8 +2322,8 @@ namespace SharpGameInput.v0
 
         }
 
-        public int SetHapticMotorState(
-            uint motorIndex,
+        public HRESULT SetHapticMotorState(
+            uint32_t motorIndex,
             in GameInputHapticFeedbackParams hapticParams
         )
         {
@@ -2327,7 +2331,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, in GameInputHapticFeedbackParams, int>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, in GameInputHapticFeedbackParams, HRESULT>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -2400,8 +2404,8 @@ namespace SharpGameInput.v0
 
         }
 
-        public int CreateRawDeviceReport(
-            uint reportId,
+        public HRESULT CreateRawDeviceReport(
+            uint32_t reportId,
             GameInputRawDeviceReportKind reportKind,
             out LightIGameInputRawDeviceReport report
         )
@@ -2410,7 +2414,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, GameInputRawDeviceReportKind, out IntPtr, int>)vtable[14];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, GameInputRawDeviceReportKind, out IntPtr, HRESULT>)vtable[14];
 
             var result = fnPtr(
                 thisPtr,
@@ -2423,8 +2427,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int GetRawDeviceFeature(
-            uint reportId,
+        public HRESULT GetRawDeviceFeature(
+            uint32_t reportId,
             out LightIGameInputRawDeviceReport report
         )
         {
@@ -2432,7 +2436,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, out IntPtr, int>)vtable[15];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, out IntPtr, HRESULT>)vtable[15];
 
             var result = fnPtr(
                 thisPtr,
@@ -2444,7 +2448,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int SetRawDeviceFeature(
+        public HRESULT SetRawDeviceFeature(
             LightIGameInputRawDeviceReport report
         )
         {
@@ -2453,7 +2457,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, int>)vtable[16];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, HRESULT>)vtable[16];
 
             var result = fnPtr(
                 thisPtr,
@@ -2463,7 +2467,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int SendRawDeviceOutput(
+        public HRESULT SendRawDeviceOutput(
             LightIGameInputRawDeviceReport report
         )
         {
@@ -2472,7 +2476,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, int>)vtable[17];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, HRESULT>)vtable[17];
 
             var result = fnPtr(
                 thisPtr,
@@ -2482,7 +2486,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int SendRawDeviceOutputWithResponse(
+        public HRESULT SendRawDeviceOutputWithResponse(
             LightIGameInputRawDeviceReport requestReport,
             out LightIGameInputRawDeviceReport responseReport
         )
@@ -2492,7 +2496,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, int>)vtable[18];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, IntPtr, out IntPtr, HRESULT>)vtable[18];
 
             var result = fnPtr(
                 thisPtr,
@@ -2504,20 +2508,20 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
-            nuint inputBufferSize,
+        public HRESULT ExecuteRawDeviceIoControl(
+            uint32_t controlCode,
+            size_t inputBufferSize,
             void* inputBuffer,
-            nuint outputBufferSize,
+            size_t outputBufferSize,
             void* outputBuffer,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, nuint, void*, nuint, void*, out nuint, int>)vtable[19];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, size_t, void*, size_t, void*, out size_t, HRESULT>)vtable[19];
 
             var result = fnPtr(
                 thisPtr,
@@ -2533,14 +2537,14 @@ namespace SharpGameInput.v0
         }
 
         public bool AcquireExclusiveRawDeviceAccess(
-            ulong timeoutInMicroseconds
+            uint64_t timeoutInMicroseconds
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong, bool>)vtable[20];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t, bool>)vtable[20];
 
             var result = fnPtr(
                 thisPtr,
@@ -2664,14 +2668,14 @@ namespace SharpGameInput.v0
         }
 
         public bool Dispatch(
-            ulong quotaInMicroseconds
+            uint64_t quotaInMicroseconds
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDispatcher));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, ulong, bool>)vtable[3];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint64_t, bool>)vtable[3];
 
             var result = fnPtr(
                 thisPtr,
@@ -2682,14 +2686,14 @@ namespace SharpGameInput.v0
         }
 
         public int OpenWaitHandle(
-            out IntPtr waitHandle
+            out HANDLE waitHandle
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDispatcher));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out IntPtr, int>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out HANDLE, int>)vtable[4];
 
             var result = fnPtr(
                 thisPtr,
@@ -2735,13 +2739,13 @@ namespace SharpGameInput.v0
             device = new(device_handle, ownsHandle: true);
         }
 
-        public uint GetMotorIndex()
+        public uint32_t GetMotorIndex()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[4];
 
             var result = fnPtr(
                 thisPtr
@@ -2951,13 +2955,13 @@ namespace SharpGameInput.v0
             device = new(device_handle, ownsHandle: true);
         }
 
-        public uint GetMotorIndex()
+        public uint32_t GetMotorIndex()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t>)vtable[4];
 
             var result = fnPtr(
                 thisPtr
@@ -3113,13 +3117,13 @@ namespace SharpGameInput.v0
             return ref result;
         }
 
-        public nuint GetRawDataSize()
+        public size_t GetRawDataSize()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, nuint>)vtable[5];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, size_t>)vtable[5];
 
             var result = fnPtr(
                 thisPtr
@@ -3128,8 +3132,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public nuint GetRawData(
-            nuint bufferSize,
+        public size_t GetRawData(
+            size_t bufferSize,
             void* buffer
         )
         {
@@ -3138,7 +3142,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, nuint, void*, nuint>)vtable[6];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, size_t, void*, size_t>)vtable[6];
 
             var result = fnPtr(
                 thisPtr,
@@ -3150,7 +3154,7 @@ namespace SharpGameInput.v0
         }
 
         public bool SetRawData(
-            nuint bufferSize,
+            size_t bufferSize,
             void* buffer
         )
         {
@@ -3159,7 +3163,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, nuint, void*, bool>)vtable[7];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, size_t, void*, bool>)vtable[7];
 
             var result = fnPtr(
                 thisPtr,
@@ -3225,15 +3229,15 @@ namespace SharpGameInput.v0
         }
 
         public bool GetItemValue(
-            uint itemIndex,
-            out long value
+            uint32_t itemIndex,
+            out int64_t value
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, out long, bool>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, out int64_t, bool>)vtable[8];
 
             var result = fnPtr(
                 thisPtr,
@@ -3245,15 +3249,15 @@ namespace SharpGameInput.v0
         }
 
         public bool SetItemValue(
-            uint itemIndex,
-            long value
+            uint32_t itemIndex,
+            int64_t value
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, long, bool>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, int64_t, bool>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -3265,14 +3269,14 @@ namespace SharpGameInput.v0
         }
 
         public bool ResetItemValue(
-            uint itemIndex
+            uint32_t itemIndex
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, bool>)vtable[10];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, bool>)vtable[10];
 
             var result = fnPtr(
                 thisPtr,
@@ -3414,13 +3418,13 @@ namespace SharpGameInput.v0
             return ref result;
         }
 
-        public nuint GetRawDataSize()
+        public size_t GetRawDataSize()
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, nuint>)vtable[5];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, size_t>)vtable[5];
 
             var result = fnPtr(
                 thisPtr
@@ -3429,8 +3433,8 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public nuint GetRawData(
-            nuint bufferSize,
+        public size_t GetRawData(
+            size_t bufferSize,
             void* buffer
         )
         {
@@ -3439,7 +3443,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, nuint, void*, nuint>)vtable[6];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, size_t, void*, size_t>)vtable[6];
 
             var result = fnPtr(
                 thisPtr,
@@ -3451,7 +3455,7 @@ namespace SharpGameInput.v0
         }
 
         public bool SetRawData(
-            nuint bufferSize,
+            size_t bufferSize,
             void* buffer
         )
         {
@@ -3460,7 +3464,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, nuint, void*, bool>)vtable[7];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, size_t, void*, bool>)vtable[7];
 
             var result = fnPtr(
                 thisPtr,
@@ -3526,15 +3530,15 @@ namespace SharpGameInput.v0
         }
 
         public bool GetItemValue(
-            uint itemIndex,
-            out long value
+            uint32_t itemIndex,
+            out int64_t value
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, out long, bool>)vtable[8];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, out int64_t, bool>)vtable[8];
 
             var result = fnPtr(
                 thisPtr,
@@ -3546,15 +3550,15 @@ namespace SharpGameInput.v0
         }
 
         public bool SetItemValue(
-            uint itemIndex,
-            long value
+            uint32_t itemIndex,
+            int64_t value
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, long, bool>)vtable[9];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, int64_t, bool>)vtable[9];
 
             var result = fnPtr(
                 thisPtr,
@@ -3566,14 +3570,14 @@ namespace SharpGameInput.v0
         }
 
         public bool ResetItemValue(
-            uint itemIndex
+            uint32_t itemIndex
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint, bool>)vtable[10];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, bool>)vtable[10];
 
             var result = fnPtr(
                 thisPtr,
@@ -3616,7 +3620,7 @@ namespace SharpGameInput.v0
             ulong callbackToken,
             void* context,
             IntPtr device,
-            ulong timestamp,
+            uint64_t timestamp,
             GameInputDeviceStatus currentStatus,
             GameInputDeviceStatus previousStatus
         );
@@ -3625,7 +3629,7 @@ namespace SharpGameInput.v0
             ulong callbackToken,
             void* context,
             IntPtr device,
-            ulong timestamp,
+            uint64_t timestamp,
             GameInputSystemButtons currentState,
             GameInputSystemButtons previousState
         );
@@ -3634,9 +3638,9 @@ namespace SharpGameInput.v0
             ulong callbackToken,
             void* context,
             IntPtr device,
-            ulong timestamp,
-            uint currentLayout,
-            uint previousLayout
+            uint64_t timestamp,
+            uint32_t currentLayout,
+            uint32_t previousLayout
         );
 
 #if NET5_0_OR_GREATER
@@ -3807,7 +3811,7 @@ namespace SharpGameInput.v0
             ulong callbackToken,
             void* context,
             IntPtr device,
-            ulong timestamp,
+            uint64_t timestamp,
             GameInputDeviceStatus currentStatus,
             GameInputDeviceStatus previousStatus
         )
@@ -3844,7 +3848,7 @@ namespace SharpGameInput.v0
             ulong callbackToken,
             void* context,
             IntPtr device,
-            ulong timestamp,
+            uint64_t timestamp,
             GameInputSystemButtons currentState,
             GameInputSystemButtons previousState
         )
@@ -3881,9 +3885,9 @@ namespace SharpGameInput.v0
             ulong callbackToken,
             void* context,
             IntPtr device,
-            ulong timestamp,
-            uint currentLayout,
-            uint previousLayout
+            uint64_t timestamp,
+            uint32_t currentLayout,
+            uint32_t previousLayout
         )
         {
             IGameInput gameInput = null!;
