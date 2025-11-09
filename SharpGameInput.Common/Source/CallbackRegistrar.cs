@@ -43,7 +43,7 @@ namespace SharpGameInput.Common
                 var (callbackFunc, context) = _registrar._callbackBeingRegistered;
                 _registrar._callbackBeingRegistered = (null, null);
 
-                if (result < 0 || token == InternalConstants.InvalidCallbackToken)
+                if (result < 0 || token == 0)
                 {
                     return false;
                 }

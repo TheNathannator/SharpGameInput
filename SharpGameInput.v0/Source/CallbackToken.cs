@@ -7,13 +7,16 @@ namespace SharpGameInput.v0
 {
     public class GameInputCallbackToken : IEquatable<GameInputCallbackToken>
     {
+        internal const ulong CurrentCallbackToken = 0xFFFFFFFFFFFFFFFF;
+        internal const ulong InvalidCallbackToken = 0x0000000000000000;
+
         private IGameInput? _gameInput;
         internal readonly ulong _callbackToken;
 
         public GameInputCallbackToken(IGameInput gameInput, ulong callbackToken)
         {
             ThrowHelper.CheckNull(gameInput);
-            if (callbackToken is InternalConstants.InvalidCallbackToken or InternalConstants.CurrentCallbackToken)
+            if (callbackToken is InvalidCallbackToken or CurrentCallbackToken)
                 throw new ArgumentException("The given token is invalid.", nameof(callbackToken));
 
             _gameInput = gameInput;
@@ -100,7 +103,7 @@ namespace SharpGameInput.v0
             ThrowHelper.CheckNull(gameInput);
             // CurrentCallbackToken is not invalid here, as it's passed when doing
             // GameInputEnumerationKind.BlockingEnumeration on RegisterDeviceCallback
-            if (callbackToken is InternalConstants.InvalidCallbackToken /*or InternalConstants.CurrentCallbackToken*/)
+            if (callbackToken is GameInputCallbackToken.InvalidCallbackToken /*or GameInputCallbackToken.CurrentCallbackToken*/)
                 throw new ArgumentException("The given token is invalid.", nameof(callbackToken));
 
             _gameInput = gameInput;
