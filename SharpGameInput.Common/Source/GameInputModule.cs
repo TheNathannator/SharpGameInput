@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Win32;
@@ -66,7 +65,7 @@ namespace SharpGameInput.Common
             }
             else
             {
-                Debug.WriteLine("(!!UNREACHABLE!!) No GameInput creation methods got loaded! This is a bug in the module loading code.");
+                Debug.WriteLine("(!!UNREACHABLE!!) GameInput module was loaded successfully, but no interface creation methods were retrieved!");
                 result = HRESULT.E_FAIL;
             }
 

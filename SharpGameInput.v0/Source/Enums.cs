@@ -4,6 +4,8 @@ namespace SharpGameInput.v0
 {
     public enum GameInputResult
     {
+        Facility = 0x38A,
+
         DeviceDisconnected = unchecked((int)0x838A0001),
         DeviceNotFound = unchecked((int)0x838A0002),
         ReadingNotFound = unchecked((int)0x838A0003),
