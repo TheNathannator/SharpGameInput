@@ -1,664 +1,686 @@
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using static SharpGameInput.Common.Tests.SizeHelper;
 
 namespace SharpGameInput.v0.Tests;
 
 public class SizeChecks
 {
-    private static unsafe void AssertSize<T>(int expected, bool checkMarshal = true)
-        where T : unmanaged
-    {
-        Assert.Multiple(() =>
-        {
-            Assert.That(sizeof(T), Is.EqualTo(expected), $"{typeof(T).Name} is the wrong size with sizeof(T)");
-            Assert.That(Unsafe.SizeOf<T>(), Is.EqualTo(expected), $"{typeof(T).Name} is the wrong size with Unsafe.SizeOf<T>()");
-            if (checkMarshal)
-                Assert.That(Marshal.SizeOf<T>(), Is.EqualTo(expected), $"{typeof(T).Name} is the wrong size with Marshal.SizeOf<T>()");
-        });
-    }
-
-    private static unsafe void AssertSize<T>(ref T _, int expected, bool checkMarshal = true)
-        where T : unmanaged
-    {
-        AssertSize<T>(expected, checkMarshal);
-    }
-
-    private static unsafe void AssertSizeEnum<T>(int expected)
-        where T : unmanaged, System.Enum
-    {
-        AssertSize<T>(expected, checkMarshal: false);
-    }
-
-    private static unsafe void AssertOffset<T, TField>(ref T instance, ref TField field, string fieldName, nint expected, bool checkMarshal = true)
-        where T : unmanaged
-        where TField : unmanaged
-    {
-        Assert.That(OffsetOf(ref instance, ref field), Is.EqualTo(expected), $"{typeof(T).Name}.{fieldName} is the wrong offset with OffsetOf()");
-        if (checkMarshal)
-            Assert.That(Marshal.OffsetOf<T>(fieldName), Is.EqualTo(expected), $"{typeof(T).Name}.{fieldName} is the wrong offset with Marshal.OffsetOf<T>()");
-    }
-
-    private static unsafe void AssertOffset<T>(T* instance, void* field, string fieldName, nint expected, bool checkMarshal = true)
-        where T : unmanaged
-    {
-        Assert.That(OffsetOf(instance, field), Is.EqualTo(expected), $"{typeof(T).Name}.{fieldName} is the wrong offset with OffsetOf()");
-        if (checkMarshal)
-            Assert.That(Marshal.OffsetOf<T>(fieldName), Is.EqualTo(expected), $"{typeof(T).Name}.{fieldName} is the wrong offset with Marshal.OffsetOf<T>()");
-    }
-
-    private static unsafe nint OffsetOf(void* instance, void* field)
-    {
-        return (nint)field - (nint)instance;
-    }
-
-    private static unsafe nint OffsetOf<T, TField>(ref T instance, ref TField field)
-        where T : unmanaged
-        where TField : unmanaged
-    {
-        return Unsafe.ByteOffset(ref instance, ref Unsafe.As<TField, T>(ref field));
-    }
+    [Test] public void GameInputKind() => AssertEnumSize<GameInputKind>(4);
+    [Test] public void GameInputEnumerationKind() => AssertEnumSize<GameInputEnumerationKind>(4);
+    [Test] public void GameInputFocusPolicy() => AssertEnumSize<GameInputFocusPolicy>(4);
+    [Test] public void GameInputSwitchKind() => AssertEnumSize<GameInputSwitchKind>(4);
+    [Test] public void GameInputSwitchPosition() => AssertEnumSize<GameInputSwitchPosition>(4);
+    [Test] public void GameInputKeyboardKind() => AssertEnumSize<GameInputKeyboardKind>(4);
+    [Test] public void GameInputMouseButtons() => AssertEnumSize<GameInputMouseButtons>(4);
+    [Test] public void GameInputTouchShape() => AssertEnumSize<GameInputTouchShape>(4);
+    [Test] public void GameInputMotionAccuracy() => AssertEnumSize<GameInputMotionAccuracy>(4);
+    [Test] public void GameInputArcadeStickButtons() => AssertEnumSize<GameInputArcadeStickButtons>(4);
+    [Test] public void GameInputFlightStickButtons() => AssertEnumSize<GameInputFlightStickButtons>(4);
+    [Test] public void GameInputGamepadButtons() => AssertEnumSize<GameInputGamepadButtons>(4);
+    [Test] public void GameInputRacingWheelButtons() => AssertEnumSize<GameInputRacingWheelButtons>(4);
+    [Test] public void GameInputUiNavigationButtons() => AssertEnumSize<GameInputUiNavigationButtons>(4);
+    [Test] public void GameInputDeviceStatus() => AssertEnumSize<GameInputDeviceStatus>(4);
+    [Test] public void GameInputBatteryStatus() => AssertEnumSize<GameInputBatteryStatus>(4);
+    [Test] public void GameInputDeviceFamily() => AssertEnumSize<GameInputDeviceFamily>(4);
+    [Test] public void GameInputDeviceCapabilities() => AssertEnumSize<GameInputDeviceCapabilities>(4);
+    [Test] public void GameInputRawDeviceReportKind() => AssertEnumSize<GameInputRawDeviceReportKind>(4);
+    [Test] public void GameInputRawDeviceReportItemFlags() => AssertEnumSize<GameInputRawDeviceReportItemFlags>(4);
+    [Test] public void GameInputRawDeviceItemCollectionKind() => AssertEnumSize<GameInputRawDeviceItemCollectionKind>(4);
+    [Test] public void GameInputRawDevicePhysicalUnitKind() => AssertEnumSize<GameInputRawDevicePhysicalUnitKind>(4);
+    [Test] public void GameInputLabel() => AssertEnumSize<GameInputLabel>(4);
+    [Test] public void GameInputLocation() => AssertEnumSize<GameInputLocation>(4);
+    [Test] public void GameInputFeedbackAxes() => AssertEnumSize<GameInputFeedbackAxes>(4);
+    [Test] public void GameInputFeedbackEffectState() => AssertEnumSize<GameInputFeedbackEffectState>(4);
+    [Test] public void GameInputForceFeedbackEffectKind() => AssertEnumSize<GameInputForceFeedbackEffectKind>(4);
+    [Test] public void GameInputRumbleMotors() => AssertEnumSize<GameInputRumbleMotors>(4);
 
     [Test]
-    public void Enum() => Assert.Multiple(() =>
+    public unsafe void APP_LOCAL_DEVICE_ID() => Assert.Multiple(() =>
     {
-        AssertSizeEnum<GameInputKind>(4);
-        AssertSizeEnum<GameInputEnumerationKind>(4);
-        AssertSizeEnum<GameInputFocusPolicy>(4);
-        AssertSizeEnum<GameInputSwitchKind>(4);
-        AssertSizeEnum<GameInputSwitchPosition>(4);
-        AssertSizeEnum<GameInputKeyboardKind>(4);
-        AssertSizeEnum<GameInputMouseButtons>(4);
-        AssertSizeEnum<GameInputTouchShape>(4);
-        AssertSizeEnum<GameInputMotionAccuracy>(4);
-        AssertSizeEnum<GameInputArcadeStickButtons>(4);
-        AssertSizeEnum<GameInputFlightStickButtons>(4);
-        AssertSizeEnum<GameInputGamepadButtons>(4);
-        AssertSizeEnum<GameInputRacingWheelButtons>(4);
-        AssertSizeEnum<GameInputUiNavigationButtons>(4);
-        AssertSizeEnum<GameInputDeviceStatus>(4);
-        AssertSizeEnum<GameInputBatteryStatus>(4);
-        AssertSizeEnum<GameInputDeviceFamily>(4);
-        AssertSizeEnum<GameInputDeviceCapabilities>(4);
-        AssertSizeEnum<GameInputRawDeviceReportKind>(4);
-        AssertSizeEnum<GameInputRawDeviceReportItemFlags>(4);
-        AssertSizeEnum<GameInputRawDeviceItemCollectionKind>(4);
-        AssertSizeEnum<GameInputRawDevicePhysicalUnitKind>(4);
-        AssertSizeEnum<GameInputLabel>(4);
-        AssertSizeEnum<GameInputLocation>(4);
-        AssertSizeEnum<GameInputFeedbackAxes>(4);
-        AssertSizeEnum<GameInputFeedbackEffectState>(4);
-        AssertSizeEnum<GameInputForceFeedbackEffectKind>(4);
-        AssertSizeEnum<GameInputRumbleMotors>(4);
+        APP_LOCAL_DEVICE_ID instance = default;
+        AssertSize(instance, 32);
+        AssertField(instance, instance.value, 0);
     });
 
     [Test]
-    public unsafe void Struct() => Assert.Multiple(() =>
+    public unsafe void GameInputKeyState() => Assert.Multiple(() =>
     {
-        {
-            APP_LOCAL_DEVICE_ID instance = default;
-            AssertSize(ref instance, 32);
-            AssertOffset(&instance, instance.value, nameof(instance.value), 0);
-        }
+        GameInputKeyState instance = default;
+        AssertSize(instance, 12);
+        AssertField(instance, instance.scanCode,   4, 0);
+        AssertField(instance, instance.codePoint,  4, 4);
+        AssertField(instance, instance.virtualKey, 1, 8);
+        AssertField(instance, instance.isDeadKey,  1, 9);
+    });
 
-        {
-            GameInputKeyState instance = default;
-            AssertSize(ref instance, 12);
-            AssertOffset(ref instance, ref instance.scanCode,   nameof(instance.scanCode),   0);
-            AssertOffset(ref instance, ref instance.codePoint,  nameof(instance.codePoint),  4);
-            AssertOffset(ref instance, ref instance.virtualKey, nameof(instance.virtualKey), 8);
-            AssertOffset(ref instance, ref instance.isDeadKey,  nameof(instance.isDeadKey),  9);
-        }
+    [Test]
+    public unsafe void GameInputMouseState() => Assert.Multiple(() =>
+    {
+        GameInputMouseState instance = default;
+        AssertSize(instance, 40);
+        AssertField(instance, instance.buttons,   4, 0);
+        AssertField(instance, instance.positionX, 8, 8);
+        AssertField(instance, instance.positionY, 8, 16);
+        AssertField(instance, instance.wheelX,    8, 24);
+        AssertField(instance, instance.wheelY,    8, 32);
+    });
 
-        {
-            GameInputMouseState instance = default;
-            AssertSize(ref instance, 40);
-            AssertOffset(ref instance, ref instance.buttons,   nameof(instance.buttons),   0);
-            AssertOffset(ref instance, ref instance.positionX, nameof(instance.positionX), 8);
-            AssertOffset(ref instance, ref instance.positionY, nameof(instance.positionY), 16);
-            AssertOffset(ref instance, ref instance.wheelX,    nameof(instance.wheelX),    24);
-            AssertOffset(ref instance, ref instance.wheelY,    nameof(instance.wheelY),    32);
-        }
+    [Test]
+    public unsafe void GameInputTouchState() => Assert.Multiple(() =>
+    {
+        GameInputTouchState instance = default;
+        AssertSize(instance, 48);
+        AssertField(instance, instance.touchId,           8, 0);
+        AssertField(instance, instance.sensorIndex,       4, 8);
+        AssertField(instance, instance.positionX,         4, 12);
+        AssertField(instance, instance.positionY,         4, 16);
+        AssertField(instance, instance.pressure,          4, 20);
+        AssertField(instance, instance.proximity,         4, 24);
+        AssertField(instance, instance.contactRectTop,    4, 28);
+        AssertField(instance, instance.contactRectLeft,   4, 32);
+        AssertField(instance, instance.contactRectRight,  4, 36);
+        AssertField(instance, instance.contactRectBottom, 4, 40);
+    });
 
-        {
-            GameInputTouchState instance = default;
-            AssertSize(ref instance, 48);
-            AssertOffset(ref instance, ref instance.touchId,           nameof(instance.touchId),           0);
-            AssertOffset(ref instance, ref instance.sensorIndex,       nameof(instance.sensorIndex),       8);
-            AssertOffset(ref instance, ref instance.positionX,         nameof(instance.positionX),         12);
-            AssertOffset(ref instance, ref instance.positionY,         nameof(instance.positionY),         16);
-            AssertOffset(ref instance, ref instance.pressure,          nameof(instance.pressure),          20);
-            AssertOffset(ref instance, ref instance.proximity,         nameof(instance.proximity),         24);
-            AssertOffset(ref instance, ref instance.contactRectTop,    nameof(instance.contactRectTop),    28);
-            AssertOffset(ref instance, ref instance.contactRectLeft,   nameof(instance.contactRectLeft),   32);
-            AssertOffset(ref instance, ref instance.contactRectRight,  nameof(instance.contactRectRight),  36);
-            AssertOffset(ref instance, ref instance.contactRectBottom, nameof(instance.contactRectBottom), 40);
-        }
+    [Test]
+    public unsafe void GameInputMotionState() => Assert.Multiple(() =>
+    {
+        GameInputMotionState instance = default;
+        AssertSize(instance, 68);
+        AssertField(instance, instance.accelerationX,         4, 0);
+        AssertField(instance, instance.accelerationY,         4, 4);
+        AssertField(instance, instance.accelerationZ,         4, 8);
+        AssertField(instance, instance.angularVelocityX,      4, 12);
+        AssertField(instance, instance.angularVelocityY,      4, 16);
+        AssertField(instance, instance.angularVelocityZ,      4, 20);
+        AssertField(instance, instance.magneticFieldX,        4, 24);
+        AssertField(instance, instance.magneticFieldY,        4, 28);
+        AssertField(instance, instance.magneticFieldZ,        4, 32);
+        AssertField(instance, instance.orientationW,          4, 36);
+        AssertField(instance, instance.orientationX,          4, 40);
+        AssertField(instance, instance.orientationY,          4, 44);
+        AssertField(instance, instance.orientationZ,          4, 48);
+        AssertField(instance, instance.accelerometerAccuracy, 4, 52);
+        AssertField(instance, instance.gyroscopeAccuracy,     4, 56);
+        AssertField(instance, instance.magnetometerAccuracy,  4, 60);
+        AssertField(instance, instance.orientationAccuracy,   4, 64);
+    });
 
-        {
-            GameInputMotionState instance = default;
-            AssertSize(ref instance, 68);
-            AssertOffset(ref instance, ref instance.accelerationX,         nameof(instance.accelerationX),         0);
-            AssertOffset(ref instance, ref instance.accelerationY,         nameof(instance.accelerationY),         4);
-            AssertOffset(ref instance, ref instance.accelerationZ,         nameof(instance.accelerationZ),         8);
-            AssertOffset(ref instance, ref instance.angularVelocityX,      nameof(instance.angularVelocityX),      12);
-            AssertOffset(ref instance, ref instance.angularVelocityY,      nameof(instance.angularVelocityY),      16);
-            AssertOffset(ref instance, ref instance.angularVelocityZ,      nameof(instance.angularVelocityZ),      20);
-            AssertOffset(ref instance, ref instance.magneticFieldX,        nameof(instance.magneticFieldX),        24);
-            AssertOffset(ref instance, ref instance.magneticFieldY,        nameof(instance.magneticFieldY),        28);
-            AssertOffset(ref instance, ref instance.magneticFieldZ,        nameof(instance.magneticFieldZ),        32);
-            AssertOffset(ref instance, ref instance.orientationW,          nameof(instance.orientationW),          36);
-            AssertOffset(ref instance, ref instance.orientationX,          nameof(instance.orientationX),          40);
-            AssertOffset(ref instance, ref instance.orientationY,          nameof(instance.orientationY),          44);
-            AssertOffset(ref instance, ref instance.orientationZ,          nameof(instance.orientationZ),          48);
-            AssertOffset(ref instance, ref instance.accelerometerAccuracy, nameof(instance.accelerometerAccuracy), 52);
-            AssertOffset(ref instance, ref instance.gyroscopeAccuracy,     nameof(instance.gyroscopeAccuracy),     56);
-            AssertOffset(ref instance, ref instance.magnetometerAccuracy,  nameof(instance.magnetometerAccuracy),  60);
-            AssertOffset(ref instance, ref instance.orientationAccuracy,   nameof(instance.orientationAccuracy),   64);
-        }
+    [Test]
+    public unsafe void GameInputArcadeStickState() => Assert.Multiple(() =>
+    {
+        GameInputArcadeStickState instance = default;
+        AssertSize(instance, 4);
+        AssertField(instance, instance.buttons, 4, 0);
+    });
 
-        {
-            GameInputArcadeStickState instance = default;
-            AssertSize(ref instance, 4);
-            AssertOffset(ref instance, ref instance.buttons, nameof(instance.buttons), 0);
-        }
+    [Test]
+    public unsafe void GameInputFlightStickState() => Assert.Multiple(() =>
+    {
+        GameInputFlightStickState instance = default;
+        AssertSize(instance, 24);
+        AssertField(instance, instance.buttons,   4, 0);
+        AssertField(instance, instance.hatSwitch, 4, 4);
+        AssertField(instance, instance.roll,      4, 8);
+        AssertField(instance, instance.pitch,     4, 12);
+        AssertField(instance, instance.yaw,       4, 16);
+        AssertField(instance, instance.throttle,  4, 20);
+    });
 
-        {
-            GameInputFlightStickState instance = default;
-            AssertSize(ref instance, 24);
-            AssertOffset(ref instance, ref instance.buttons,   nameof(instance.buttons),   0);
-            AssertOffset(ref instance, ref instance.hatSwitch, nameof(instance.hatSwitch), 4);
-            AssertOffset(ref instance, ref instance.roll,      nameof(instance.roll),      8);
-            AssertOffset(ref instance, ref instance.pitch,     nameof(instance.pitch),     12);
-            AssertOffset(ref instance, ref instance.yaw,       nameof(instance.yaw),       16);
-            AssertOffset(ref instance, ref instance.throttle,  nameof(instance.throttle),  20);
-        }
+    [Test]
+    public unsafe void GameInputGamepadState() => Assert.Multiple(() =>
+    {
+        GameInputGamepadState instance = default;
+        AssertSize(instance, 28);
+        AssertField(instance, instance.buttons,          4, 0);
+        AssertField(instance, instance.leftTrigger,      4, 4);
+        AssertField(instance, instance.rightTrigger,     4, 8);
+        AssertField(instance, instance.leftThumbstickX,  4, 12);
+        AssertField(instance, instance.leftThumbstickY,  4, 16);
+        AssertField(instance, instance.rightThumbstickX, 4, 20);
+        AssertField(instance, instance.rightThumbstickY, 4, 24);
+    });
 
-        {
-            GameInputGamepadState instance = default;
-            AssertSize(ref instance, 28);
-            AssertOffset(ref instance, ref instance.buttons,          nameof(instance.buttons),          0);
-            AssertOffset(ref instance, ref instance.leftTrigger,      nameof(instance.leftTrigger),      4);
-            AssertOffset(ref instance, ref instance.rightTrigger,     nameof(instance.rightTrigger),     8);
-            AssertOffset(ref instance, ref instance.leftThumbstickX,  nameof(instance.leftThumbstickX),  12);
-            AssertOffset(ref instance, ref instance.leftThumbstickY,  nameof(instance.leftThumbstickY),  16);
-            AssertOffset(ref instance, ref instance.rightThumbstickX, nameof(instance.rightThumbstickX), 20);
-            AssertOffset(ref instance, ref instance.rightThumbstickY, nameof(instance.rightThumbstickY), 24);
-        }
+    [Test]
+    public unsafe void GameInputRacingWheelState() => Assert.Multiple(() =>
+    {
+        GameInputRacingWheelState instance = default;
+        AssertSize(instance, 28);
+        AssertField(instance, instance.buttons,            4, 0);
+        AssertField(instance, instance.patternShifterGear, 4, 4);
+        AssertField(instance, instance.wheel,              4, 8);
+        AssertField(instance, instance.throttle,           4, 12);
+        AssertField(instance, instance.brake,              4, 16);
+        AssertField(instance, instance.clutch,             4, 20);
+        AssertField(instance, instance.handbrake,          4, 24);
+    });
 
-        {
-            GameInputRacingWheelState instance = default;
-            AssertSize(ref instance, 28);
-            AssertOffset(ref instance, ref instance.buttons,            nameof(instance.buttons),            0);
-            AssertOffset(ref instance, ref instance.patternShifterGear, nameof(instance.patternShifterGear), 4);
-            AssertOffset(ref instance, ref instance.wheel,              nameof(instance.wheel),              8);
-            AssertOffset(ref instance, ref instance.throttle,           nameof(instance.throttle),           12);
-            AssertOffset(ref instance, ref instance.brake,              nameof(instance.brake),              16);
-            AssertOffset(ref instance, ref instance.clutch,             nameof(instance.clutch),             20);
-            AssertOffset(ref instance, ref instance.handbrake,          nameof(instance.handbrake),          24);
-        }
+    [Test]
+    public unsafe void GameInputUiNavigationState() => Assert.Multiple(() =>
+    {
+        GameInputUiNavigationState instance = default;
+        AssertSize(instance, 4);
+        AssertField(instance, instance.buttons, 4, 0);
+    });
 
-        {
-            GameInputUiNavigationState instance = default;
-            AssertSize(ref instance, 4);
-            AssertOffset(ref instance, ref instance.buttons, nameof(instance.buttons), 0);
-        }
+    [Test]
+    public unsafe void GameInputBatteryState() => Assert.Multiple(() =>
+    {
+        GameInputBatteryState instance = default;
+        AssertSize(instance, 20);
+        AssertField(instance, instance.chargeRate,         4, 0);
+        AssertField(instance, instance.maxChargeRate,      4, 4);
+        AssertField(instance, instance.remainingCapacity,  4, 8);
+        AssertField(instance, instance.fullChargeCapacity, 4, 12);
+        AssertField(instance, instance.status,             4, 16);
+    });
 
-        {
-            GameInputBatteryState instance = default;
-            AssertSize(ref instance, 20);
-            AssertOffset(ref instance, ref instance.chargeRate,         nameof(instance.chargeRate),         0);
-            AssertOffset(ref instance, ref instance.maxChargeRate,      nameof(instance.maxChargeRate),      4);
-            AssertOffset(ref instance, ref instance.remainingCapacity,  nameof(instance.remainingCapacity),  8);
-            AssertOffset(ref instance, ref instance.fullChargeCapacity, nameof(instance.fullChargeCapacity), 12);
-            AssertOffset(ref instance, ref instance.status,             nameof(instance.status),             16);
-        }
+    [Test]
+    public unsafe void GameInputString() => Assert.Multiple(() =>
+    {
+        GameInputString instance = default;
+        AssertSize(instance, 16);
+        AssertField(instance, instance.sizeInBytes,    4, 0);
+        AssertField(instance, instance.codePointCount, 4, 4);
+        AssertField(instance, instance.data,              8);
+    });
 
-        {
-            GameInputString instance = default;
-            AssertSize(ref instance, 16);
-            AssertOffset(ref instance, ref instance.sizeInBytes,    nameof(instance.sizeInBytes),    0);
-            AssertOffset(ref instance, ref instance.codePointCount, nameof(instance.codePointCount), 4);
-            AssertOffset(&instance,    &instance.data,              nameof(instance.data),           8);
-        }
+    [Test]
+    public unsafe void GameInputUsage() => Assert.Multiple(() =>
+    {
+        GameInputUsage instance = default;
+        AssertSize(instance, 4);
+        AssertField(instance, instance.page, 2, 0);
+        AssertField(instance, instance.id,   2, 2);
+    });
 
-        {
-            GameInputUsage instance = default;
-            AssertSize(ref instance, 4);
-            AssertOffset(ref instance, ref instance.page, nameof(instance.page), 0);
-            AssertOffset(ref instance, ref instance.id,   nameof(instance.id),   2);
-        }
+    [Test]
+    public unsafe void GameInputVersion() => Assert.Multiple(() =>
+    {
+        GameInputVersion instance = default;
+        AssertSize(instance, 8);
+        AssertField(instance, instance.major,    2, 0);
+        AssertField(instance, instance.minor,    2, 2);
+        AssertField(instance, instance.build,    2, 4);
+        AssertField(instance, instance.revision, 2, 6);
+    });
 
-        {
-            GameInputVersion instance = default;
-            AssertSize(ref instance, 8);
-            AssertOffset(ref instance, ref instance.major,    nameof(instance.major),    0);
-            AssertOffset(ref instance, ref instance.minor,    nameof(instance.minor),    2);
-            AssertOffset(ref instance, ref instance.build,    nameof(instance.build),    4);
-            AssertOffset(ref instance, ref instance.revision, nameof(instance.revision), 6);
-        }
+    [Test]
+    public unsafe void GameInputRawDeviceItemCollectionInfo() => Assert.Multiple(() =>
+    {
+        GameInputRawDeviceItemCollectionInfo instance = default;
+        AssertSize(instance, 80);
+        AssertField(instance, instance.kind,            4, 0);
+        AssertField(instance, instance.childCount,      4, 4);
+        AssertField(instance, instance.siblingCount,    4, 8);
+        AssertField(instance, instance.usageCount,      4, 12);
+        AssertField(instance, instance.usages,             16);
+        AssertField(instance, instance.parent,             24);
+        AssertField(instance, instance.firstSibling,       32);
+        AssertField(instance, instance.previousSibling,    40);
+        AssertField(instance, instance.nextSibling,        48);
+        AssertField(instance, instance.lastSibling,        56);
+        AssertField(instance, instance.firstChild,         64);
+        AssertField(instance, instance.lastChild,          72);
+    });
 
-        {
-            GameInputRawDeviceItemCollectionInfo instance = default;
-            AssertSize(ref instance, 80);
-            AssertOffset(ref instance, ref instance.kind,            nameof(instance.kind),            0);
-            AssertOffset(ref instance, ref instance.childCount,      nameof(instance.childCount),      4);
-            AssertOffset(ref instance, ref instance.siblingCount,    nameof(instance.siblingCount),    8);
-            AssertOffset(ref instance, ref instance.usageCount,      nameof(instance.usageCount),      12);
-            AssertOffset(&instance,    &instance.usages,             nameof(instance.usages),          16);
-            AssertOffset(&instance,    &instance.parent,             nameof(instance.parent),          24);
-            AssertOffset(&instance,    &instance.firstSibling,       nameof(instance.firstSibling),    32);
-            AssertOffset(&instance,    &instance.previousSibling,    nameof(instance.previousSibling), 40);
-            AssertOffset(&instance,    &instance.nextSibling,        nameof(instance.nextSibling),     48);
-            AssertOffset(&instance,    &instance.lastSibling,        nameof(instance.lastSibling),     56);
-            AssertOffset(&instance,    &instance.firstChild,         nameof(instance.firstChild),      64);
-            AssertOffset(&instance,    &instance.lastChild,          nameof(instance.lastChild),       72);
-        }
+    [Test]
+    public unsafe void GameInputRawDeviceReportItemInfo() => Assert.Multiple(() =>
+    {
+        GameInputRawDeviceReportItemInfo instance = default;
+        AssertSize(instance, 88);
+        AssertField(instance, instance.bitOffset,                4, 0);
+        AssertField(instance, instance.bitSize,                  4, 4);
+        AssertField(instance, instance.logicalMin,               8, 8);
+        AssertField(instance, instance.logicalMax,               8, 16);
+        AssertField(instance, instance.physicalMin,              8, 24);
+        AssertField(instance, instance.physicalMax,              8, 32);
+        AssertField(instance, instance.physicalUnits,            4, 40);
+        AssertField(instance, instance.rawPhysicalUnits,         4, 44);
+        AssertField(instance, instance.rawPhysicalUnitsExponent, 4, 48);
+        AssertField(instance, instance.flags,                    4, 52);
+        AssertField(instance, instance.usageCount,               4, 56);
+        AssertField(instance, instance.usages,                      64);
+        AssertField(instance, instance.collection,                  72);
+        AssertField(instance, instance.itemString,                  80);
+    });
 
-        {
-            GameInputRawDeviceReportItemInfo instance = default;
-            AssertSize(ref instance, 88);
-            AssertOffset(ref instance, ref instance.bitOffset,                nameof(instance.bitOffset),                0);
-            AssertOffset(ref instance, ref instance.bitSize,                  nameof(instance.bitSize),                  4);
-            AssertOffset(ref instance, ref instance.logicalMin,               nameof(instance.logicalMin),               8);
-            AssertOffset(ref instance, ref instance.logicalMax,               nameof(instance.logicalMax),               16);
-            AssertOffset(ref instance, ref instance.physicalMin,              nameof(instance.physicalMin),              24);
-            AssertOffset(ref instance, ref instance.physicalMax,              nameof(instance.physicalMax),              32);
-            AssertOffset(ref instance, ref instance.physicalUnits,            nameof(instance.physicalUnits),            40);
-            AssertOffset(ref instance, ref instance.rawPhysicalUnits,         nameof(instance.rawPhysicalUnits),         44);
-            AssertOffset(ref instance, ref instance.rawPhysicalUnitsExponent, nameof(instance.rawPhysicalUnitsExponent), 48);
-            AssertOffset(ref instance, ref instance.flags,                    nameof(instance.flags),                    52);
-            AssertOffset(ref instance, ref instance.usageCount,               nameof(instance.usageCount),               56);
-            AssertOffset(&instance,    &instance.usages,                      nameof(instance.usages),                   64);
-            AssertOffset(&instance,    &instance.collection,                  nameof(instance.collection),               72);
-            AssertOffset(&instance,    &instance.itemString,                  nameof(instance.itemString),               80);
-        }
+    [Test]
+    public unsafe void GameInputRawDeviceReportInfo() => Assert.Multiple(() =>
+    {
+        GameInputRawDeviceReportInfo instance = default;
+        AssertSize(instance, 24);
+        AssertField(instance, instance.kind,      4, 0);
+        AssertField(instance, instance.id,        4, 4);
+        AssertField(instance, instance.size,      4, 8);
+        AssertField(instance, instance.itemCount, 4, 12);
+        AssertField(instance, instance.items,        16);
+    });
 
-        {
-            GameInputRawDeviceReportInfo instance = default;
-            AssertSize(ref instance, 24);
-            AssertOffset(ref instance, ref instance.kind,      nameof(instance.kind),      0);
-            AssertOffset(ref instance, ref instance.id,        nameof(instance.id),        4);
-            AssertOffset(ref instance, ref instance.size,      nameof(instance.size),      8);
-            AssertOffset(ref instance, ref instance.itemCount, nameof(instance.itemCount), 12);
-            AssertOffset(&instance,    &instance.items,        nameof(instance.items),     16);
-        }
+    [Test]
+    public unsafe void GameInputControllerAxisInfo() => Assert.Multiple(() =>
+    {
+        GameInputControllerAxisInfo instance = default;
+        AssertSize(instance, 48);
+        AssertField(instance, instance.mappedInputKinds,  4, 0);
+        AssertField(instance, instance.label,             4, 4);
+        AssertField(instance, instance.isContinuous,      1, 8);
+        AssertField(instance, instance.isNonlinear,       1, 9);
+        AssertField(instance, instance.isQuantized,       1, 10);
+        AssertField(instance, instance.hasRestValue,      1, 11);
+        AssertField(instance, instance.restValue,         4, 12);
+        AssertField(instance, instance.resolution,        8, 16);
+        AssertField(instance, instance.legacyDInputIndex, 2, 24);
+        AssertField(instance, instance.legacyHidIndex,    2, 26);
+        AssertField(instance, instance.rawReportIndex,    4, 28);
+        AssertField(instance, instance.inputReport,          32);
+        AssertField(instance, instance.inputReportItem,      40);
+    });
 
-        {
-            GameInputControllerAxisInfo instance = default;
-            AssertSize(ref instance, 48);
-            AssertOffset(ref instance, ref instance.mappedInputKinds,  nameof(instance.mappedInputKinds),  0);
-            AssertOffset(ref instance, ref instance.label,             nameof(instance.label),             4);
-            AssertOffset(ref instance, ref instance.isContinuous,      nameof(instance.isContinuous),      8);
-            AssertOffset(ref instance, ref instance.isNonlinear,       nameof(instance.isNonlinear),       9);
-            AssertOffset(ref instance, ref instance.isQuantized,       nameof(instance.isQuantized),       10);
-            AssertOffset(ref instance, ref instance.hasRestValue,      nameof(instance.hasRestValue),      11);
-            AssertOffset(ref instance, ref instance.restValue,         nameof(instance.restValue),         12);
-            AssertOffset(ref instance, ref instance.resolution,        nameof(instance.resolution),        16);
-            AssertOffset(ref instance, ref instance.legacyDInputIndex, nameof(instance.legacyDInputIndex), 24);
-            AssertOffset(ref instance, ref instance.legacyHidIndex,    nameof(instance.legacyHidIndex),    26);
-            AssertOffset(ref instance, ref instance.rawReportIndex,    nameof(instance.rawReportIndex),    28);
-            AssertOffset(&instance,    &instance.inputReport,          nameof(instance.inputReport),       32);
-            AssertOffset(&instance,    &instance.inputReportItem,      nameof(instance.inputReportItem),   40);
-        }
+    [Test]
+    public unsafe void GameInputControllerButtonInfo() => Assert.Multiple(() =>
+    {
+        GameInputControllerButtonInfo instance = default;
+        AssertSize(instance, 32);
+        AssertField(instance, instance.mappedInputKinds,  4, 0);
+        AssertField(instance, instance.label,             4, 4);
+        AssertField(instance, instance.legacyDInputIndex, 2, 8);
+        AssertField(instance, instance.legacyHidIndex,    2, 10);
+        AssertField(instance, instance.rawReportIndex,    4, 12);
+        AssertField(instance, instance.inputReport,          16);
+        AssertField(instance, instance.inputReportItem,      24);
+    });
 
-        {
-            GameInputControllerButtonInfo instance = default;
-            AssertSize(ref instance, 32);
-            AssertOffset(ref instance, ref instance.mappedInputKinds,   nameof(instance.mappedInputKinds),   0);
-            AssertOffset(ref instance, ref instance.label,              nameof(instance.label),              4);
-            AssertOffset(ref instance, ref instance.legacyDInputIndex,  nameof(instance.legacyDInputIndex),  8);
-            AssertOffset(ref instance, ref instance.legacyHidIndex,     nameof(instance.legacyHidIndex),     10);
-            AssertOffset(ref instance, ref instance.rawReportIndex,     nameof(instance.rawReportIndex),     12);
-            AssertOffset(&instance, &instance.inputReport,              nameof(instance.inputReport),        16);
-            AssertOffset(&instance, &instance.inputReportItem,          nameof(instance.inputReportItem),    24);
-        }
+    [Test]
+    public unsafe void GameInputControllerSwitchInfo() => Assert.Multiple(() =>
+    {
+        GameInputControllerSwitchInfo instance = default;
+        AssertSize(instance, 72);
+        AssertField(instance, instance.mappedInputKinds,  4, 0);
+        AssertField(instance, instance.label,             4, 4);
+        AssertField(instance, instance._positionLabels,      8);
+        AssertField(instance, instance.kind,              4, 44);
+        AssertField(instance, instance.legacyDInputIndex, 2, 48);
+        AssertField(instance, instance.legacyHidIndex,    2, 50);
+        AssertField(instance, instance.rawReportIndex,    4, 52);
+        AssertField(instance, instance.inputReport,          56);
+        AssertField(instance, instance.inputReportItem,      64);
+    });
 
-        {
-            GameInputControllerSwitchInfo instance = default;
-            AssertSize(ref instance, 72);
-            AssertOffset(ref instance, ref instance.mappedInputKinds,  nameof(instance.mappedInputKinds),  0);
-            AssertOffset(ref instance, ref instance.label,             nameof(instance.label),             4);
-            AssertOffset(&instance,    instance._positionLabels,       nameof(instance._positionLabels),   8);
-            AssertOffset(ref instance, ref instance.kind,              nameof(instance.kind),              44);
-            AssertOffset(ref instance, ref instance.legacyDInputIndex, nameof(instance.legacyDInputIndex), 48);
-            AssertOffset(ref instance, ref instance.legacyHidIndex,    nameof(instance.legacyHidIndex),    50);
-            AssertOffset(ref instance, ref instance.rawReportIndex,    nameof(instance.rawReportIndex),    52);
-            AssertOffset(&instance,    &instance.inputReport,          nameof(instance.inputReport),       56);
-            AssertOffset(&instance,    &instance.inputReportItem,      nameof(instance.inputReportItem),   64);
-        }
+    [Test]
+    public unsafe void GameInputKeyboardInfo() => Assert.Multiple(() =>
+    {
+        GameInputKeyboardInfo instance = default;
+        AssertSize(instance, 40);
+        AssertField(instance, instance.kind,                4, 0);
+        AssertField(instance, instance.layout,              4, 4);
+        AssertField(instance, instance.keyCount,            4, 8);
+        AssertField(instance, instance.functionKeyCount,    4, 12);
+        AssertField(instance, instance.maxSimultaneousKeys, 4, 16);
+        AssertField(instance, instance.platformType,        4, 20);
+        AssertField(instance, instance.platformSubtype,     4, 24);
+        AssertField(instance, instance.nativeLanguage,         32);
+    });
 
-        {
-            GameInputKeyboardInfo instance = default;
-            AssertSize(ref instance, 40);
-            AssertOffset(ref instance, ref instance.kind,                nameof(instance.kind),                0);
-            AssertOffset(ref instance, ref instance.layout,              nameof(instance.layout),              4);
-            AssertOffset(ref instance, ref instance.keyCount,            nameof(instance.keyCount),            8);
-            AssertOffset(ref instance, ref instance.functionKeyCount,    nameof(instance.functionKeyCount),    12);
-            AssertOffset(ref instance, ref instance.maxSimultaneousKeys, nameof(instance.maxSimultaneousKeys), 16);
-            AssertOffset(ref instance, ref instance.platformType,        nameof(instance.platformType),        20);
-            AssertOffset(ref instance, ref instance.platformSubtype,     nameof(instance.platformSubtype),     24);
-            AssertOffset(&instance,    &instance.nativeLanguage,         nameof(instance.nativeLanguage),      32);
-        }
+    [Test]
+    public unsafe void GameInputMouseInfo() => Assert.Multiple(() =>
+    {
+        GameInputMouseInfo instance = default;
+        AssertSize(instance, 16);
+        AssertField(instance, instance.supportedButtons, 4, 0);
+        AssertField(instance, instance.sampleRate,       4, 4);
+        AssertField(instance, instance.sensorDpi,        4, 8);
+        AssertField(instance, instance.hasWheelX,        1, 12);
+        AssertField(instance, instance.hasWheelY,        1, 13);
+    });
 
-        {
-            GameInputMouseInfo instance = default;
-            AssertSize(ref instance, 16);
-            AssertOffset(ref instance, ref instance.supportedButtons, nameof(instance.supportedButtons), 0);
-            AssertOffset(ref instance, ref instance.sampleRate,       nameof(instance.sampleRate),       4);
-            AssertOffset(ref instance, ref instance.sensorDpi,        nameof(instance.sensorDpi),        8);
-            AssertOffset(ref instance, ref instance.hasWheelX,        nameof(instance.hasWheelX),        12);
-            AssertOffset(ref instance, ref instance.hasWheelY,        nameof(instance.hasWheelY),        13);
-        }
+    [Test]
+    public unsafe void GameInputTouchSensorInfo() => Assert.Multiple(() =>
+    {
+        GameInputTouchSensorInfo instance = default;
+        AssertSize(instance, 64);
+        AssertField(instance, instance.mappedInputKinds, 4, 0);
+        AssertField(instance, instance.label,            4, 4);
+        AssertField(instance, instance.location,         4, 8);
+        AssertField(instance, instance.locationId,       4, 12);
+        AssertField(instance, instance.resolutionX,      8, 16);
+        AssertField(instance, instance.resolutionY,      8, 24);
+        AssertField(instance, instance.shape,            4, 32);
+        AssertField(instance, instance.aspectRatio,      4, 36);
+        AssertField(instance, instance.orientation,      4, 40);
+        AssertField(instance, instance.physicalWidth,    4, 44);
+        AssertField(instance, instance.physicalHeight,   4, 48);
+        AssertField(instance, instance.maxPressure,      4, 52);
+        AssertField(instance, instance.maxProximity,     4, 56);
+        AssertField(instance, instance.maxTouchPoints,   4, 60);
+    });
 
-        {
-            GameInputTouchSensorInfo instance = default;
-            AssertSize(ref instance, 64);
-            AssertOffset(ref instance, ref instance.mappedInputKinds, nameof(instance.mappedInputKinds), 0);
-            AssertOffset(ref instance, ref instance.label,            nameof(instance.label),            4);
-            AssertOffset(ref instance, ref instance.location,         nameof(instance.location),         8);
-            AssertOffset(ref instance, ref instance.locationId,       nameof(instance.locationId),       12);
-            AssertOffset(ref instance, ref instance.resolutionX,      nameof(instance.resolutionX),      16);
-            AssertOffset(ref instance, ref instance.resolutionY,      nameof(instance.resolutionY),      24);
-            AssertOffset(ref instance, ref instance.shape,            nameof(instance.shape),            32);
-            AssertOffset(ref instance, ref instance.aspectRatio,      nameof(instance.aspectRatio),      36);
-            AssertOffset(ref instance, ref instance.orientation,      nameof(instance.orientation),      40);
-            AssertOffset(ref instance, ref instance.physicalWidth,    nameof(instance.physicalWidth),    44);
-            AssertOffset(ref instance, ref instance.physicalHeight,   nameof(instance.physicalHeight),   48);
-            AssertOffset(ref instance, ref instance.maxPressure,      nameof(instance.maxPressure),      52);
-            AssertOffset(ref instance, ref instance.maxProximity,     nameof(instance.maxProximity),     56);
-            AssertOffset(ref instance, ref instance.maxTouchPoints,   nameof(instance.maxTouchPoints),   60);
-        }
+    [Test]
+    public unsafe void GameInputMotionInfo() => Assert.Multiple(() =>
+    {
+        GameInputMotionInfo instance = default;
+        AssertSize(instance, 12);
+        AssertField(instance, instance.maxAcceleration,          4, 0);
+        AssertField(instance, instance.maxAngularVelocity,       4, 4);
+        AssertField(instance, instance.maxMagneticFieldStrength, 4, 8);
+    });
 
-        {
-            GameInputMotionInfo instance = default;
-            AssertSize(ref instance, 12);
-            AssertOffset(ref instance, ref instance.maxAcceleration,          nameof(instance.maxAcceleration),          0);
-            AssertOffset(ref instance, ref instance.maxAngularVelocity,       nameof(instance.maxAngularVelocity),       4);
-            AssertOffset(ref instance, ref instance.maxMagneticFieldStrength, nameof(instance.maxMagneticFieldStrength), 8);
-        }
+    [Test]
+    public unsafe void GameInputArcadeStickInfo() => Assert.Multiple(() =>
+    {
+        GameInputArcadeStickInfo instance = default;
+        AssertSize(instance, 56);
+        AssertField(instance, instance.menuButtonLabel,     4, 0);
+        AssertField(instance, instance.viewButtonLabel,     4, 4);
+        AssertField(instance, instance.stickUpLabel,        4, 8);
+        AssertField(instance, instance.stickDownLabel,      4, 12);
+        AssertField(instance, instance.stickLeftLabel,      4, 16);
+        AssertField(instance, instance.stickRightLabel,     4, 20);
+        AssertField(instance, instance.actionButton1Label,  4, 24);
+        AssertField(instance, instance.actionButton2Label,  4, 28);
+        AssertField(instance, instance.actionButton3Label,  4, 32);
+        AssertField(instance, instance.actionButton4Label,  4, 36);
+        AssertField(instance, instance.actionButton5Label,  4, 40);
+        AssertField(instance, instance.actionButton6Label,  4, 44);
+        AssertField(instance, instance.specialButton1Label, 4, 48);
+        AssertField(instance, instance.specialButton2Label, 4, 52);
+    });
 
-        {
-            GameInputArcadeStickInfo instance = default;
-            AssertSize(ref instance, 56);
-            AssertOffset(ref instance, ref instance.menuButtonLabel,     nameof(instance.menuButtonLabel),     0);
-            AssertOffset(ref instance, ref instance.viewButtonLabel,     nameof(instance.viewButtonLabel),     4);
-            AssertOffset(ref instance, ref instance.stickUpLabel,        nameof(instance.stickUpLabel),        8);
-            AssertOffset(ref instance, ref instance.stickDownLabel,      nameof(instance.stickDownLabel),      12);
-            AssertOffset(ref instance, ref instance.stickLeftLabel,      nameof(instance.stickLeftLabel),      16);
-            AssertOffset(ref instance, ref instance.stickRightLabel,     nameof(instance.stickRightLabel),     20);
-            AssertOffset(ref instance, ref instance.actionButton1Label,  nameof(instance.actionButton1Label),  24);
-            AssertOffset(ref instance, ref instance.actionButton2Label,  nameof(instance.actionButton2Label),  28);
-            AssertOffset(ref instance, ref instance.actionButton3Label,  nameof(instance.actionButton3Label),  32);
-            AssertOffset(ref instance, ref instance.actionButton4Label,  nameof(instance.actionButton4Label),  36);
-            AssertOffset(ref instance, ref instance.actionButton5Label,  nameof(instance.actionButton5Label),  40);
-            AssertOffset(ref instance, ref instance.actionButton6Label,  nameof(instance.actionButton6Label),  44);
-            AssertOffset(ref instance, ref instance.specialButton1Label, nameof(instance.specialButton1Label), 48);
-            AssertOffset(ref instance, ref instance.specialButton2Label, nameof(instance.specialButton2Label), 52);
-        }
+    [Test]
+    public unsafe void GameInputFlightStickInfo() => Assert.Multiple(() =>
+    {
+        GameInputFlightStickInfo instance = default;
+        AssertSize(instance, 20);
+        AssertField(instance, instance.menuButtonLabel,          4, 0);
+        AssertField(instance, instance.viewButtonLabel,          4, 4);
+        AssertField(instance, instance.firePrimaryButtonLabel,   4, 8);
+        AssertField(instance, instance.fireSecondaryButtonLabel, 4, 12);
+        AssertField(instance, instance.hatSwitchKind,            4, 16);
+    });
 
-        {
-            GameInputFlightStickInfo instance = default;
-            AssertSize(ref instance, 20);
-            AssertOffset(ref instance, ref instance.menuButtonLabel,          nameof(instance.menuButtonLabel),          0);
-            AssertOffset(ref instance, ref instance.viewButtonLabel,          nameof(instance.viewButtonLabel),          4);
-            AssertOffset(ref instance, ref instance.firePrimaryButtonLabel,   nameof(instance.firePrimaryButtonLabel),   8);
-            AssertOffset(ref instance, ref instance.fireSecondaryButtonLabel, nameof(instance.fireSecondaryButtonLabel), 12);
-            AssertOffset(ref instance, ref instance.hatSwitchKind,            nameof(instance.hatSwitchKind),            16);
-        }
+    [Test]
+    public unsafe void GameInputGamepadInfo() => Assert.Multiple(() =>
+    {
+        GameInputGamepadInfo instance = default;
+        AssertSize(instance, 56);
+        AssertField(instance, instance.menuButtonLabel,            4, 0);
+        AssertField(instance, instance.viewButtonLabel,            4, 4);
+        AssertField(instance, instance.aButtonLabel,               4, 8);
+        AssertField(instance, instance.bButtonLabel,               4, 12);
+        AssertField(instance, instance.xButtonLabel,               4, 16);
+        AssertField(instance, instance.yButtonLabel,               4, 20);
+        AssertField(instance, instance.dpadUpLabel,                4, 24);
+        AssertField(instance, instance.dpadDownLabel,              4, 28);
+        AssertField(instance, instance.dpadLeftLabel,              4, 32);
+        AssertField(instance, instance.dpadRightLabel,             4, 36);
+        AssertField(instance, instance.leftShoulderButtonLabel,    4, 40);
+        AssertField(instance, instance.rightShoulderButtonLabel,   4, 44);
+        AssertField(instance, instance.leftThumbstickButtonLabel,  4, 48);
+        AssertField(instance, instance.rightThumbstickButtonLabel, 4, 52);
+    });
 
-        {
-            GameInputGamepadInfo instance = default;
-            AssertSize(ref instance, 56);
-            AssertOffset(ref instance, ref instance.menuButtonLabel,            nameof(instance.menuButtonLabel),            0);
-            AssertOffset(ref instance, ref instance.viewButtonLabel,            nameof(instance.viewButtonLabel),            4);
-            AssertOffset(ref instance, ref instance.aButtonLabel,               nameof(instance.aButtonLabel),               8);
-            AssertOffset(ref instance, ref instance.bButtonLabel,               nameof(instance.bButtonLabel),               12);
-            AssertOffset(ref instance, ref instance.xButtonLabel,               nameof(instance.xButtonLabel),               16);
-            AssertOffset(ref instance, ref instance.yButtonLabel,               nameof(instance.yButtonLabel),               20);
-            AssertOffset(ref instance, ref instance.dpadUpLabel,                nameof(instance.dpadUpLabel),                24);
-            AssertOffset(ref instance, ref instance.dpadDownLabel,              nameof(instance.dpadDownLabel),              28);
-            AssertOffset(ref instance, ref instance.dpadLeftLabel,              nameof(instance.dpadLeftLabel),              32);
-            AssertOffset(ref instance, ref instance.dpadRightLabel,             nameof(instance.dpadRightLabel),             36);
-            AssertOffset(ref instance, ref instance.leftShoulderButtonLabel,    nameof(instance.leftShoulderButtonLabel),    40);
-            AssertOffset(ref instance, ref instance.rightShoulderButtonLabel,   nameof(instance.rightShoulderButtonLabel),   44);
-            AssertOffset(ref instance, ref instance.leftThumbstickButtonLabel,  nameof(instance.leftThumbstickButtonLabel),  48);
-            AssertOffset(ref instance, ref instance.rightThumbstickButtonLabel, nameof(instance.rightThumbstickButtonLabel), 52);
-        }
+    [Test]
+    public unsafe void GameInputRacingWheelInfo() => Assert.Multiple(() =>
+    {
+        GameInputRacingWheelInfo instance = default;
+        AssertSize(instance, 48);
+        AssertField(instance, instance.menuButtonLabel,         4, 0);
+        AssertField(instance, instance.viewButtonLabel,         4, 4);
+        AssertField(instance, instance.previousGearButtonLabel, 4, 8);
+        AssertField(instance, instance.nextGearButtonLabel,     4, 12);
+        AssertField(instance, instance.dpadUpLabel,             4, 16);
+        AssertField(instance, instance.dpadDownLabel,           4, 20);
+        AssertField(instance, instance.dpadLeftLabel,           4, 24);
+        AssertField(instance, instance.dpadRightLabel,          4, 28);
+        AssertField(instance, instance.hasClutch,               1, 32);
+        AssertField(instance, instance.hasHandbrake,            1, 33);
+        AssertField(instance, instance.hasPatternShifter,       1, 34);
+        AssertField(instance, instance.minPatternShifterGear,   4, 36);
+        AssertField(instance, instance.maxPatternShifterGear,   4, 40);
+        AssertField(instance, instance.maxWheelAngle,           4, 44);
+    });
 
-        {
-            GameInputRacingWheelInfo instance = default;
-            AssertSize(ref instance, 48);
-            AssertOffset(ref instance, ref instance.menuButtonLabel,         nameof(instance.menuButtonLabel),         0);
-            AssertOffset(ref instance, ref instance.viewButtonLabel,         nameof(instance.viewButtonLabel),         4);
-            AssertOffset(ref instance, ref instance.previousGearButtonLabel, nameof(instance.previousGearButtonLabel), 8);
-            AssertOffset(ref instance, ref instance.nextGearButtonLabel,     nameof(instance.nextGearButtonLabel),     12);
-            AssertOffset(ref instance, ref instance.dpadUpLabel,             nameof(instance.dpadUpLabel),             16);
-            AssertOffset(ref instance, ref instance.dpadDownLabel,           nameof(instance.dpadDownLabel),           20);
-            AssertOffset(ref instance, ref instance.dpadLeftLabel,           nameof(instance.dpadLeftLabel),           24);
-            AssertOffset(ref instance, ref instance.dpadRightLabel,          nameof(instance.dpadRightLabel),          28);
-            AssertOffset(ref instance, ref instance.hasClutch,               nameof(instance.hasClutch),               32);
-            AssertOffset(ref instance, ref instance.hasHandbrake,            nameof(instance.hasHandbrake),            33);
-            AssertOffset(ref instance, ref instance.hasPatternShifter,       nameof(instance.hasPatternShifter),       34);
-            AssertOffset(ref instance, ref instance.minPatternShifterGear,   nameof(instance.minPatternShifterGear),   36);
-            AssertOffset(ref instance, ref instance.maxPatternShifterGear,   nameof(instance.maxPatternShifterGear),   40);
-            AssertOffset(ref instance, ref instance.maxWheelAngle,           nameof(instance.maxWheelAngle),           44);
-        }
+    [Test]
+    public unsafe void GameInputUiNavigationInfo() => Assert.Multiple(() =>
+    {
+        GameInputUiNavigationInfo instance = default;
+        AssertSize(instance, 84);
+        AssertField(instance, instance.menuButtonLabel,        4, 0);
+        AssertField(instance, instance.viewButtonLabel,        4, 4);
+        AssertField(instance, instance.acceptButtonLabel,      4, 8);
+        AssertField(instance, instance.cancelButtonLabel,      4, 12);
+        AssertField(instance, instance.upButtonLabel,          4, 16);
+        AssertField(instance, instance.downButtonLabel,        4, 20);
+        AssertField(instance, instance.leftButtonLabel,        4, 24);
+        AssertField(instance, instance.rightButtonLabel,       4, 28);
+        AssertField(instance, instance.contextButton1Label,    4, 32);
+        AssertField(instance, instance.contextButton2Label,    4, 36);
+        AssertField(instance, instance.contextButton3Label,    4, 40);
+        AssertField(instance, instance.contextButton4Label,    4, 44);
+        AssertField(instance, instance.pageUpButtonLabel,      4, 48);
+        AssertField(instance, instance.pageDownButtonLabel,    4, 52);
+        AssertField(instance, instance.pageLeftButtonLabel,    4, 56);
+        AssertField(instance, instance.pageRightButtonLabel,   4, 60);
+        AssertField(instance, instance.scrollUpButtonLabel,    4, 64);
+        AssertField(instance, instance.scrollDownButtonLabel,  4, 68);
+        AssertField(instance, instance.scrollLeftButtonLabel,  4, 72);
+        AssertField(instance, instance.scrollRightButtonLabel, 4, 76);
+        AssertField(instance, instance.guideButtonLabel,       4, 80);
+    });
 
-        {
-            GameInputUiNavigationInfo instance = default;
-            AssertSize(ref instance, 84);
-            AssertOffset(ref instance, ref instance.menuButtonLabel,        nameof(instance.menuButtonLabel),        0);
-            AssertOffset(ref instance, ref instance.viewButtonLabel,        nameof(instance.viewButtonLabel),        4);
-            AssertOffset(ref instance, ref instance.acceptButtonLabel,      nameof(instance.acceptButtonLabel),      8);
-            AssertOffset(ref instance, ref instance.cancelButtonLabel,      nameof(instance.cancelButtonLabel),      12);
-            AssertOffset(ref instance, ref instance.upButtonLabel,          nameof(instance.upButtonLabel),          16);
-            AssertOffset(ref instance, ref instance.downButtonLabel,        nameof(instance.downButtonLabel),        20);
-            AssertOffset(ref instance, ref instance.leftButtonLabel,        nameof(instance.leftButtonLabel),        24);
-            AssertOffset(ref instance, ref instance.rightButtonLabel,       nameof(instance.rightButtonLabel),       28);
-            AssertOffset(ref instance, ref instance.contextButton1Label,    nameof(instance.contextButton1Label),    32);
-            AssertOffset(ref instance, ref instance.contextButton2Label,    nameof(instance.contextButton2Label),    36);
-            AssertOffset(ref instance, ref instance.contextButton3Label,    nameof(instance.contextButton3Label),    40);
-            AssertOffset(ref instance, ref instance.contextButton4Label,    nameof(instance.contextButton4Label),    44);
-            AssertOffset(ref instance, ref instance.pageUpButtonLabel,      nameof(instance.pageUpButtonLabel),      48);
-            AssertOffset(ref instance, ref instance.pageDownButtonLabel,    nameof(instance.pageDownButtonLabel),    52);
-            AssertOffset(ref instance, ref instance.pageLeftButtonLabel,    nameof(instance.pageLeftButtonLabel),    56);
-            AssertOffset(ref instance, ref instance.pageRightButtonLabel,   nameof(instance.pageRightButtonLabel),   60);
-            AssertOffset(ref instance, ref instance.scrollUpButtonLabel,    nameof(instance.scrollUpButtonLabel),    64);
-            AssertOffset(ref instance, ref instance.scrollDownButtonLabel,  nameof(instance.scrollDownButtonLabel),  68);
-            AssertOffset(ref instance, ref instance.scrollLeftButtonLabel,  nameof(instance.scrollLeftButtonLabel),  72);
-            AssertOffset(ref instance, ref instance.scrollRightButtonLabel, nameof(instance.scrollRightButtonLabel), 76);
-            AssertOffset(ref instance, ref instance.guideButtonLabel,       nameof(instance.guideButtonLabel),       80);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackMotorInfo() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackMotorInfo instance = default;
+        AssertSize(instance, 28);
+        AssertField(instance, instance.supportedAxes,                     4, 0);
+        AssertField(instance, instance.location,                          4, 4);
+        AssertField(instance, instance.locationId,                        4, 8);
+        AssertField(instance, instance.maxSimultaneousEffects,            4, 12);
+        AssertField(instance, instance.isConstantEffectSupported,         1, 16);
+        AssertField(instance, instance.isRampEffectSupported,             1, 17);
+        AssertField(instance, instance.isSineWaveEffectSupported,         1, 18);
+        AssertField(instance, instance.isSquareWaveEffectSupported,       1, 19);
+        AssertField(instance, instance.isTriangleWaveEffectSupported,     1, 20);
+        AssertField(instance, instance.isSawtoothUpWaveEffectSupported,   1, 21);
+        AssertField(instance, instance.isSawtoothDownWaveEffectSupported, 1, 22);
+        AssertField(instance, instance.isSpringEffectSupported,           1, 23);
+        AssertField(instance, instance.isFrictionEffectSupported,         1, 24);
+        AssertField(instance, instance.isDamperEffectSupported,           1, 25);
+        AssertField(instance, instance.isInertiaEffectSupported,          1, 26);
+    });
 
-        {
-            GameInputForceFeedbackMotorInfo instance = default;
-            AssertSize(ref instance, 28);
-            AssertOffset(ref instance, ref instance.supportedAxes,                     nameof(instance.supportedAxes),                     0);
-            AssertOffset(ref instance, ref instance.location,                          nameof(instance.location),                          4);
-            AssertOffset(ref instance, ref instance.locationId,                        nameof(instance.locationId),                        8);
-            AssertOffset(ref instance, ref instance.maxSimultaneousEffects,            nameof(instance.maxSimultaneousEffects),            12);
-            AssertOffset(ref instance, ref instance.isConstantEffectSupported,         nameof(instance.isConstantEffectSupported),         16);
-            AssertOffset(ref instance, ref instance.isRampEffectSupported,             nameof(instance.isRampEffectSupported),             17);
-            AssertOffset(ref instance, ref instance.isSineWaveEffectSupported,         nameof(instance.isSineWaveEffectSupported),         18);
-            AssertOffset(ref instance, ref instance.isSquareWaveEffectSupported,       nameof(instance.isSquareWaveEffectSupported),       19);
-            AssertOffset(ref instance, ref instance.isTriangleWaveEffectSupported,     nameof(instance.isTriangleWaveEffectSupported),     20);
-            AssertOffset(ref instance, ref instance.isSawtoothUpWaveEffectSupported,   nameof(instance.isSawtoothUpWaveEffectSupported),   21);
-            AssertOffset(ref instance, ref instance.isSawtoothDownWaveEffectSupported, nameof(instance.isSawtoothDownWaveEffectSupported), 22);
-            AssertOffset(ref instance, ref instance.isSpringEffectSupported,           nameof(instance.isSpringEffectSupported),           23);
-            AssertOffset(ref instance, ref instance.isFrictionEffectSupported,         nameof(instance.isFrictionEffectSupported),         24);
-            AssertOffset(ref instance, ref instance.isDamperEffectSupported,           nameof(instance.isDamperEffectSupported),           25);
-            AssertOffset(ref instance, ref instance.isInertiaEffectSupported,          nameof(instance.isInertiaEffectSupported),          26);
-        }
+    [Test]
+    public unsafe void GameInputHapticWaveformInfo() => Assert.Multiple(() =>
+    {
+        GameInputHapticWaveformInfo instance = default;
+        AssertSize(instance, 16);
+        AssertField(instance, instance.usage,                  4, 0);
+        AssertField(instance, instance.isDurationSupported,    1, 4);
+        AssertField(instance, instance.isIntensitySupported,   1, 5);
+        AssertField(instance, instance.isRepeatSupported,      1, 6);
+        AssertField(instance, instance.isRepeatDelaySupported, 1, 7);
+        AssertField(instance, instance.defaultDuration,        8, 8);
+    });
 
-        {
-            GameInputHapticWaveformInfo instance = default;
-            AssertSize(ref instance, 16);
-            AssertOffset(ref instance, ref instance.usage,                  nameof(instance.usage),                  0);
-            AssertOffset(ref instance, ref instance.isDurationSupported,    nameof(instance.isDurationSupported),    4);
-            AssertOffset(ref instance, ref instance.isIntensitySupported,   nameof(instance.isIntensitySupported),   5);
-            AssertOffset(ref instance, ref instance.isRepeatSupported,      nameof(instance.isRepeatSupported),      6);
-            AssertOffset(ref instance, ref instance.isRepeatDelaySupported, nameof(instance.isRepeatDelaySupported), 7);
-            AssertOffset(ref instance, ref instance.defaultDuration,        nameof(instance.defaultDuration),        8);
-        }
+    [Test]
+    public unsafe void GameInputHapticFeedbackMotorInfo() => Assert.Multiple(() =>
+    {
+        GameInputHapticFeedbackMotorInfo instance = default;
+        AssertSize(instance, 24);
+        AssertField(instance, instance.mappedRumbleMotors, 4, 0);
+        AssertField(instance, instance.location,           4, 4);
+        AssertField(instance, instance.locationId,         4, 8);
+        AssertField(instance, instance.waveformCount,      4, 12);
+        AssertField(instance, instance.waveformInfo,          16);
+    });
 
-        {
-            GameInputHapticFeedbackMotorInfo instance = default;
-            AssertSize(ref instance, 24);
-            AssertOffset(ref instance, ref instance.mappedRumbleMotors, nameof(instance.mappedRumbleMotors), 0);
-            AssertOffset(ref instance, ref instance.location,           nameof(instance.location),           4);
-            AssertOffset(ref instance, ref instance.locationId,         nameof(instance.locationId),         8);
-            AssertOffset(ref instance, ref instance.waveformCount,      nameof(instance.waveformCount),      12);
-            AssertOffset(&instance,    &instance.waveformInfo,          nameof(instance.waveformInfo),       16);
-        }
+    [Test]
+    public unsafe void GameInputDeviceInfo() => Assert.Multiple(() =>
+    {
+        GameInputDeviceInfo instance = default;
+        AssertSize(instance, 320);
+        AssertField(instance, instance.infoSize,                 4, 0);
+        AssertField(instance, instance.vendorId,                 2, 4);
+        AssertField(instance, instance.productId,                2, 6);
+        AssertField(instance, instance.revisionNumber,           2, 8);
+        AssertField(instance, instance.interfaceNumber,          1, 10);
+        AssertField(instance, instance.collectionNumber,         1, 11);
+        AssertField(instance, instance.usage,                    4, 12);
+        AssertField(instance, instance.hardwareVersion,          8, 16);
+        AssertField(instance, instance.firmwareVersion,          8, 24);
+        AssertField(instance, instance.deviceId,                 32, 32);
+        AssertField(instance, instance.deviceRootId,             32, 64);
+        AssertField(instance, instance.deviceFamily,             4, 96);
+        AssertField(instance, instance.capabilities,             4, 100);
+        AssertField(instance, instance.supportedInput,           4, 104);
+        AssertField(instance, instance.supportedRumbleMotors,    4, 108);
+        AssertField(instance, instance.inputReportCount,         4, 112);
+        AssertField(instance, instance.outputReportCount,        4, 116);
+        AssertField(instance, instance.featureReportCount,       4, 120);
+        AssertField(instance, instance.controllerAxisCount,      4, 124);
+        AssertField(instance, instance.controllerButtonCount,    4, 128);
+        AssertField(instance, instance.controllerSwitchCount,    4, 132);
+        AssertField(instance, instance.touchPointCount,          4, 136);
+        AssertField(instance, instance.touchSensorCount,         4, 140);
+        AssertField(instance, instance.forceFeedbackMotorCount,  4, 144);
+        AssertField(instance, instance.hapticFeedbackMotorCount, 4, 148);
+        AssertField(instance, instance.deviceStringCount,        4, 152);
+        AssertField(instance, instance.deviceDescriptorSize,     4, 156);
+        AssertField(instance, instance.inputReportInfo,             160);
+        AssertField(instance, instance.outputReportInfo,            168);
+        AssertField(instance, instance.featureReportInfo,           176);
+        AssertField(instance, instance.controllerAxisInfo,          184);
+        AssertField(instance, instance.controllerButtonInfo,        192);
+        AssertField(instance, instance.controllerSwitchInfo,        200);
+        AssertField(instance, instance.keyboardInfo,                208);
+        AssertField(instance, instance.mouseInfo,                   216);
+        AssertField(instance, instance.touchSensorInfo,             224);
+        AssertField(instance, instance.motionInfo,                  232);
+        AssertField(instance, instance.arcadeStickInfo,             240);
+        AssertField(instance, instance.flightStickInfo,             248);
+        AssertField(instance, instance.gamepadInfo,                 256);
+        AssertField(instance, instance.racingWheelInfo,             264);
+        AssertField(instance, instance.uiNavigationInfo,            272);
+        AssertField(instance, instance.forceFeedbackMotorInfo,      280);
+        AssertField(instance, instance.hapticFeedbackMotorInfo,     288);
+        AssertField(instance, instance.displayName,                 296);
+        AssertField(instance, instance.deviceStrings,               304);
+        AssertField(instance, instance.deviceDescriptorData,        312);
+    });
 
-        {
-            GameInputDeviceInfo instance = default;
-            AssertSize(ref instance, 320);
-            AssertOffset(ref instance, ref instance.infoSize,                 nameof(instance.infoSize),                 0);
-            AssertOffset(ref instance, ref instance.vendorId,                 nameof(instance.vendorId),                 4);
-            AssertOffset(ref instance, ref instance.productId,                nameof(instance.productId),                6);
-            AssertOffset(ref instance, ref instance.revisionNumber,           nameof(instance.revisionNumber),           8);
-            AssertOffset(ref instance, ref instance.interfaceNumber,          nameof(instance.interfaceNumber),          10);
-            AssertOffset(ref instance, ref instance.collectionNumber,         nameof(instance.collectionNumber),         11);
-            AssertOffset(ref instance, ref instance.usage,                    nameof(instance.usage),                    12);
-            AssertOffset(ref instance, ref instance.hardwareVersion,          nameof(instance.hardwareVersion),          16);
-            AssertOffset(ref instance, ref instance.firmwareVersion,          nameof(instance.firmwareVersion),          24);
-            AssertOffset(ref instance, ref instance.deviceId,                 nameof(instance.deviceId),                 32);
-            AssertOffset(ref instance, ref instance.deviceRootId,             nameof(instance.deviceRootId),             64);
-            AssertOffset(ref instance, ref instance.deviceFamily,             nameof(instance.deviceFamily),             96);
-            AssertOffset(ref instance, ref instance.capabilities,             nameof(instance.capabilities),             100);
-            AssertOffset(ref instance, ref instance.supportedInput,           nameof(instance.supportedInput),           104);
-            AssertOffset(ref instance, ref instance.supportedRumbleMotors,    nameof(instance.supportedRumbleMotors),    108);
-            AssertOffset(ref instance, ref instance.inputReportCount,         nameof(instance.inputReportCount),         112);
-            AssertOffset(ref instance, ref instance.outputReportCount,        nameof(instance.outputReportCount),        116);
-            AssertOffset(ref instance, ref instance.featureReportCount,       nameof(instance.featureReportCount),       120);
-            AssertOffset(ref instance, ref instance.controllerAxisCount,      nameof(instance.controllerAxisCount),      124);
-            AssertOffset(ref instance, ref instance.controllerButtonCount,    nameof(instance.controllerButtonCount),    128);
-            AssertOffset(ref instance, ref instance.controllerSwitchCount,    nameof(instance.controllerSwitchCount),    132);
-            AssertOffset(ref instance, ref instance.touchPointCount,          nameof(instance.touchPointCount),          136);
-            AssertOffset(ref instance, ref instance.touchSensorCount,         nameof(instance.touchSensorCount),         140);
-            AssertOffset(ref instance, ref instance.forceFeedbackMotorCount,  nameof(instance.forceFeedbackMotorCount),  144);
-            AssertOffset(ref instance, ref instance.hapticFeedbackMotorCount, nameof(instance.hapticFeedbackMotorCount), 148);
-            AssertOffset(ref instance, ref instance.deviceStringCount,        nameof(instance.deviceStringCount),        152);
-            AssertOffset(ref instance, ref instance.deviceDescriptorSize,     nameof(instance.deviceDescriptorSize),     156);
-            AssertOffset(&instance,    &instance.inputReportInfo,             nameof(instance.inputReportInfo),          160);
-            AssertOffset(&instance,    &instance.outputReportInfo,            nameof(instance.outputReportInfo),         168);
-            AssertOffset(&instance,    &instance.featureReportInfo,           nameof(instance.featureReportInfo),        176);
-            AssertOffset(&instance,    &instance.controllerAxisInfo,          nameof(instance.controllerAxisInfo),       184);
-            AssertOffset(&instance,    &instance.controllerButtonInfo,        nameof(instance.controllerButtonInfo),     192);
-            AssertOffset(&instance,    &instance.controllerSwitchInfo,        nameof(instance.controllerSwitchInfo),     200);
-            AssertOffset(&instance,    &instance.keyboardInfo,                nameof(instance.keyboardInfo),             208);
-            AssertOffset(&instance,    &instance.mouseInfo,                   nameof(instance.mouseInfo),                216);
-            AssertOffset(&instance,    &instance.touchSensorInfo,             nameof(instance.touchSensorInfo),          224);
-            AssertOffset(&instance,    &instance.motionInfo,                  nameof(instance.motionInfo),               232);
-            AssertOffset(&instance,    &instance.arcadeStickInfo,             nameof(instance.arcadeStickInfo),          240);
-            AssertOffset(&instance,    &instance.flightStickInfo,             nameof(instance.flightStickInfo),          248);
-            AssertOffset(&instance,    &instance.gamepadInfo,                 nameof(instance.gamepadInfo),              256);
-            AssertOffset(&instance,    &instance.racingWheelInfo,             nameof(instance.racingWheelInfo),          264);
-            AssertOffset(&instance,    &instance.uiNavigationInfo,            nameof(instance.uiNavigationInfo),         272);
-            AssertOffset(&instance,    &instance.forceFeedbackMotorInfo,      nameof(instance.forceFeedbackMotorInfo),   280);
-            AssertOffset(&instance,    &instance.hapticFeedbackMotorInfo,     nameof(instance.hapticFeedbackMotorInfo),  288);
-            AssertOffset(&instance,    &instance.displayName,                 nameof(instance.displayName),              296);
-            AssertOffset(&instance,    &instance.deviceStrings,               nameof(instance.deviceStrings),            304);
-            AssertOffset(&instance,    &instance.deviceDescriptorData,        nameof(instance.deviceDescriptorData),     312);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackEnvelope() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackEnvelope instance = default;
+        AssertSize(instance, 48);
+        AssertField(instance, instance.attackDuration,  8, 0);
+        AssertField(instance, instance.sustainDuration, 8, 8);
+        AssertField(instance, instance.releaseDuration, 8, 16);
+        AssertField(instance, instance.attackGain,      4, 24);
+        AssertField(instance, instance.sustainGain,     4, 28);
+        AssertField(instance, instance.releaseGain,     4, 32);
+        AssertField(instance, instance.playCount,       4, 36);
+        AssertField(instance, instance.repeatDelay,     8, 40);
+    });
 
-        {
-            GameInputForceFeedbackEnvelope instance = default;
-            AssertSize(ref instance, 48);
-            AssertOffset(ref instance, ref instance.attackDuration,  nameof(instance.attackDuration),  0);
-            AssertOffset(ref instance, ref instance.sustainDuration, nameof(instance.sustainDuration), 8);
-            AssertOffset(ref instance, ref instance.releaseDuration, nameof(instance.releaseDuration), 16);
-            AssertOffset(ref instance, ref instance.attackGain,      nameof(instance.attackGain),      24);
-            AssertOffset(ref instance, ref instance.sustainGain,     nameof(instance.sustainGain),     28);
-            AssertOffset(ref instance, ref instance.releaseGain,     nameof(instance.releaseGain),     32);
-            AssertOffset(ref instance, ref instance.playCount,       nameof(instance.playCount),       36);
-            AssertOffset(ref instance, ref instance.repeatDelay,     nameof(instance.repeatDelay),     40);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackMagnitude() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackMagnitude instance = default;
+        AssertSize(instance, 28);
+        AssertField(instance, instance.linearX,  4, 0);
+        AssertField(instance, instance.linearY,  4, 4);
+        AssertField(instance, instance.linearZ,  4, 8);
+        AssertField(instance, instance.angularX, 4, 12);
+        AssertField(instance, instance.angularY, 4, 16);
+        AssertField(instance, instance.angularZ, 4, 20);
+        AssertField(instance, instance.normal,   4, 24);
+    });
 
-        {
-            GameInputForceFeedbackMagnitude instance = default;
-            AssertSize(ref instance, 28);
-            AssertOffset(ref instance, ref instance.linearX,  nameof(instance.linearX),  0);
-            AssertOffset(ref instance, ref instance.linearY,  nameof(instance.linearY),  4);
-            AssertOffset(ref instance, ref instance.linearZ,  nameof(instance.linearZ),  8);
-            AssertOffset(ref instance, ref instance.angularX, nameof(instance.angularX), 12);
-            AssertOffset(ref instance, ref instance.angularY, nameof(instance.angularY), 16);
-            AssertOffset(ref instance, ref instance.angularZ, nameof(instance.angularZ), 20);
-            AssertOffset(ref instance, ref instance.normal,   nameof(instance.normal),   24);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackConditionParams() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackConditionParams instance = default;
+        AssertSize(instance, 52);
+        AssertField(instance, instance.magnitude,            28, 0);
+        AssertField(instance, instance.positiveCoefficient,  4,  28);
+        AssertField(instance, instance.negativeCoefficient,  4,  32);
+        AssertField(instance, instance.maxPositiveMagnitude, 4,  36);
+        AssertField(instance, instance.maxNegativeMagnitude, 4,  40);
+        AssertField(instance, instance.deadZone,             4,  44);
+        AssertField(instance, instance.bias,                 4,  48);
+    });
 
-        {
-            GameInputForceFeedbackConditionParams instance = default;
-            AssertSize(ref instance, 52);
-            AssertOffset(ref instance, ref instance.magnitude,            nameof(instance.magnitude),            0);
-            AssertOffset(ref instance, ref instance.positiveCoefficient,  nameof(instance.positiveCoefficient),  28);
-            AssertOffset(ref instance, ref instance.negativeCoefficient,  nameof(instance.negativeCoefficient),  32);
-            AssertOffset(ref instance, ref instance.maxPositiveMagnitude, nameof(instance.maxPositiveMagnitude), 36);
-            AssertOffset(ref instance, ref instance.maxNegativeMagnitude, nameof(instance.maxNegativeMagnitude), 40);
-            AssertOffset(ref instance, ref instance.deadZone,             nameof(instance.deadZone),             44);
-            AssertOffset(ref instance, ref instance.bias,                 nameof(instance.bias),                 48);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackConstantParams() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackConstantParams instance = default;
+        AssertSize(instance, 80);
+        AssertField(instance, instance.envelope,  48, 0);
+        AssertField(instance, instance.magnitude, 28, 48);
+    });
 
-        {
-            GameInputForceFeedbackConstantParams instance = default;
-            AssertSize(ref instance, 80);
-            AssertOffset(ref instance, ref instance.envelope,  nameof(instance.envelope),  0);
-            AssertOffset(ref instance, ref instance.magnitude, nameof(instance.magnitude), 48);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackPeriodicParams() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackPeriodicParams instance = default;
+        AssertSize(instance, 88);
+        AssertField(instance, instance.envelope,  48, 0);
+        AssertField(instance, instance.magnitude, 28, 48);
+        AssertField(instance, instance.frequency, 4,  76);
+        AssertField(instance, instance.phase,     4,  80);
+        AssertField(instance, instance.bias,      4,  84);
+    });
 
-        {
-            GameInputForceFeedbackPeriodicParams instance = default;
-            AssertSize(ref instance, 88);
-            AssertOffset(ref instance, ref instance.envelope,  nameof(instance.envelope),  0);
-            AssertOffset(ref instance, ref instance.magnitude, nameof(instance.magnitude), 48);
-            AssertOffset(ref instance, ref instance.frequency, nameof(instance.frequency), 76);
-            AssertOffset(ref instance, ref instance.phase,     nameof(instance.phase),     80);
-            AssertOffset(ref instance, ref instance.bias,      nameof(instance.bias),      84);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackRampParams() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackRampParams instance = default;
+        AssertSize(instance, 104);
+        AssertField(instance, instance.envelope,       48, 0);
+        AssertField(instance, instance.startMagnitude, 28, 48);
+        AssertField(instance, instance.endMagnitude,   28, 76);
+    });
 
-        {
-            GameInputForceFeedbackRampParams instance = default;
-            AssertSize(ref instance, 104);
-            AssertOffset(ref instance, ref instance.envelope,       nameof(instance.envelope),       0);
-            AssertOffset(ref instance, ref instance.startMagnitude, nameof(instance.startMagnitude), 48);
-            AssertOffset(ref instance, ref instance.endMagnitude,   nameof(instance.endMagnitude),   76);
-        }
+    [Test]
+    public unsafe void GameInputForceFeedbackParams() => Assert.Multiple(() =>
+    {
+        GameInputForceFeedbackParams instance = default;
+        AssertSize(instance, 112);
+        AssertField(instance, instance.kind,             4,   0);
+        AssertField(instance, instance.constant,         80,  4);
+        AssertField(instance, instance.ramp,             104, 4);
+        AssertField(instance, instance.sineWave,         88,  4);
+        AssertField(instance, instance.squareWave,       88,  4);
+        AssertField(instance, instance.triangleWave,     88,  4);
+        AssertField(instance, instance.sawtoothUpWave,   88,  4);
+        AssertField(instance, instance.sawtoothDownWave, 88,  4);
+        AssertField(instance, instance.spring,           52,  4);
+        AssertField(instance, instance.friction,         52,  4);
+        AssertField(instance, instance.damper,           52,  4);
+        AssertField(instance, instance.inertia,          52,  4);
+    });
 
-        {
-            GameInputForceFeedbackParams instance = default;
-            AssertSize(ref instance, 112);
-            AssertOffset(ref instance, ref instance.kind,             nameof(instance.kind),             0);
-            AssertOffset(ref instance, ref instance.constant,         nameof(instance.constant),         4);
-            AssertOffset(ref instance, ref instance.ramp,             nameof(instance.ramp),             4);
-            AssertOffset(ref instance, ref instance.sineWave,         nameof(instance.sineWave),         4);
-            AssertOffset(ref instance, ref instance.squareWave,       nameof(instance.squareWave),       4);
-            AssertOffset(ref instance, ref instance.triangleWave,     nameof(instance.triangleWave),     4);
-            AssertOffset(ref instance, ref instance.sawtoothUpWave,   nameof(instance.sawtoothUpWave),   4);
-            AssertOffset(ref instance, ref instance.sawtoothDownWave, nameof(instance.sawtoothDownWave), 4);
-            AssertOffset(ref instance, ref instance.spring,           nameof(instance.spring),           4);
-            AssertOffset(ref instance, ref instance.friction,         nameof(instance.friction),         4);
-            AssertOffset(ref instance, ref instance.damper,           nameof(instance.damper),           4);
-            AssertOffset(ref instance, ref instance.inertia,          nameof(instance.inertia),          4);
-        }
+    [Test]
+    public unsafe void GameInputHapticFeedbackParams() => Assert.Multiple(() =>
+    {
+        GameInputHapticFeedbackParams instance = default;
+        AssertSize(instance, 32);
+        AssertField(instance, instance.waveformIndex, 4, 0);
+        AssertField(instance, instance.duration,      8, 8);
+        AssertField(instance, instance.intensity,     4, 16);
+        AssertField(instance, instance.playCount,     4, 20);
+        AssertField(instance, instance.repeatDelay,   8, 24);
+    });
 
-        {
-            GameInputHapticFeedbackParams instance = default;
-            AssertSize(ref instance, 32);
-            AssertOffset(ref instance, ref instance.waveformIndex, nameof(instance.waveformIndex), 0);
-            AssertOffset(ref instance, ref instance.duration,      nameof(instance.duration),      8);
-            AssertOffset(ref instance, ref instance.intensity,     nameof(instance.intensity),     16);
-            AssertOffset(ref instance, ref instance.playCount,     nameof(instance.playCount),     20);
-            AssertOffset(ref instance, ref instance.repeatDelay,   nameof(instance.repeatDelay),   24);
-        }
-
-        {
-            GameInputRumbleParams instance = default;
-            AssertSize(ref instance, 16);
-            AssertOffset(ref instance, ref instance.lowFrequency,  nameof(instance.lowFrequency),  0);
-            AssertOffset(ref instance, ref instance.highFrequency, nameof(instance.highFrequency), 4);
-            AssertOffset(ref instance, ref instance.leftTrigger,   nameof(instance.leftTrigger),   8);
-            AssertOffset(ref instance, ref instance.rightTrigger,  nameof(instance.rightTrigger),  12);
-        }
+    [Test]
+    public unsafe void GameInputRumbleParams() => Assert.Multiple(() =>
+    {
+        GameInputRumbleParams instance = default;
+        AssertSize(instance, 16);
+        AssertField(instance, instance.lowFrequency,  4, 0);
+        AssertField(instance, instance.highFrequency, 4, 4);
+        AssertField(instance, instance.leftTrigger,   4, 8);
+        AssertField(instance, instance.rightTrigger,  4, 12);
     });
 }
