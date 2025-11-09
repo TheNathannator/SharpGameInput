@@ -101,7 +101,7 @@ namespace SharpGameInput.v0
 
         public ulong GetCurrentTimestamp()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -120,7 +120,7 @@ namespace SharpGameInput.v0
             out LightIGameInputReading reading
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -144,8 +144,8 @@ namespace SharpGameInput.v0
             out LightIGameInputReading reading
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(referenceReading.IsInvalid, nameof(referenceReading));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
+            ThrowHelper.CheckDisposed(referenceReading.IsInvalid, typeof(LightIGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -170,8 +170,8 @@ namespace SharpGameInput.v0
             out LightIGameInputReading reading
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(referenceReading.IsInvalid, nameof(referenceReading));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
+            ThrowHelper.CheckDisposed(referenceReading.IsInvalid, typeof(LightIGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -195,9 +195,9 @@ namespace SharpGameInput.v0
             out LightIGameInputReading reading
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
             ThrowHelper.CheckNull(device);
-            ThrowHelper.CheckDisposed(device.IsInvalid, nameof(device));
+            ThrowHelper.CheckDisposed(device.IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -223,7 +223,7 @@ namespace SharpGameInput.v0
             out ulong callbackToken
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -252,7 +252,7 @@ namespace SharpGameInput.v0
             out ulong callbackToken
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -280,7 +280,7 @@ namespace SharpGameInput.v0
             out ulong callbackToken
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -305,7 +305,7 @@ namespace SharpGameInput.v0
             out ulong callbackToken
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -326,7 +326,7 @@ namespace SharpGameInput.v0
             ulong callbackToken
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -344,7 +344,7 @@ namespace SharpGameInput.v0
             ulong timeoutInMicroseconds
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -363,7 +363,7 @@ namespace SharpGameInput.v0
             out IGameInputDispatcher dispatcher
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -383,7 +383,7 @@ namespace SharpGameInput.v0
             out IGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -404,7 +404,7 @@ namespace SharpGameInput.v0
             out IGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -425,7 +425,7 @@ namespace SharpGameInput.v0
             out IGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -446,7 +446,7 @@ namespace SharpGameInput.v0
             out IGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -467,7 +467,7 @@ namespace SharpGameInput.v0
             out IGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
             ThrowHelper.CheckNull(value);
 
             var thisPtr = handle;
@@ -499,7 +499,7 @@ namespace SharpGameInput.v0
             byte collectionNumber
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -520,7 +520,7 @@ namespace SharpGameInput.v0
             GameInputFocusPolicy policy
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInput));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -553,7 +553,7 @@ namespace SharpGameInput.v0
 
         public GameInputKind GetInputKind()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -570,7 +570,7 @@ namespace SharpGameInput.v0
             GameInputKind inputKind
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -586,7 +586,7 @@ namespace SharpGameInput.v0
 
         public ulong GetTimestamp()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -603,7 +603,7 @@ namespace SharpGameInput.v0
             out LightIGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -621,7 +621,7 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -638,7 +638,7 @@ namespace SharpGameInput.v0
 
         public uint GetControllerAxisCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -656,7 +656,7 @@ namespace SharpGameInput.v0
             float* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -692,7 +692,7 @@ namespace SharpGameInput.v0
 
         public uint GetControllerButtonCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -710,7 +710,7 @@ namespace SharpGameInput.v0
             bool* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -746,7 +746,7 @@ namespace SharpGameInput.v0
 
         public uint GetControllerSwitchCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -764,7 +764,7 @@ namespace SharpGameInput.v0
             GameInputSwitchPosition* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -800,7 +800,7 @@ namespace SharpGameInput.v0
 
         public uint GetKeyCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -818,7 +818,7 @@ namespace SharpGameInput.v0
             GameInputKeyState* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -856,7 +856,7 @@ namespace SharpGameInput.v0
             out GameInputMouseState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -872,7 +872,7 @@ namespace SharpGameInput.v0
 
         public uint GetTouchCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -890,7 +890,7 @@ namespace SharpGameInput.v0
             GameInputTouchState* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -928,7 +928,7 @@ namespace SharpGameInput.v0
             out GameInputMotionState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -946,7 +946,7 @@ namespace SharpGameInput.v0
             out GameInputArcadeStickState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -964,7 +964,7 @@ namespace SharpGameInput.v0
             out GameInputFlightStickState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -982,7 +982,7 @@ namespace SharpGameInput.v0
             out GameInputGamepadState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1000,7 +1000,7 @@ namespace SharpGameInput.v0
             out GameInputRacingWheelState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1018,7 +1018,7 @@ namespace SharpGameInput.v0
             out GameInputUiNavigationState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1118,7 +1118,7 @@ namespace SharpGameInput.v0
 
         public GameInputKind GetInputKind()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1135,7 +1135,7 @@ namespace SharpGameInput.v0
             GameInputKind inputKind
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1151,7 +1151,7 @@ namespace SharpGameInput.v0
 
         public ulong GetTimestamp()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1168,7 +1168,7 @@ namespace SharpGameInput.v0
             out LightIGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1186,7 +1186,7 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1203,7 +1203,7 @@ namespace SharpGameInput.v0
 
         public uint GetControllerAxisCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1221,7 +1221,7 @@ namespace SharpGameInput.v0
             float* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -1257,7 +1257,7 @@ namespace SharpGameInput.v0
 
         public uint GetControllerButtonCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1275,7 +1275,7 @@ namespace SharpGameInput.v0
             bool* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -1311,7 +1311,7 @@ namespace SharpGameInput.v0
 
         public uint GetControllerSwitchCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1329,7 +1329,7 @@ namespace SharpGameInput.v0
             GameInputSwitchPosition* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -1365,7 +1365,7 @@ namespace SharpGameInput.v0
 
         public uint GetKeyCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1383,7 +1383,7 @@ namespace SharpGameInput.v0
             GameInputKeyState* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -1421,7 +1421,7 @@ namespace SharpGameInput.v0
             out GameInputMouseState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1437,7 +1437,7 @@ namespace SharpGameInput.v0
 
         public uint GetTouchCount()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1455,7 +1455,7 @@ namespace SharpGameInput.v0
             GameInputTouchState* stateArray
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
             ThrowHelper.CheckNull(stateArray);
 
             var thisPtr = handle;
@@ -1493,7 +1493,7 @@ namespace SharpGameInput.v0
             out GameInputMotionState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1511,7 +1511,7 @@ namespace SharpGameInput.v0
             out GameInputArcadeStickState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1529,7 +1529,7 @@ namespace SharpGameInput.v0
             out GameInputFlightStickState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1547,7 +1547,7 @@ namespace SharpGameInput.v0
             out GameInputGamepadState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1565,7 +1565,7 @@ namespace SharpGameInput.v0
             out GameInputRacingWheelState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1583,7 +1583,7 @@ namespace SharpGameInput.v0
             out GameInputUiNavigationState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1614,7 +1614,7 @@ namespace SharpGameInput.v0
 
         public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1629,7 +1629,7 @@ namespace SharpGameInput.v0
 
         public GameInputDeviceStatus GetDeviceStatus()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1646,7 +1646,7 @@ namespace SharpGameInput.v0
             out GameInputBatteryState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1665,7 +1665,7 @@ namespace SharpGameInput.v0
             out LightIGameInputForceFeedbackEffect effect
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1686,7 +1686,7 @@ namespace SharpGameInput.v0
             uint motorIndex
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1705,7 +1705,7 @@ namespace SharpGameInput.v0
             float masterGain
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1724,7 +1724,7 @@ namespace SharpGameInput.v0
             in GameInputHapticFeedbackParams hapticParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1743,7 +1743,7 @@ namespace SharpGameInput.v0
             in GameInputRumbleParams rumbleParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1760,7 +1760,7 @@ namespace SharpGameInput.v0
             bool enabled
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1775,7 +1775,7 @@ namespace SharpGameInput.v0
 
         public void SendInputSynchronizationHint()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1789,7 +1789,7 @@ namespace SharpGameInput.v0
 
         public void PowerOff()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1807,7 +1807,7 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1829,7 +1829,7 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1849,8 +1849,8 @@ namespace SharpGameInput.v0
             LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(report.IsInvalid, nameof(report));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
+            ThrowHelper.CheckDisposed(report.IsInvalid, typeof(LightIGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1868,8 +1868,8 @@ namespace SharpGameInput.v0
             LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(report.IsInvalid, nameof(report));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
+            ThrowHelper.CheckDisposed(report.IsInvalid, typeof(LightIGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1888,8 +1888,8 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport responseReport
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(requestReport.IsInvalid, nameof(requestReport));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
+            ThrowHelper.CheckDisposed(requestReport.IsInvalid, typeof(LightIGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1914,7 +1914,7 @@ namespace SharpGameInput.v0
             out nuint bytesReturned
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1937,7 +1937,7 @@ namespace SharpGameInput.v0
             ulong timeoutInMicroseconds
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -1953,7 +1953,7 @@ namespace SharpGameInput.v0
 
         public void ReleaseExclusiveRawDeviceAccess()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2135,7 +2135,7 @@ namespace SharpGameInput.v0
 
         public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2150,7 +2150,7 @@ namespace SharpGameInput.v0
 
         public GameInputDeviceStatus GetDeviceStatus()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2167,7 +2167,7 @@ namespace SharpGameInput.v0
             out GameInputBatteryState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2186,7 +2186,7 @@ namespace SharpGameInput.v0
             out LightIGameInputForceFeedbackEffect effect
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2207,7 +2207,7 @@ namespace SharpGameInput.v0
             uint motorIndex
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2226,7 +2226,7 @@ namespace SharpGameInput.v0
             float masterGain
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2245,7 +2245,7 @@ namespace SharpGameInput.v0
             in GameInputHapticFeedbackParams hapticParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2264,7 +2264,7 @@ namespace SharpGameInput.v0
             in GameInputRumbleParams rumbleParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2281,7 +2281,7 @@ namespace SharpGameInput.v0
             bool enabled
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2296,7 +2296,7 @@ namespace SharpGameInput.v0
 
         public void SendInputSynchronizationHint()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2310,7 +2310,7 @@ namespace SharpGameInput.v0
 
         public void PowerOff()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2328,7 +2328,7 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2350,7 +2350,7 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2370,8 +2370,8 @@ namespace SharpGameInput.v0
             LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(report.IsInvalid, nameof(report));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
+            ThrowHelper.CheckDisposed(report.IsInvalid, typeof(LightIGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2389,8 +2389,8 @@ namespace SharpGameInput.v0
             LightIGameInputRawDeviceReport report
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(report.IsInvalid, nameof(report));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
+            ThrowHelper.CheckDisposed(report.IsInvalid, typeof(LightIGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2409,8 +2409,8 @@ namespace SharpGameInput.v0
             out LightIGameInputRawDeviceReport responseReport
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckDisposed(requestReport.IsInvalid, nameof(requestReport));
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
+            ThrowHelper.CheckDisposed(requestReport.IsInvalid, typeof(LightIGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2435,7 +2435,7 @@ namespace SharpGameInput.v0
             out nuint bytesReturned
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2458,7 +2458,7 @@ namespace SharpGameInput.v0
             ulong timeoutInMicroseconds
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2474,7 +2474,7 @@ namespace SharpGameInput.v0
 
         public void ReleaseExclusiveRawDeviceAccess()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDevice));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2589,7 +2589,7 @@ namespace SharpGameInput.v0
             ulong quotaInMicroseconds
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDispatcher));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2607,7 +2607,7 @@ namespace SharpGameInput.v0
             out IntPtr waitHandle
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputDispatcher));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2643,7 +2643,7 @@ namespace SharpGameInput.v0
             out LightIGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2659,7 +2659,7 @@ namespace SharpGameInput.v0
 
         public uint GetMotorIndex()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2674,7 +2674,7 @@ namespace SharpGameInput.v0
 
         public float GetGain()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2691,7 +2691,7 @@ namespace SharpGameInput.v0
             float gain
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2708,7 +2708,7 @@ namespace SharpGameInput.v0
             out GameInputForceFeedbackParams ffbParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2725,7 +2725,7 @@ namespace SharpGameInput.v0
             in GameInputForceFeedbackParams ffbParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2741,7 +2741,7 @@ namespace SharpGameInput.v0
 
         public GameInputFeedbackEffectState GetState()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2758,7 +2758,7 @@ namespace SharpGameInput.v0
             GameInputFeedbackEffectState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2859,7 +2859,7 @@ namespace SharpGameInput.v0
             out LightIGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2875,7 +2875,7 @@ namespace SharpGameInput.v0
 
         public uint GetMotorIndex()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2890,7 +2890,7 @@ namespace SharpGameInput.v0
 
         public float GetGain()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2907,7 +2907,7 @@ namespace SharpGameInput.v0
             float gain
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2924,7 +2924,7 @@ namespace SharpGameInput.v0
             out GameInputForceFeedbackParams ffbParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2941,7 +2941,7 @@ namespace SharpGameInput.v0
             in GameInputForceFeedbackParams ffbParams
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2957,7 +2957,7 @@ namespace SharpGameInput.v0
 
         public GameInputFeedbackEffectState GetState()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -2974,7 +2974,7 @@ namespace SharpGameInput.v0
             GameInputFeedbackEffectState state
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputForceFeedbackEffect));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3006,7 +3006,7 @@ namespace SharpGameInput.v0
             out LightIGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3022,7 +3022,7 @@ namespace SharpGameInput.v0
 
         public ref readonly GameInputRawDeviceReportInfo GetReportInfo()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3037,7 +3037,7 @@ namespace SharpGameInput.v0
 
         public nuint GetRawDataSize()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3055,7 +3055,7 @@ namespace SharpGameInput.v0
             void* buffer
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
             ThrowHelper.CheckNull(buffer);
 
             var thisPtr = handle;
@@ -3076,7 +3076,7 @@ namespace SharpGameInput.v0
             void* buffer
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
             ThrowHelper.CheckNull(buffer);
 
             var thisPtr = handle;
@@ -3151,7 +3151,7 @@ namespace SharpGameInput.v0
             out long value
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3171,7 +3171,7 @@ namespace SharpGameInput.v0
             long value
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3190,7 +3190,7 @@ namespace SharpGameInput.v0
             uint itemIndex
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3206,7 +3206,7 @@ namespace SharpGameInput.v0
 
         public bool ResetAllItems()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3307,7 +3307,7 @@ namespace SharpGameInput.v0
             out LightIGameInputDevice device
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3323,7 +3323,7 @@ namespace SharpGameInput.v0
 
         public ref readonly GameInputRawDeviceReportInfo GetReportInfo()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3338,7 +3338,7 @@ namespace SharpGameInput.v0
 
         public nuint GetRawDataSize()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3356,7 +3356,7 @@ namespace SharpGameInput.v0
             void* buffer
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
             ThrowHelper.CheckNull(buffer);
 
             var thisPtr = handle;
@@ -3377,7 +3377,7 @@ namespace SharpGameInput.v0
             void* buffer
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
             ThrowHelper.CheckNull(buffer);
 
             var thisPtr = handle;
@@ -3452,7 +3452,7 @@ namespace SharpGameInput.v0
             out long value
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3472,7 +3472,7 @@ namespace SharpGameInput.v0
             long value
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3491,7 +3491,7 @@ namespace SharpGameInput.v0
             uint itemIndex
         )
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -3507,7 +3507,7 @@ namespace SharpGameInput.v0
 
         public bool ResetAllItems()
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputRawDeviceReport));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;

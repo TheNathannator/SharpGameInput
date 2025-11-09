@@ -25,8 +25,7 @@ namespace SharpGameInput.v0
 
         public void Stop()
         {
-            ThrowHelper.CheckDisposed(_gameInput);
-            _gameInput.StopCallback(_callbackToken);
+            _gameInput?.StopCallback(_callbackToken);
         }
 
         public void Unregister(ulong timeoutInMicroseconds)

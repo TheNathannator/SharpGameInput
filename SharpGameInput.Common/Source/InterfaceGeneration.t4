@@ -103,7 +103,7 @@ foreach (var _iface in Interfaces)
             return new(handle, ownsHandle: true);
         }
 <#
-    ForwardInterfaceMethods(iface.Methods);
+    ForwardInterfaceMethods(iface);
 #>
 
         public bool Equals([NotNullWhen(true)] <#= iface.Name #>? ptr)
@@ -193,7 +193,7 @@ foreach (var _iface in Interfaces)
 
         public override int GetHashCode()
             => handle.GetHashCode();
-<# ForwardInterfaceMethods(iface.Methods); #>
+<# ForwardInterfaceMethods(iface); #>
 <#
     }
 #>
@@ -202,7 +202,7 @@ foreach (var _iface in Interfaces)
 <#
 }
 
-void ForwardInterfaceMethods(MethodDecl[] methods)
+void ForwardInterfaceMethods(in InterfaceDecl iface)
 {
     int vtableIndex = 0;
 
@@ -218,21 +218,21 @@ void ForwardInterfaceMethods(MethodDecl[] methods)
     vtableIndex += 3;
 
     // Other interface methods
-    for (int i = 0; i < methods.Length; i++)
+    for (int i = 0; i < iface.Methods.Length; i++)
     {
-        var method = methods[i];
+        var method = iface.Methods[i];
         if (method.IsCustom)
         {
             method.CustomAction();
         }
         else
         {
-            ForwardMethod(vtableIndex++, methods[i]);
+            ForwardMethod(iface, method, vtableIndex++);
         }
     }
 }
 
-void ForwardMethod(int vtableIndex, MethodDecl method)
+void ForwardMethod(in InterfaceDecl iface, MethodDecl method, int vtableIndex)
 {
     var fnPtrTypes = method.Parameters.Select((p) => p.Type.ToFnPointerType()).Prepend("IntPtr").Append(method.ReturnType.ToTypeDecl());
     var fnCallArgs = method.Parameters.Select((p) => p.ToFnPointerArgument()).Prepend("thisPtr");
@@ -267,7 +267,7 @@ void ForwardMethod(int vtableIndex, MethodDecl method)
     }
 #>
         {
-            ThrowHelper.CheckDisposed(IsInvalid, "this");
+            ThrowHelper.CheckDisposed(IsInvalid, typeof(<#= iface.Name #>));
 <#
     foreach (var parameter in method.Parameters)
     {
@@ -281,14 +281,14 @@ void ForwardMethod(int vtableIndex, MethodDecl method)
         if ((flags & TypeFlag.LightInterface) != 0)
         {
 #>
-            ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, nameof(<#= parameter.Name #>));
+            ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, typeof(<#= parameter.Type.Name #>));
 <#
         }
         else if ((flags & TypeFlag.Interface) != 0)
         {
 #>
             ThrowHelper.CheckNull(<#= parameter.Name #>);
-            ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, nameof(<#= parameter.Name #>));
+            ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, typeof(<#= parameter.Type.Name #>));
 <#
         }
         // Verify pointer types
