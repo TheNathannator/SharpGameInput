@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using SharpGameInput.Common;
 
@@ -14,14 +15,89 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
+    public abstract class GameInputComPtr : CriticalFinalizerObject,
+        IDisposable,
+        IEquatable<GameInputComPtr>
+    {
+        protected internal IntPtr handle;
+        private readonly bool ownsHandle;
+
+        public bool IsInvalid => handle == IntPtr.Zero;
+
+        internal GameInputComPtr(IntPtr handle, bool ownsHandle)
+        {
+            this.handle = handle;
+            this.ownsHandle = ownsHandle;
+        }
+
+        ~GameInputComPtr() => Dispose(false);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+                DisposeManagedResources();
+            DisposeUnmanagedResources();
+        }
+
+        protected virtual void DisposeManagedResources()
+        {
+        }
+
+        protected virtual void DisposeUnmanagedResources()
+        {
+            if (handle != IntPtr.Zero && ownsHandle)
+            {
+                Marshal.Release(handle);
+                handle = IntPtr.Zero;
+            }
+        }
+
+        public IntPtr DangerousGetHandle() => handle;
+
+        public static bool operator ==(GameInputComPtr? left, GameInputComPtr? right)
+        {
+            if (ReferenceEquals(left, right))
+                return true;
+
+            if (left is null || right is null)
+                return false;
+
+            // GameInput interfaces can be compared directly by pointer for equality
+            return left.handle == right.handle;
+        }
+
+        public static bool operator !=(GameInputComPtr? left, GameInputComPtr? right)
+            => !(left == right);
+
+        public bool Equals([NotNullWhen(true)] GameInputComPtr? ptr)
+            => ptr == this;
+
+        public override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is GameInputComPtr ptr && Equals(ptr);
+
+        public override int GetHashCode()
+            => handle.GetHashCode();
+    }
+
     [Guid("11BE2A7E-4254-445A-9C09-FFC40F006918")]
-    public sealed unsafe partial class IGameInput : GameInputComPtr<IGameInput>
+    public sealed unsafe partial class IGameInput : GameInputComPtr,
+        IEquatable<IGameInput>
     {
         internal static readonly Guid Iid = new("11BE2A7E-4254-445A-9C09-FFC40F006918");
 
         internal IGameInput(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override IGameInput DuplicateImpl() => new(handle, true);
+        public IGameInput Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 
         public ulong GetCurrentTimestamp()
         {
@@ -120,7 +196,8 @@ namespace SharpGameInput.v0
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, "this");
-            ThrowHelper.CheckHandle(device);
+            ThrowHelper.CheckNull(device);
+            ThrowHelper.CheckDisposed(device.IsInvalid, nameof(device));
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
@@ -455,16 +532,24 @@ namespace SharpGameInput.v0
             );
 
         }
+
+        public bool Equals([NotNullWhen(true)] IGameInput? ptr)
+            => ptr == this;
     }
 
     [Guid("2156947A-E1FA-4DE0-A30B-D812931DBD8D")]
-    public sealed unsafe partial class IGameInputReading : GameInputComPtr<IGameInputReading>
+    public sealed unsafe partial class IGameInputReading : GameInputComPtr,
+        IEquatable<IGameInputReading>
     {
         internal static readonly Guid Iid = new("2156947A-E1FA-4DE0-A30B-D812931DBD8D");
 
         internal IGameInputReading(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override IGameInputReading DuplicateImpl() => new(handle, true);
+        public IGameInputReading Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 
         public GameInputKind GetInputKind()
         {
@@ -946,6 +1031,9 @@ namespace SharpGameInput.v0
 
             return result;
         }
+
+        public bool Equals([NotNullWhen(true)] IGameInputReading? ptr)
+            => ptr == this;
 
         public bool Equals(LightIGameInputReading obj)
             => obj == this;
@@ -1511,13 +1599,18 @@ namespace SharpGameInput.v0
     }
 
     [Guid("31DD86FB-4C1B-408A-868F-439B3CD47125")]
-    public sealed unsafe partial class IGameInputDevice : GameInputComPtr<IGameInputDevice>
+    public sealed unsafe partial class IGameInputDevice : GameInputComPtr,
+        IEquatable<IGameInputDevice>
     {
         internal static readonly Guid Iid = new("31DD86FB-4C1B-408A-868F-439B3CD47125");
 
         internal IGameInputDevice(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override IGameInputDevice DuplicateImpl() => new(handle, true);
+        public IGameInputDevice Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 
         public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
@@ -1955,6 +2048,9 @@ namespace SharpGameInput.v0
                 );
             }
         }
+
+        public bool Equals([NotNullWhen(true)] IGameInputDevice? ptr)
+            => ptr == this;
 
         public bool Equals(LightIGameInputDevice obj)
             => obj == this;
@@ -2476,13 +2572,18 @@ namespace SharpGameInput.v0
     }
 
     [Guid("415EED2E-98CB-42C2-8F28-B94601074E31")]
-    public sealed unsafe partial class IGameInputDispatcher : GameInputComPtr<IGameInputDispatcher>
+    public sealed unsafe partial class IGameInputDispatcher : GameInputComPtr,
+        IEquatable<IGameInputDispatcher>
     {
         internal static readonly Guid Iid = new("415EED2E-98CB-42C2-8F28-B94601074E31");
 
         internal IGameInputDispatcher(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override IGameInputDispatcher DuplicateImpl() => new(handle, true);
+        public IGameInputDispatcher Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 
         public bool Dispatch(
             ulong quotaInMicroseconds
@@ -2519,16 +2620,24 @@ namespace SharpGameInput.v0
 
             return result;
         }
+
+        public bool Equals([NotNullWhen(true)] IGameInputDispatcher? ptr)
+            => ptr == this;
     }
 
     [Guid("51BDA05E-F742-45D9-B085-9444AE48381D")]
-    public sealed unsafe partial class IGameInputForceFeedbackEffect : GameInputComPtr<IGameInputForceFeedbackEffect>
+    public sealed unsafe partial class IGameInputForceFeedbackEffect : GameInputComPtr,
+        IEquatable<IGameInputForceFeedbackEffect>
     {
         internal static readonly Guid Iid = new("51BDA05E-F742-45D9-B085-9444AE48381D");
 
         internal IGameInputForceFeedbackEffect(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override IGameInputForceFeedbackEffect DuplicateImpl() => new(handle, true);
+        public IGameInputForceFeedbackEffect Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 
         public void GetDevice(
             out LightIGameInputDevice device
@@ -2661,6 +2770,9 @@ namespace SharpGameInput.v0
             );
 
         }
+
+        public bool Equals([NotNullWhen(true)] IGameInputForceFeedbackEffect? ptr)
+            => ptr == this;
 
         public bool Equals(LightIGameInputForceFeedbackEffect obj)
             => obj == this;
@@ -2877,13 +2989,18 @@ namespace SharpGameInput.v0
     }
 
     [Guid("61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC")]
-    public sealed unsafe partial class IGameInputRawDeviceReport : GameInputComPtr<IGameInputRawDeviceReport>
+    public sealed unsafe partial class IGameInputRawDeviceReport : GameInputComPtr,
+        IEquatable<IGameInputRawDeviceReport>
     {
         internal static readonly Guid Iid = new("61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC");
 
         internal IGameInputRawDeviceReport(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override IGameInputRawDeviceReport DuplicateImpl() => new(handle, true);
+        public IGameInputRawDeviceReport Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 
         public void GetDevice(
             out LightIGameInputDevice device
@@ -3101,6 +3218,9 @@ namespace SharpGameInput.v0
 
             return result;
         }
+
+        public bool Equals([NotNullWhen(true)] IGameInputRawDeviceReport? ptr)
+            => ptr == this;
 
         public bool Equals(LightIGameInputRawDeviceReport obj)
             => obj == this;

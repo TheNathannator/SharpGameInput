@@ -6,6 +6,7 @@
 <#
 UsingDirectives.Add("System");
 UsingDirectives.Add("System.Diagnostics.CodeAnalysis");
+UsingDirectives.Add("System.Runtime.ConstrainedExecution");
 UsingDirectives.Add("System.Runtime.InteropServices");
 UsingDirectives.Add("SharpGameInput.Common");
 #>
@@ -13,21 +14,101 @@ UsingDirectives.Add("SharpGameInput.Common");
 <#@ include file="TypeParsing.t4" once="true" #>
 namespace <#= Namespace #>
 {
+    public abstract class GameInputComPtr : CriticalFinalizerObject,
+        IDisposable,
+        IEquatable<GameInputComPtr>
+    {
+        protected internal IntPtr handle;
+        private readonly bool ownsHandle;
+
+        public bool IsInvalid => handle == IntPtr.Zero;
+
+        internal GameInputComPtr(IntPtr handle, bool ownsHandle)
+        {
+            this.handle = handle;
+            this.ownsHandle = ownsHandle;
+        }
+
+        ~GameInputComPtr() => Dispose(false);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+                DisposeManagedResources();
+            DisposeUnmanagedResources();
+        }
+
+        protected virtual void DisposeManagedResources()
+        {
+        }
+
+        protected virtual void DisposeUnmanagedResources()
+        {
+            if (handle != IntPtr.Zero && ownsHandle)
+            {
+                Marshal.Release(handle);
+                handle = IntPtr.Zero;
+            }
+        }
+
+        public IntPtr DangerousGetHandle() => handle;
+
+        public static bool operator ==(GameInputComPtr? left, GameInputComPtr? right)
+        {
+            if (ReferenceEquals(left, right))
+                return true;
+
+            if (left is null || right is null)
+                return false;
+
+            // GameInput interfaces can be compared directly by pointer for equality
+            return left.handle == right.handle;
+        }
+
+        public static bool operator !=(GameInputComPtr? left, GameInputComPtr? right)
+            => !(left == right);
+
+        public bool Equals([NotNullWhen(true)] GameInputComPtr? ptr)
+            => ptr == this;
+
+        public override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is GameInputComPtr ptr && Equals(ptr);
+
+        public override int GetHashCode()
+            => handle.GetHashCode();
+    }
+
 <#
 foreach (var _iface in Interfaces)
 {
     var iface = _iface.ToDecl();
 #>
     [Guid("<#= iface.Guid #>")]
-    public sealed unsafe partial class <#= iface.Name #> : GameInputComPtr<<#= iface.Name #>>
+    public sealed unsafe partial class <#= iface.Name #> : GameInputComPtr,
+        IEquatable<<#= iface.Name #>>
     {
         internal static readonly Guid Iid = new("<#= iface.Guid #>");
 
         internal <#= iface.Name #>(IntPtr handle, bool ownsHandle) : base(handle, ownsHandle) { }
 
-        protected override <#= iface.Name #> DuplicateImpl() => new(handle, true);
+        public <#= iface.Name #> Duplicate()
+        {
+            Marshal.AddRef(handle);
+            return new(handle, ownsHandle: true);
+        }
 <#
     ForwardInterfaceMethods(iface.Methods);
+#>
+
+        public bool Equals([NotNullWhen(true)] <#= iface.Name #>? ptr)
+            => ptr == this;
+<#
     if (iface.IsLight)
     {
 #>
@@ -206,7 +287,8 @@ void ForwardMethod(int vtableIndex, MethodDecl method)
         else if ((flags & TypeFlag.Interface) != 0)
         {
 #>
-            ThrowHelper.CheckHandle(<#= parameter.Name #>);
+            ThrowHelper.CheckNull(<#= parameter.Name #>);
+            ThrowHelper.CheckDisposed(<#= parameter.Name #>.IsInvalid, nameof(<#= parameter.Name #>));
 <#
         }
         // Verify pointer types

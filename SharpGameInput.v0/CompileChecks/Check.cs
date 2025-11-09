@@ -1,4 +1,3 @@
-using SharpGameInput.Common;
 using SharpGameInput.v0;
 
 public static partial class Checks
@@ -66,7 +65,7 @@ public static partial class Checks
         ref var inertia = ref ffbParams.inertia;
     }
 
-    public static void Check(GameInputComPtr<IGameInput> left, GameInputComPtr<IGameInput> right)
+    public static void Check(GameInputComPtr left, GameInputComPtr right)
     {
         left.DangerousGetHandle();
 
@@ -78,7 +77,6 @@ public static partial class Checks
         b = left == right;
         b = left != right;
 
-        left.Duplicate();
         left.Dispose();
     }
 }
