@@ -13,20 +13,27 @@ namespace SharpGameInput.v0
 
         public fixed byte value[Size];
 
-        public static bool operator ==(APP_LOCAL_DEVICE_ID left, APP_LOCAL_DEVICE_ID right)
+        public static bool operator ==(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
         {
-            long* l = (long*)left.value;
-            long* r = (long*)left.value;
-            return l[0] == r[0] &&
-                l[1] == r[1] &&
-                l[2] == r[2] &&
-                l[3] == r[3];
+            fixed (byte* _l = left.value)
+            fixed (byte* _r = left.value)
+            {
+                long* l = (long*)_l;
+                long* r = (long*)_r;
+                return l[0] == r[0] &&
+                    l[1] == r[1] &&
+                    l[2] == r[2] &&
+                    l[3] == r[3];
+            }
         }
 
-        public static bool operator !=(APP_LOCAL_DEVICE_ID left, APP_LOCAL_DEVICE_ID right)
+        public static bool operator !=(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
             => !(left == right);
 
-        public readonly bool Equals(APP_LOCAL_DEVICE_ID other)
+        public readonly bool Equals(in APP_LOCAL_DEVICE_ID other)
+            => other == this;
+
+        readonly bool IEquatable<APP_LOCAL_DEVICE_ID>.Equals(APP_LOCAL_DEVICE_ID other)
             => other == this;
 
         public readonly override bool Equals([NotNullWhen(true)] object? obj)
