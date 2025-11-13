@@ -31,68 +31,56 @@ public static class SizeHelper
         AssertSize<T>(expected, checkMarshal: false);
     }
 
-    public static unsafe void AssertField<T, TField>(in T instance, in TField field, int size, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldName = "")
+    public static unsafe void AssertField<T, TField>(in T instance, in TField field, string fieldName, int size, nint offset, bool checkMarshal = true)
         where T : unmanaged
         where TField : unmanaged
     {
-        AssertSize<TField>(size);
-        Assert.That(OffsetOf(in instance, in field), Is.EqualTo(offset), $"({typeof(T).Name}) {fieldName} is the wrong offset with OffsetOf()");
-        if (checkMarshal)
-        {
-            Assert.That(Marshal.OffsetOf<T>(fieldName), Is.EqualTo(offset), $"({typeof(T).Name}) {fieldName} is the wrong offset with Marshal.OffsetOf<T>()");
-        }
+        AssertSize<TField>(size, checkMarshal: false);
+        AssertField(instance, field, fieldName, offset, checkMarshal);
     }
 
-    public static unsafe void AssertField<T, TField>(in T instance, in TField* field, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldName = "")
+    public static unsafe void AssertField<T, TField>(in T instance, in TField field, string fieldName, nint offset, bool checkMarshal = true)
         where T : unmanaged
         where TField : unmanaged
     {
-        Assert.That(OffsetOf(instance, field), Is.EqualTo(offset), $"({typeof(T).Name}) {fieldName} is the wrong offset with OffsetOf()");
-        if (checkMarshal)
-        {
-            Assert.That(Marshal.OffsetOf<T>(fieldName), Is.EqualTo(offset), $"({typeof(T).Name}) {fieldName} is the wrong offset with Marshal.OffsetOf<T>()");
-        }
-    }
-
-    public static unsafe void AssertField<T>(in T instance, in void* field, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldName = "")
-        where T : unmanaged
-    {
-        Assert.That(OffsetOf(instance, field), Is.EqualTo(offset), $"({typeof(T).Name}) {fieldName} is the wrong offset with OffsetOf()");
-        if (checkMarshal)
-        {
-            Assert.That(Marshal.OffsetOf<T>(fieldName), Is.EqualTo(offset), $"({typeof(T).Name}) {fieldName} is the wrong offset with Marshal.OffsetOf<T>()");
-        }
-    }
-
-    public static unsafe nint OffsetOf<T, TField>(in T instance, in TField field)
-        where T : unmanaged
-        where TField : unmanaged
-    {
-        fixed (void* instancePtr = &instance)
         fixed (void* fieldPtr = &field)
         {
-            return (nint)fieldPtr - (nint)instancePtr;
+            AssertFixed(instance, fieldPtr, fieldName, offset, checkMarshal);
         }
     }
 
-    public static unsafe nint OffsetOf<T, TField>(in T instance, in TField* field)
+    public static unsafe void AssertField<T, TField>(in T instance, in TField* field, string fieldName, nint offset, bool checkMarshal = true)
         where T : unmanaged
         where TField : unmanaged
     {
-        fixed (void* instancePtr = &instance)
         fixed (void* fieldPtr = &field)
         {
-            return (nint)fieldPtr - (nint)instancePtr;
+            AssertFixed(instance, fieldPtr, fieldName, offset, checkMarshal);
         }
     }
 
-    public static unsafe nint OffsetOf<T>(in T instance, in void* field)
+    public static unsafe void AssertField<T>(in T instance, in void* field, string fieldName, nint offset, bool checkMarshal = true)
         where T : unmanaged
     {
-        fixed (void* instancePtr = &instance)
         fixed (void* fieldPtr = &field)
         {
-            return (nint)fieldPtr - (nint)instancePtr;
+            AssertFixed(instance, fieldPtr, fieldName, offset, checkMarshal);
+        }
+    }
+
+    public static unsafe void AssertFixed<T>(in T instance, void* field, string fieldName, nint offset, bool checkMarshal = true)
+        where T : unmanaged
+    {
+        nint fieldOffset;
+        fixed (void* instancePtr = &instance)
+        {
+            fieldOffset = (nint)((byte*)field - (byte*)instancePtr);
+        }
+
+        Assert.That(fieldOffset, Is.EqualTo(offset), $"{typeof(T).Name}.{fieldName} is the wrong offset with OffsetOf()");
+        if (checkMarshal)
+        {
+            Assert.That(Marshal.OffsetOf<T>(fieldName), Is.EqualTo(offset), $"{typeof(T).Name}.{fieldName} is the wrong offset with Marshal.OffsetOf<T>()");
         }
     }
 }

@@ -653,37 +653,37 @@ namespace SharpGameInput.v0
         public GameInputForceFeedbackEffectKind kind;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackConstantParams _constant;
+        internal GameInputForceFeedbackConstantParams _constant;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackRampParams _ramp;
+        internal GameInputForceFeedbackRampParams _ramp;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackPeriodicParams _sineWave;
+        internal GameInputForceFeedbackPeriodicParams _sineWave;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackPeriodicParams _squareWave;
+        internal GameInputForceFeedbackPeriodicParams _squareWave;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackPeriodicParams _triangleWave;
+        internal GameInputForceFeedbackPeriodicParams _triangleWave;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackPeriodicParams _sawtoothUpWave;
+        internal GameInputForceFeedbackPeriodicParams _sawtoothUpWave;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackPeriodicParams _sawtoothDownWave;
+        internal GameInputForceFeedbackPeriodicParams _sawtoothDownWave;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackConditionParams _spring;
+        internal GameInputForceFeedbackConditionParams _spring;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackConditionParams _friction;
+        internal GameInputForceFeedbackConditionParams _friction;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackConditionParams _damper;
+        internal GameInputForceFeedbackConditionParams _damper;
 
         [FieldOffset(4)]
-        private GameInputForceFeedbackConditionParams _inertia;
+        internal GameInputForceFeedbackConditionParams _inertia;
 
         private void CheckType(GameInputForceFeedbackEffectKind type)
         {
