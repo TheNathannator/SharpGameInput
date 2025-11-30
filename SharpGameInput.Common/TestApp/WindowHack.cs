@@ -17,7 +17,7 @@ namespace SharpGameInput.TestApp
 
         public static bool StartWindow()
         {
-            var windowThread = new Thread(WindowThread);
+            var windowThread = new Thread(WindowThread) { IsBackground = true };
             windowThread.Start();
 
             _windowCreated.WaitOne();
