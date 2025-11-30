@@ -3791,7 +3791,7 @@ namespace SharpGameInput.v0
                 callbackFunc(
                     new LightGameInputCallbackToken(gameInput, callbackToken),
                     callbackContext,
-                    new LightIGameInputReading(reading, true),
+                    new LightIGameInputReading(reading, false),
                     hasOverrunOccurred != 0
                 );
             }

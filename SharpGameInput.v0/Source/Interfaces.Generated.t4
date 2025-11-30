@@ -16,7 +16,7 @@ Callbacks = [
     new()
     {
         Delegate = new("void", "GameInputReadingCallback", [
-            ("owned LightIGameInputReading", "reading"),
+            ("LightIGameInputReading", "reading"),
             ("bool", "hasOverrunOccurred"),
         ]),
         Register = new("ignored_t", "RegisterReadingCallback", [
