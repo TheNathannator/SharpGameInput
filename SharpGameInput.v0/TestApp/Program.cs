@@ -49,13 +49,13 @@ namespace SharpGameInput.TestApp
                     tests[choice].func(gameInput);
                 }
             }
+        }
 
-            static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
-            {
-                Console.WriteLine("An unhandled exception has occured:");
-                Console.WriteLine(args.ExceptionObject);
-                ConsoleMenu.WaitForKey("Press any key to exit...");
-            }
+        private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
+        {
+            Console.WriteLine("An unhandled exception has occured:");
+            Console.WriteLine(args.ExceptionObject);
+            ConsoleMenu.WaitForKey("Press any key to exit...");
         }
     }
 }
