@@ -228,6 +228,31 @@ public struct ParameterDecl
             }
         }
 
+        if (Type.Name == "bool" && Type.Flags == TypeFlag.None)
+        {
+            argument = $"{Name} ? (byte)1 : (byte)0";
+        }
+
+        argument = ToModifierPrefix(Type.Indirection) + argument;
+
+        return argument;
+    }
+
+    public string FromFnPointerArgument()
+    {
+        string argument = Name;
+
+        if ((Type.Flags & TypeFlag.Interface) != 0)
+        {
+            string owned = (Type.Flags & TypeFlag.OwnedInstance) != 0 ? "true" : "false";
+            argument = $"new {Type.Name}({Name}, {owned})";
+        }
+
+        if (Type.Name == "bool" && Type.Flags == TypeFlag.None)
+        {
+            argument = $"{Name} != 0";
+        }
+
         argument = ToModifierPrefix(Type.Indirection) + argument;
 
         return argument;
@@ -413,5 +438,6 @@ public static Dictionary<string, string> TypeNameReplacements = new()
 public static Dictionary<string, string> FnPointerTypeReplacements = new()
 {
     { "object", "void*" },
+    { "bool", "byte" },
 };
 #>

@@ -19,6 +19,26 @@ public static partial class Checks
         b = left != right;
     }
 
+    public static void Check(ButtonBool left, ButtonBool right)
+    {
+        left.Equals(right);
+        left.GetHashCode();
+        left.ToString();
+
+        bool b;
+        b = left == right;
+        b = left != right;
+
+        left = true;
+        right = false;
+
+        if (left) { }
+        if (!right) { }
+
+        if (left == true) { }
+        if (right == false) { }
+    }
+
     public static void Check(CallbackTokenDisposer disposer)
     {
         disposer.Dispose();

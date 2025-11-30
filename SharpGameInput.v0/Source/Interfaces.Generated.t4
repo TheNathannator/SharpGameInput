@@ -223,10 +223,10 @@ Interfaces = [
         new("uint32_t", "GetControllerButtonCount"),
         new("uint32_t", "GetControllerButtonState",
             ("uint32_t", "stateArrayCount"),
-            ("bool*", "stateArray")
+            ("ButtonBool*", "stateArray")
         ),
         new(() => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
-            ("bool", "stateArray")
+            ("ButtonBool", "stateArray")
         )),
 
         new("uint32_t", "GetControllerSwitchCount"),

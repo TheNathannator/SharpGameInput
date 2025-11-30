@@ -67,6 +67,53 @@ namespace SharpGameInput.v0
         }
     }
 
+    // This exists because `bool` is not naturally marshallable or blittable in C#
+    /// <summary>
+    /// Workaround wrapper that avoids blittability issues around <c><see langword="bool"/></c>.
+    /// Allows <see cref="IGameInputReading.GetControllerButtonState"/> to be used
+    /// without necessitating an intermediate marshalling buffer.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Size = sizeof(byte))]
+    public struct ButtonBool : IEquatable<ButtonBool>
+    {
+        private byte _value;
+
+        public bool Value
+        {
+            get => _value != 0;
+            set => _value = value ? (byte)1 : (byte)0;
+        }
+
+        public ButtonBool(bool value)
+        {
+            _value = value ? (byte)1 : (byte)0;
+        }
+
+        public static implicit operator bool(ButtonBool value)
+            => value.Value;
+
+        public static implicit operator ButtonBool(bool value)
+            => new(value);
+
+        public static bool operator ==(ButtonBool left, ButtonBool right)
+            => left.Value == right.Value;
+
+        public static bool operator !=(ButtonBool left, ButtonBool right)
+            => !(left == right);
+
+        public readonly bool Equals(ButtonBool other)
+            => other == this;
+
+        public readonly override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is ButtonBool other && Equals(other);
+
+        public override int GetHashCode()
+            => Value.GetHashCode();
+
+        public override string ToString()
+            => Value.ToString();
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputKeyState
     {

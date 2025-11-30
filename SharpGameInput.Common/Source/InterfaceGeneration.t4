@@ -291,7 +291,7 @@ void ForwardInterfaceMethods(in InterfaceDecl iface)
 
 void ForwardMethod(in InterfaceDecl iface, MethodDecl method, int vtableIndex)
 {
-    var fnPtrTypes = method.Parameters.Select((p) => p.Type.ToFnPointerType()).Prepend("IntPtr").Append(method.ReturnType.ToTypeDecl());
+    var fnPtrTypes = method.Parameters.Select((p) => p.Type.ToFnPointerType()).Prepend("IntPtr").Append(method.ReturnType.ToFnPointerType());
     var fnCallArgs = method.Parameters.Select((p) => p.ToFnPointerArgument()).Prepend("thisPtr");
     string fnPtrType = $"delegate* unmanaged[Stdcall]<{string.Join(", ", fnPtrTypes)}>";
 
@@ -428,7 +428,7 @@ void ForwardMethod(in InterfaceDecl iface, MethodDecl method, int vtableIndex)
         else
         {
 #>
-            return result;
+            return <#= new ParameterDecl() { Name = "result", Type = method.ReturnType }.FromFnPointerArgument() #>;
 <#
         }
     }
@@ -616,19 +616,9 @@ foreach (var callback in callbacks)
             }
             default:
             {
-                if ((parameter.Type.Flags & (TypeFlag.LightInterface | TypeFlag.Interface)) != 0)
-                {
-                    string owned = (parameter.Type.Flags & TypeFlag.OwnedInstance) != 0 ? "true" : "false";
 #>
-                    new <#= parameter.Type.Name #>(<#= parameter.Name #>, <#= owned #>)<#= delimiter #>
+                    <#= parameter.FromFnPointerArgument() #><#= delimiter #>
 <#
-                }
-                else
-                {
-#>
-                    <#= parameter.Name #><#= delimiter #>
-<#
-                }
                 break;
             }
         }
