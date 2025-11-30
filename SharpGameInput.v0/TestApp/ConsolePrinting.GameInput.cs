@@ -1,5 +1,5 @@
 using System;
-using System.Diagnostics;
+using System.Buffers;
 using SharpGameInput.v0;
 
 namespace SharpGameInput.TestApp
@@ -24,46 +24,62 @@ namespace SharpGameInput.TestApp
 
         public static void Print(LightIGameInputRawDeviceReport rawReport, ulong timestamp, ref byte[]? lastReport)
         {
+            const int maxStackSize = 64;
+
             uint reportId = rawReport.GetReportInfo().id;
-            UIntPtr size = rawReport.GetRawDataSize();
+            int reportSize = (int)rawReport.GetRawDataSize();
 
-            Span<byte> buffer = stackalloc byte[(int)size];
-            unsafe
+            byte[]? poolBuffer = null;
+            Span<byte> buffer = reportSize > maxStackSize
+                ? (poolBuffer = ArrayPool<byte>.Shared.Rent(reportSize))
+                : stackalloc byte[maxStackSize];
+
+            try
             {
-                fixed (byte* ptr = buffer)
+                unsafe
                 {
-                    UIntPtr readSize = rawReport.GetRawData(size, ptr);
-                    Debug.Assert(size == readSize);
+                    fixed (byte* ptr = buffer)
+                    {
+                        int readSize = (int)rawReport.GetRawData((UIntPtr)buffer.Length, ptr);
+                        buffer = buffer.Slice(0, Math.Min(readSize, buffer.Length));
+                    }
+                }
+
+                if (lastReport != null)
+                {
+                    // Ignore unchanged reports
+                    // GameInput does not update timestamps when only third-party-defined data changes,
+                    // so we have to compare state memory manually to see when things actually change
+                    if (buffer.SequenceEqual(lastReport))
+                    {
+                        return;
+                    }
+
+                    if (lastReport.Length != buffer.Length)
+                    {
+                        lastReport = buffer.ToArray();
+                    }
+                    else
+                    {
+                        buffer.CopyTo(lastReport);
+                    }
+                }
+
+                WriteTimestamp(timestamp);
+                Console.Write(": Report ID: ");
+                Console.Write(reportId);
+                Console.Write(", size: ");
+                Console.Write(buffer.Length);
+                Console.Write(", ");
+                PrintBuffer(buffer);
+            }
+            finally
+            {
+                if (poolBuffer != null)
+                {
+                    ArrayPool<byte>.Shared.Return(poolBuffer);
                 }
             }
-
-            if (lastReport != null)
-            {
-                // Ignore unchanged reports
-                // GameInput does not update timestamps when only third-party-defined data changes,
-                // so we have to compare state memory manually to see when things actually change
-                if (buffer.SequenceEqual(lastReport))
-                {
-                    return;
-                }
-
-                if (lastReport.Length != buffer.Length)
-                {
-                    lastReport = buffer.ToArray();
-                }
-                else
-                {
-                    buffer.CopyTo(lastReport);
-                }
-            }
-
-            WriteTimestamp(timestamp);
-            Console.Write(": Report ID: ");
-            Console.Write(reportId);
-            Console.Write(", size: ");
-            Console.Write(size);
-            Console.Write(", ");
-            PrintBuffer(buffer);
         }
     }
 }

@@ -10,6 +10,11 @@ namespace SharpGameInput.TestApp
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
+            if (!WindowHack.StartWindow())
+            {
+                return;
+            }
+
             // Initialize GameInput
             if (!GameInput.Create(out var gameInput, out int result))
             {

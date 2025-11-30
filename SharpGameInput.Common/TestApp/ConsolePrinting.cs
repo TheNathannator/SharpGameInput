@@ -42,7 +42,7 @@ namespace SharpGameInput.TestApp
             }
 
             // Exclude last '-'
-            stringBuffer = stringBuffer[..^1];
+            stringBuffer = stringBuffer.Slice(0, stringBuffer.Length - 1);
 
             Console.WriteLine(stringBuffer.ToString());
         }
