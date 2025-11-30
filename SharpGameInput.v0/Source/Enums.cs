@@ -52,10 +52,10 @@ namespace SharpGameInput.v0
 
     public enum GameInputSwitchKind
     {
-        Unknown        = -1,
-        TwoWaySwitch   =  0,
-        FourWaySwitch  =  1,
-        EightWaySwitch =  2
+        Unknown  = -1,
+        TwoWay   =  0,
+        FourWay  =  1,
+        EightWay =  2
     }
 
     public enum GameInputSwitchPosition
