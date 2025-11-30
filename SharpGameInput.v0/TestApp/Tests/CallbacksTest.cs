@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using SharpGameInput.v0;
 
 namespace SharpGameInput.TestApp
@@ -9,51 +10,87 @@ namespace SharpGameInput.TestApp
         {
             ConsoleMenu.WriteMenuHeader("Callbacks");
 
+            (string name, Action<IGameInput> func)[] subTests =
+            {
+                ("Reading callback", ReadingCallbackTest),
+                ("Device callback", DeviceCallbackTest),
+                ("System button callback", SystemButtonCallbackTest),
+                ("Keyboard layout callback", KeyboardLayoutCallbackTest),
+            };
+
+            int choice = ConsoleMenu.PromptChoice("Select a sub-test", subTests.Select((i) => i.name));
+            if (choice < 0)
+                return;
+
+            subTests[choice].func(gameInput);
+        }
+
+        private static void ReadingCallbackTest(IGameInput gameInput)
+        {
             if (!gameInput.RegisterReadingCallback(
-                null, GameInputKind.Unknown, 0,
+                null, GameInputKind.AnyKind, 0,
                 null, ReadingCallback,
-                out var readingToken, out int result
+                out var token, out int result
             ))
             {
                 ConsolePrinting.PrintPInvokeError("Failed to register reading callback", result);
+                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
+                return;
             }
 
-            using var readingTokenDisposer = new CallbackTokenDisposer(readingToken, 5000);
+            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            token.Unregister(5000);
+        }
 
+        private static void DeviceCallbackTest(IGameInput gameInput)
+        {
             if (!gameInput.RegisterDeviceCallback(
                 null, GameInputKind.AnyKind, GameInputDeviceStatus.AnyStatus, GameInputEnumerationKind.AsyncEnumeration,
                 null, DeviceCallback,
-                out var deviceToken, out result
+                out var token, out int result
             ))
             {
                 ConsolePrinting.PrintPInvokeError("Failed to register device callback", result);
+                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
+                return;
             }
 
-            using var deviceTokenDisposer = new CallbackTokenDisposer(deviceToken, 5000);
+            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            token.Unregister(5000);
+        }
 
+        private static void SystemButtonCallbackTest(IGameInput gameInput)
+        {
             if (!gameInput.RegisterSystemButtonCallback(
                 null, GameInputSystemButtons.Guide | GameInputSystemButtons.Share,
                 null, SystemButtonCallback,
-                out var systemButtonToken, out result
+                out var token, out int result
             ))
             {
                 ConsolePrinting.PrintPInvokeError("Failed to register guide button callback", result);
+                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
+                return;
             }
 
-            using var systemButtonTokenDisposer = new CallbackTokenDisposer(systemButtonToken, 5000);
+            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            token.Unregister(5000);
+        }
 
+        private static void KeyboardLayoutCallbackTest(IGameInput gameInput)
+        {
             if (!gameInput.RegisterKeyboardLayoutCallback(
                 null,
                 null, KeyboardLayoutCallback,
-                out var keyboardLayoutToken, out result
+                out var token, out int result
             ))
             {
                 ConsolePrinting.PrintPInvokeError("Failed to register keyboard layout callback", result);
+                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
+                return;
             }
 
-            using var keyboardLayoutTokenDisposer = new CallbackTokenDisposer(keyboardLayoutToken, 5000);
-
             ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            token.Unregister(5000);
         }
 
         private static void ReadingCallback(
