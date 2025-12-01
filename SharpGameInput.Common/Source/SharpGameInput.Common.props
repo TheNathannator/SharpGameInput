@@ -19,7 +19,7 @@
     <AssemblyName>SharpGameInput.v$(GameInputApiVersion)</AssemblyName>
     <AssemblyTitle>$(AssemblyName)</AssemblyTitle>
     <Product>$(AssemblyName)</Product>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Description>C# interop bindings for GameInput v$(GameInputApiVersion).</Description>
     <Authors>Nathan Hurst</Authors>
     <Copyright>Copyright (c) 2024 $(Authors)</Copyright>
