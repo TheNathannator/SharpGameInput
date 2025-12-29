@@ -3,7 +3,7 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
-    public unsafe partial class IGameInput
+    public partial class IGameInput
     {
         private readonly CallbackRegistrar<IGameInput> _callbacks = new();
 

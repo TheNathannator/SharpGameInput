@@ -133,7 +133,7 @@ namespace SharpGameInput.v0
             return Encoding.UTF8.GetString(data, (int)sizeInBytes);
         }
 
-        public static unsafe string? ToString(GameInputString* str)
+        public static string? ToString(GameInputString* str)
         {
             if (str == null)
             {

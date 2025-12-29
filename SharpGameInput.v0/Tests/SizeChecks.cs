@@ -34,7 +34,7 @@ public class SizeChecks
     [Test] public void GameInputRumbleMotors() => AssertEnumSize<GameInputRumbleMotors>(4);
 
     [Test]
-    public unsafe void ByteBool() => Assert.Multiple(() =>
+    public void ByteBool() => Assert.Multiple(() =>
     {
         ByteBool instance = default;
         AssertSize(instance, 1);
@@ -49,7 +49,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputKeyState() => Assert.Multiple(() =>
+    public void GameInputKeyState() => Assert.Multiple(() =>
     {
         GameInputKeyState instance = default;
         AssertSize(instance, 12);
@@ -60,7 +60,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputMouseState() => Assert.Multiple(() =>
+    public void GameInputMouseState() => Assert.Multiple(() =>
     {
         GameInputMouseState instance = default;
         AssertSize(instance, 40);
@@ -72,7 +72,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputTouchState() => Assert.Multiple(() =>
+    public void GameInputTouchState() => Assert.Multiple(() =>
     {
         GameInputTouchState instance = default;
         AssertSize(instance, 48);
@@ -89,7 +89,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputMotionState() => Assert.Multiple(() =>
+    public void GameInputMotionState() => Assert.Multiple(() =>
     {
         GameInputMotionState instance = default;
         AssertSize(instance, 68);
@@ -113,7 +113,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputArcadeStickState() => Assert.Multiple(() =>
+    public void GameInputArcadeStickState() => Assert.Multiple(() =>
     {
         GameInputArcadeStickState instance = default;
         AssertSize(instance, 4);
@@ -121,7 +121,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputFlightStickState() => Assert.Multiple(() =>
+    public void GameInputFlightStickState() => Assert.Multiple(() =>
     {
         GameInputFlightStickState instance = default;
         AssertSize(instance, 24);
@@ -134,7 +134,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputGamepadState() => Assert.Multiple(() =>
+    public void GameInputGamepadState() => Assert.Multiple(() =>
     {
         GameInputGamepadState instance = default;
         AssertSize(instance, 28);
@@ -148,7 +148,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputRacingWheelState() => Assert.Multiple(() =>
+    public void GameInputRacingWheelState() => Assert.Multiple(() =>
     {
         GameInputRacingWheelState instance = default;
         AssertSize(instance, 28);
@@ -162,7 +162,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputUiNavigationState() => Assert.Multiple(() =>
+    public void GameInputUiNavigationState() => Assert.Multiple(() =>
     {
         GameInputUiNavigationState instance = default;
         AssertSize(instance, 4);
@@ -170,7 +170,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputBatteryState() => Assert.Multiple(() =>
+    public void GameInputBatteryState() => Assert.Multiple(() =>
     {
         GameInputBatteryState instance = default;
         AssertSize(instance, 20);
@@ -192,7 +192,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputUsage() => Assert.Multiple(() =>
+    public void GameInputUsage() => Assert.Multiple(() =>
     {
         GameInputUsage instance = default;
         AssertSize(instance, 4);
@@ -201,7 +201,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputVersion() => Assert.Multiple(() =>
+    public void GameInputVersion() => Assert.Multiple(() =>
     {
         GameInputVersion instance = default;
         AssertSize(instance, 8);
@@ -329,7 +329,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputMouseInfo() => Assert.Multiple(() =>
+    public void GameInputMouseInfo() => Assert.Multiple(() =>
     {
         GameInputMouseInfo instance = default;
         AssertSize(instance, 16);
@@ -341,7 +341,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputTouchSensorInfo() => Assert.Multiple(() =>
+    public void GameInputTouchSensorInfo() => Assert.Multiple(() =>
     {
         GameInputTouchSensorInfo instance = default;
         AssertSize(instance, 64);
@@ -362,7 +362,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputMotionInfo() => Assert.Multiple(() =>
+    public void GameInputMotionInfo() => Assert.Multiple(() =>
     {
         GameInputMotionInfo instance = default;
         AssertSize(instance, 12);
@@ -372,7 +372,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputArcadeStickInfo() => Assert.Multiple(() =>
+    public void GameInputArcadeStickInfo() => Assert.Multiple(() =>
     {
         GameInputArcadeStickInfo instance = default;
         AssertSize(instance, 56);
@@ -393,7 +393,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputFlightStickInfo() => Assert.Multiple(() =>
+    public void GameInputFlightStickInfo() => Assert.Multiple(() =>
     {
         GameInputFlightStickInfo instance = default;
         AssertSize(instance, 20);
@@ -405,7 +405,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputGamepadInfo() => Assert.Multiple(() =>
+    public void GameInputGamepadInfo() => Assert.Multiple(() =>
     {
         GameInputGamepadInfo instance = default;
         AssertSize(instance, 56);
@@ -426,7 +426,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputRacingWheelInfo() => Assert.Multiple(() =>
+    public void GameInputRacingWheelInfo() => Assert.Multiple(() =>
     {
         GameInputRacingWheelInfo instance = default;
         AssertSize(instance, 48);
@@ -447,7 +447,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputUiNavigationInfo() => Assert.Multiple(() =>
+    public void GameInputUiNavigationInfo() => Assert.Multiple(() =>
     {
         GameInputUiNavigationInfo instance = default;
         AssertSize(instance, 84);
@@ -475,7 +475,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackMotorInfo() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackMotorInfo() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackMotorInfo instance = default;
         AssertSize(instance, 28);
@@ -497,7 +497,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputHapticWaveformInfo() => Assert.Multiple(() =>
+    public void GameInputHapticWaveformInfo() => Assert.Multiple(() =>
     {
         GameInputHapticWaveformInfo instance = default;
         AssertSize(instance, 16);
@@ -576,7 +576,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackEnvelope() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackEnvelope() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackEnvelope instance = default;
         AssertSize(instance, 48);
@@ -591,7 +591,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackMagnitude() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackMagnitude() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackMagnitude instance = default;
         AssertSize(instance, 28);
@@ -605,7 +605,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackConditionParams() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackConditionParams() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackConditionParams instance = default;
         AssertSize(instance, 52);
@@ -619,7 +619,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackConstantParams() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackConstantParams() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackConstantParams instance = default;
         AssertSize(instance, 80);
@@ -628,7 +628,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackPeriodicParams() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackPeriodicParams() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackPeriodicParams instance = default;
         AssertSize(instance, 88);
@@ -640,7 +640,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackRampParams() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackRampParams() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackRampParams instance = default;
         AssertSize(instance, 104);
@@ -650,7 +650,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputForceFeedbackParams() => Assert.Multiple(() =>
+    public void GameInputForceFeedbackParams() => Assert.Multiple(() =>
     {
         GameInputForceFeedbackParams instance = default;
         AssertSize(instance, 112);
@@ -669,7 +669,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputHapticFeedbackParams() => Assert.Multiple(() =>
+    public void GameInputHapticFeedbackParams() => Assert.Multiple(() =>
     {
         GameInputHapticFeedbackParams instance = default;
         AssertSize(instance, 32);
@@ -681,7 +681,7 @@ public class SizeChecks
     });
 
     [Test]
-    public unsafe void GameInputRumbleParams() => Assert.Multiple(() =>
+    public void GameInputRumbleParams() => Assert.Multiple(() =>
     {
         GameInputRumbleParams instance = default;
         AssertSize(instance, 16);

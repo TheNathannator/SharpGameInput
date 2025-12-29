@@ -19,19 +19,19 @@ public static class SizeHelper
         });
     }
 
-    public static unsafe void AssertSize<T>(in T _, int expected, bool checkMarshal = true)
+    public static void AssertSize<T>(in T _, int expected, bool checkMarshal = true)
         where T : unmanaged
     {
         AssertSize<T>(expected, checkMarshal);
     }
 
-    public static unsafe void AssertEnumSize<T>(int expected)
+    public static void AssertEnumSize<T>(int expected)
         where T : unmanaged, System.Enum
     {
         AssertSize<T>(expected, checkMarshal: false);
     }
 
-    public static unsafe void AssertField<T, TField>(in T instance, in TField field, string fieldName, int size, nint offset, bool checkMarshal = true)
+    public static void AssertField<T, TField>(in T instance, in TField field, string fieldName, int size, nint offset, bool checkMarshal = true)
         where T : unmanaged
         where TField : unmanaged
     {
