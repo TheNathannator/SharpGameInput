@@ -34,6 +34,13 @@ public class SizeChecks
     [Test] public void GameInputRumbleMotors() => AssertEnumSize<GameInputRumbleMotors>(4);
 
     [Test]
+    public unsafe void ByteBool() => Assert.Multiple(() =>
+    {
+        ByteBool instance = default;
+        AssertSize(instance, 1);
+    });
+
+    [Test]
     public unsafe void APP_LOCAL_DEVICE_ID() => Assert.Multiple(() =>
     {
         APP_LOCAL_DEVICE_ID instance = default;

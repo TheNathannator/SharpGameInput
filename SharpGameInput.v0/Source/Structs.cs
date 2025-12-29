@@ -6,14 +6,15 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
+    using bool_t = ByteBool;
+
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputKeyState
     {
         public uint32_t scanCode;
         public uint32_t codePoint;
         public uint8_t virtualKey;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isDeadKey;
+        public bool_t isDeadKey;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -215,14 +216,10 @@ namespace SharpGameInput.v0
     {
         public GameInputKind mappedInputKinds;
         public GameInputLabel label;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isContinuous;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isNonlinear;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isQuantized;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool hasRestValue;
+        public bool_t isContinuous;
+        public bool_t isNonlinear;
+        public bool_t isQuantized;
+        public bool_t hasRestValue;
         public float restValue;
         public uint64_t resolution;
         public uint16_t legacyDInputIndex;
@@ -286,10 +283,8 @@ namespace SharpGameInput.v0
         public GameInputMouseButtons supportedButtons;
         public uint32_t sampleRate;
         public uint32_t sensorDpi;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool hasWheelX;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool hasWheelY;
+        public bool_t hasWheelX;
+        public bool_t hasWheelY;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -378,12 +373,9 @@ namespace SharpGameInput.v0
         public GameInputLabel dpadDownLabel;
         public GameInputLabel dpadLeftLabel;
         public GameInputLabel dpadRightLabel;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool hasClutch;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool hasHandbrake;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool hasPatternShifter;
+        public bool_t hasClutch;
+        public bool_t hasHandbrake;
+        public bool_t hasPatternShifter;
         public int32_t minPatternShifterGear;
         public int32_t maxPatternShifterGear;
         public float maxWheelAngle;
@@ -422,42 +414,27 @@ namespace SharpGameInput.v0
         public GameInputLocation location;
         public uint32_t locationId;
         public uint32_t maxSimultaneousEffects;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isConstantEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isRampEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isSineWaveEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isSquareWaveEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isTriangleWaveEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isSawtoothUpWaveEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isSawtoothDownWaveEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isSpringEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isFrictionEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isDamperEffectSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isInertiaEffectSupported;
+        public bool_t isConstantEffectSupported;
+        public bool_t isRampEffectSupported;
+        public bool_t isSineWaveEffectSupported;
+        public bool_t isSquareWaveEffectSupported;
+        public bool_t isTriangleWaveEffectSupported;
+        public bool_t isSawtoothUpWaveEffectSupported;
+        public bool_t isSawtoothDownWaveEffectSupported;
+        public bool_t isSpringEffectSupported;
+        public bool_t isFrictionEffectSupported;
+        public bool_t isDamperEffectSupported;
+        public bool_t isInertiaEffectSupported;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct GameInputHapticWaveformInfo
     {
         public GameInputUsage usage;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isDurationSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isIntensitySupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isRepeatSupported;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool isRepeatDelaySupported;
+        public bool_t isDurationSupported;
+        public bool_t isIntensitySupported;
+        public bool_t isRepeatSupported;
+        public bool_t isRepeatDelaySupported;
         public uint64_t defaultDuration;
     }
 
