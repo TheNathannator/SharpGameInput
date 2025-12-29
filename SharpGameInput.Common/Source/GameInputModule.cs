@@ -70,6 +70,14 @@ namespace SharpGameInput.Common
                 result = HRESULT.E_FAIL;
             }
 
+            if (result >= 0 && gameInput != IntPtr.Zero)
+            {
+                // This QueryInterface likely isn't necessary, but better safe than sorry
+                nint oldGameInput = gameInput;
+                result = Marshal.QueryInterface(oldGameInput, ref iid, out gameInput);
+                Marshal.Release(oldGameInput);
+            }
+
             return result >= 0 && gameInput != IntPtr.Zero;
         }
 
