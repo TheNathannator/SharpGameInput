@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
 using Windows.Win32.System.Registry;
 
 namespace SharpGameInput.Common
@@ -100,25 +101,29 @@ namespace SharpGameInput.Common
                 }
             }
 
-            var (inboxVersion, inboxVersionStr) = GetDllVersion(inboxPath);
-            var (redistVersion, redistVersionStr) = GetDllVersion(redistPath);
+            var inboxVersion = GetDllVersion(inboxPath);
+            var redistVersion = GetDllVersion(redistPath);
 
-            Debug.WriteLine(inboxVersionStr != null
-                ? $"[SharpGameInput] Inbox module: '{inboxPath}' v{inboxVersionStr} ({inboxVersion})"
+            Debug.WriteLine(inboxVersion != null
+                ? $"[SharpGameInput] Inbox module: '{inboxPath}' {FileVersionToString(inboxVersion)}"
                 : $"[SharpGameInput] Inbox module not found at '{inboxPath}'"
             );
-            Debug.WriteLine(redistVersionStr != null
-                ? $"[SharpGameInput] Redist module: '{redistPath}' v{redistVersionStr} ({redistVersion})"
+            Debug.WriteLine(redistVersion != null
+                ? $"[SharpGameInput] Redist module: '{redistPath}' {FileVersionToString(redistVersion)}"
                 : $"[SharpGameInput] Redist module not found at '{redistPath}'"
             );
 
             // Take whichever has the later version,
             // preferring the redistributable if versions match
-            // Note that file existence checks are done by GetDllVersion,
-            // so this will also implicitly handle the case where only one exists
-            var (finalPath, finalVersionStr) = inboxVersion > redistVersion
-                ? (inboxPath, inboxVersionStr)
-                : (redistPath, redistVersionStr);
+            string? finalPath = null;
+            if (inboxVersion != null)
+            {
+                finalPath = inboxPath;
+            }
+            if (redistVersion != null && (inboxVersion == null || inboxVersion < redistVersion))
+            {
+                finalPath = redistPath;
+            }
 
             if (!File.Exists(finalPath))
             {
@@ -126,7 +131,7 @@ namespace SharpGameInput.Common
                 return HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_DLL_NOT_FOUND);
             }
 
-            Debug.WriteLine($"[SharpGameInput] Loading GameInput {finalVersionStr} from {finalPath}");
+            Debug.WriteLine($"[SharpGameInput] Loading GameInput from {finalPath}");
             var module = LoadLibrary(finalPath);
             if (module == null || module.IsInvalid)
             {
@@ -202,19 +207,67 @@ namespace SharpGameInput.Common
             }
         }
 
-        private static (long, string?) GetDllVersion(string path)
+        private static unsafe ulong? GetDllVersion(string path)
         {
             if (!File.Exists(path))
             {
-                return (0, null);
+                return null;
             }
 
-            var version = FileVersionInfo.GetVersionInfo(path);
-            long versionNum = (version.FileMajorPart << 48) |
-                (version.FileMinorPart << 32) |
-                (version.FileBuildPart << 16) |
-                version.FilePrivatePart;
-            return (versionNum, version.FileVersion);
+            // For whatever reason, Unity IL2CPP does not support GetVersionInfo,
+            // so we need to get the version info ourselves manually
+            // var version = FileVersionInfo.GetVersionInfo(path);
+            // long versionNum = (version.FileMajorPart << 48) |
+            //     (version.FileMinorPart << 32) |
+            //     (version.FileBuildPart << 16) |
+            //     version.FilePrivatePart;
+            // return versionNum;
+
+            uint _dummy = 0;
+            uint size = GetFileVersionInfoSize(path, &_dummy);
+            if (size == 0)
+            {
+                var result = (WIN32_ERROR)Marshal.GetLastWin32Error();
+                Debug.WriteLine($"[SharpGameInput] Failed to get version info size for {path}: {result} (0x{(int)result:X4})");
+                return null;
+            }
+
+            var buffer = new byte[size];
+            fixed (byte* ptr = buffer)
+            {
+                if (!GetFileVersionInfo(path, size, ptr))
+                {
+                    var result = (WIN32_ERROR)Marshal.GetLastWin32Error();
+                    Debug.WriteLine($"[SharpGameInput] Failed to get version info for {path}: {result} (0x{(int)result:X4})");
+                    return null;
+                }
+
+                uint versionLength;
+                void* _versionInfo = null;
+                fixed (char* subBlock = "\\")
+                {
+                    if (!VerQueryValue(ptr, subBlock, &_versionInfo, &versionLength))
+                    {
+                        var result = (WIN32_ERROR)Marshal.GetLastWin32Error();
+                        Debug.WriteLine($"[SharpGameInput] Failed to get version value for {path}: {result} (0x{(int)result:X4})");
+                        return null;
+                    }
+                }
+
+                var versionInfo = (VS_FIXEDFILEINFO*)_versionInfo;
+                ulong versionNum = ((ulong)versionInfo->dwFileVersionMS << 32) | versionInfo->dwFileVersionLS;
+                return versionNum;
+            }
+        }
+
+        private static string FileVersionToString(ulong? version)
+        {
+            if (version is not {} v)
+            {
+                return "";
+            }
+
+            return $"v{(v >> 48) & 0xFFFF}.{(v >> 32) & 0xFFFF}.{(v >> 16) & 0xFFFF}.{(v >> 0) & 0xFFFF} ({v})";
         }
     }
 }
