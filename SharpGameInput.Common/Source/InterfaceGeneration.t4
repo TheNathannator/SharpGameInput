@@ -12,6 +12,7 @@ UsingDirectives.Add("SharpGameInput.Common");
 #>
 <#@ include file="GeneratedFileHeader.t4" once="true" #>
 <#@ include file="TypeParsing.t4" once="true" #>
+<#@ include file="CommonStructs.t4" once="true" #>
 namespace <#= Namespace #>
 {
 <#
@@ -70,6 +71,14 @@ foreach (var callback in callbacks)
 <#
 }
 #>
+    #endregion
+
+    #region Common structures
+
+<#
+WriteCommonStructs();
+#>
+
     #endregion
 
     #region Interface definitions

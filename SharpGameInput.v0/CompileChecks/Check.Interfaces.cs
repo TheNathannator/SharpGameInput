@@ -110,12 +110,12 @@ public static partial class Checks
         left.GetControllerAxisState(4, axisStates);
 
         left.GetControllerButtonCount();
-        left.GetControllerButtonState(new ButtonBool[4]);
+        left.GetControllerButtonState(new ByteBool[4]);
 #if NETSTANDARD2_1_OR_GREATER
-        Span<ButtonBool> buttonSpan = stackalloc ButtonBool[4];
+        Span<ByteBool> buttonSpan = stackalloc ByteBool[4];
         left.GetControllerButtonState(buttonSpan);
 #endif
-        ButtonBool* buttonStates = stackalloc ButtonBool[4];
+        ByteBool* buttonStates = stackalloc ByteBool[4];
         left.GetControllerButtonState(4, buttonStates);
 
         left.GetControllerSwitchCount();

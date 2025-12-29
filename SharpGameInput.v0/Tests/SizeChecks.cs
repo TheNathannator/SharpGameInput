@@ -38,7 +38,7 @@ public class SizeChecks
     {
         APP_LOCAL_DEVICE_ID instance = default;
         AssertSize(instance, 32);
-        AssertFixed(instance, instance._inner._value, nameof(instance._inner._value), 0);
+        AssertFixed(instance, instance.value, nameof(instance.value), 0);
     });
 
     [Test]

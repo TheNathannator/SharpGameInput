@@ -95,6 +95,114 @@ namespace SharpGameInput.v0
 
     #endregion
 
+    #region Common structures
+
+    /// <summary>
+    /// A wrapper for <c><see langword="bool"/></c>s that enables them to be blitted when marshalling.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Size = sizeof(byte))]
+    public struct ByteBool : IEquatable<ByteBool>
+    {
+        private byte _value;
+
+        public bool Value
+        {
+            get => _value != 0;
+            set => _value = value ? (byte)1 : (byte)0;
+        }
+
+        public ByteBool(bool value)
+        {
+            _value = value ? (byte)1 : (byte)0;
+        }
+
+        public static implicit operator bool(ByteBool value)
+            => value.Value;
+
+        public static implicit operator ByteBool(bool value)
+            => new(value);
+
+        public static bool operator ==(ByteBool left, ByteBool right)
+            => left.Value == right.Value;
+
+        public static bool operator !=(ByteBool left, ByteBool right)
+            => !(left == right);
+
+        public readonly bool Equals(ByteBool other)
+            => this == other;
+
+        public readonly override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is ByteBool other && Equals(other);
+
+        public override int GetHashCode()
+            => Value.GetHashCode();
+
+        public override string ToString()
+            => Value.ToString();
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct APP_LOCAL_DEVICE_ID : IEquatable<APP_LOCAL_DEVICE_ID>
+    {
+        public const int Size = 32;
+
+        public fixed byte value[Size];
+
+        public static bool operator ==(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
+        {
+            fixed (byte* _l = left.value)
+            fixed (byte* _r = right.value)
+            {
+                long* l = (long*)_l;
+                long* r = (long*)_r;
+                return l[0] == r[0] &&
+                    l[1] == r[1] &&
+                    l[2] == r[2] &&
+                    l[3] == r[3];
+            }
+        }
+
+        public static bool operator !=(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
+            => !(left == right);
+
+        public readonly bool Equals(in APP_LOCAL_DEVICE_ID other)
+            => this == other;
+
+        readonly bool IEquatable<APP_LOCAL_DEVICE_ID>.Equals(APP_LOCAL_DEVICE_ID other)
+            => this == other;
+
+        public readonly override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is APP_LOCAL_DEVICE_ID other && Equals(other);
+
+        public override int GetHashCode()
+        {
+            fixed (byte* _p = value)
+            {
+                long* data = (long*)_p;
+                return (data[0], data[1], data[2], data[3]).GetHashCode();
+            }
+        }
+
+        public override string ToString()
+        {
+            const string characters = "0123456789ABCDEF";
+
+            const int bufferSize = Size * 2;
+            char* stringBuffer = stackalloc char[bufferSize];
+            for (int i = 0; i < Size; i++)
+            {
+                byte v = value[i];
+                int stringIndex = i * 2;
+                stringBuffer[stringIndex] = characters[(v & 0xF0) >> 4];
+                stringBuffer[stringIndex + 1] = characters[v & 0x0F];
+            }
+
+            return new string(stringBuffer, 0, bufferSize);
+        }
+    }
+
+    #endregion
+
     #region Interface definitions
 
     public abstract class GameInputComPtr : CriticalFinalizerObject,
@@ -799,7 +907,7 @@ namespace SharpGameInput.v0
 
         public uint32_t GetControllerButtonState(
             uint32_t stateArrayCount,
-            ButtonBool* stateArray
+            ByteBool* stateArray
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
@@ -807,7 +915,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, ButtonBool*, uint32_t>)vtable[11];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, ByteBool*, uint32_t>)vtable[11];
 
             var result = fnPtr(
                 thisPtr,
@@ -819,10 +927,10 @@ namespace SharpGameInput.v0
         }
 
         public uint32_t GetControllerButtonState(
-            ButtonBool[] stateArray
+            ByteBool[] stateArray
         )
         {
-            fixed (ButtonBool* stateArrayPtr = stateArray)
+            fixed (ByteBool* stateArrayPtr = stateArray)
             {
                 return GetControllerButtonState(
                     (uint32_t)stateArray.Length,
@@ -833,10 +941,10 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ButtonBool> stateArray
+            scoped System.Span<ByteBool> stateArray
         )
         {
-            fixed (ButtonBool* stateArrayPtr = stateArray)
+            fixed (ByteBool* stateArrayPtr = stateArray)
             {
                 return GetControllerButtonState(
                     (uint32_t)stateArray.Length,
@@ -1414,7 +1522,7 @@ namespace SharpGameInput.v0
 
         public uint32_t GetControllerButtonState(
             uint32_t stateArrayCount,
-            ButtonBool* stateArray
+            ByteBool* stateArray
         )
         {
             ThrowHelper.CheckDisposed(IsInvalid, typeof(IGameInputReading));
@@ -1422,7 +1530,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, ButtonBool*, uint32_t>)vtable[11];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, uint32_t, ByteBool*, uint32_t>)vtable[11];
 
             var result = fnPtr(
                 thisPtr,
@@ -1434,10 +1542,10 @@ namespace SharpGameInput.v0
         }
 
         public uint32_t GetControllerButtonState(
-            ButtonBool[] stateArray
+            ByteBool[] stateArray
         )
         {
-            fixed (ButtonBool* stateArrayPtr = stateArray)
+            fixed (ByteBool* stateArrayPtr = stateArray)
             {
                 return GetControllerButtonState(
                     (uint32_t)stateArray.Length,
@@ -1448,10 +1556,10 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ButtonBool> stateArray
+            scoped System.Span<ByteBool> stateArray
         )
         {
-            fixed (ButtonBool* stateArrayPtr = stateArray)
+            fixed (ByteBool* stateArrayPtr = stateArray)
             {
                 return GetControllerButtonState(
                     (uint32_t)stateArray.Length,

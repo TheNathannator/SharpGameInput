@@ -19,7 +19,7 @@ public static partial class Checks
         b = left != right;
     }
 
-    public static void Check(ButtonBool left, ButtonBool right)
+    public static void Check(ByteBool left, ByteBool right)
     {
         left.Equals(right);
         left.GetHashCode();
