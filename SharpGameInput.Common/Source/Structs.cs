@@ -50,18 +50,17 @@ namespace SharpGameInput.Common
         {
             const string characters = "0123456789ABCDEF";
 
-            const int bufferSize = Size * 3;
+            const int bufferSize = Size * 2;
             char* stringBuffer = stackalloc char[bufferSize];
             for (int i = 0; i < Size; i++)
             {
                 byte v = _value[i];
-                int stringIndex = i * 3;
+                int stringIndex = i * 2;
                 stringBuffer[stringIndex] = characters[(v & 0xF0) >> 4];
                 stringBuffer[stringIndex + 1] = characters[v & 0x0F];
-                stringBuffer[stringIndex + 2] = '-';
             }
 
-            return new string(stringBuffer, 0, bufferSize - 1); // Exclude last '-'
+            return new string(stringBuffer, 0, bufferSize);
         }
     }
 }
