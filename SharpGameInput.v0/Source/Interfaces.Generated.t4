@@ -78,7 +78,8 @@ Callbacks = [
 ];
 
 Interfaces = [
-    new("IGameInput", "11BE2A7E-4254-445A-9C09-FFC40F006918", light: false,
+    new("IGameInput", "11BE2A7E-4254-445A-9C09-FFC40F006918",
+        light: false,
         new("uint64_t", "GetCurrentTimestamp"),
         new("HRESULT", "GetCurrentReading", 
             ("GameInputKind", "inputKind"),
@@ -176,7 +177,7 @@ Interfaces = [
         {
 #>
 
-        public int FindDeviceFromPlatformString(string value, out IGameInputDevice device)
+        public HRESULT FindDeviceFromPlatformString(string value, out IGameInputDevice device)
         {
             fixed (char* ptr = value)
             {
@@ -217,7 +218,9 @@ Interfaces = [
             ("float*", "stateArray")
         ),
         new(() => MakeArrayWrappers("uint32_t", "GetControllerAxisState",
-            ("float", "stateArray")
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("float[mut]", "stateArray")
         )),
 
         new("uint32_t", "GetControllerButtonCount"),
@@ -226,7 +229,9 @@ Interfaces = [
             ("ButtonBool*", "stateArray")
         ),
         new(() => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
-            ("ButtonBool", "stateArray")
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("ButtonBool[mut]", "stateArray")
         )),
 
         new("uint32_t", "GetControllerSwitchCount"),
@@ -235,7 +240,9 @@ Interfaces = [
             ("GameInputSwitchPosition*", "stateArray")
         ),
         new(() => MakeArrayWrappers("uint32_t", "GetControllerSwitchState",
-            ("GameInputSwitchPosition", "stateArray")
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("GameInputSwitchPosition[mut]", "stateArray")
         )),
 
         new("uint32_t", "GetKeyCount"),
@@ -244,7 +251,9 @@ Interfaces = [
             ("GameInputKeyState*", "stateArray")
         ),
         new(() => MakeArrayWrappers("uint32_t", "GetKeyState",
-            ("GameInputKeyState", "stateArray")
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("GameInputKeyState[mut]", "stateArray")
         )),
 
         new("bool", "GetMouseState",
@@ -257,7 +266,9 @@ Interfaces = [
             ("GameInputTouchState*", "stateArray")
         ),
         new(() => MakeArrayWrappers("uint32_t", "GetTouchState",
-            ("GameInputTouchState", "stateArray")
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("GameInputTouchState[mut]", "stateArray")
         )),
 
         new("bool", "GetMotionState",
@@ -353,79 +364,50 @@ Interfaces = [
             ("uint64_t", "timeoutInMicroseconds")
         ),
         new("void", "ReleaseExclusiveRawDeviceAccess"),
+
+        new(() => MakeArrayWrappers("HRESULT", "ExecuteRawDeviceIoControl",
+            castLengthTo: "size_t",
+            lengthBeforePtr: true,
+            ("uint32_t", "controlCode"),
+            ("byte[]?", "inputBuffer"),
+            ("byte[mut]?", "outputBuffer"),
+            ("out size_t", "bytesReturned")
+        )),
         new(() =>
         {
 #>
 
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
-            byte[] inputBuffer,
-            byte[] outputBuffer,
-            out nuint bytesReturned
-        )
-        {
-            fixed (byte* inputPtr = inputBuffer)
-            fixed (byte* outputPtr = outputBuffer)
-            {
-                return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)inputBuffer.Length, inputPtr,
-                    (nuint)outputBuffer.Length, outputPtr,
-                    out bytesReturned
-                );
-            }
-        }
-
-#if NETSTANDARD2_1_OR_GREATER
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
-            scoped System.ReadOnlySpan<byte> inputBuffer,
-            scoped System.Span<byte> outputBuffer,
-            out nuint bytesReturned
-        )
-        {
-            fixed (byte* inputPtr = inputBuffer)
-            fixed (byte* outputPtr = outputBuffer)
-            {
-                return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)inputBuffer.Length, inputPtr,
-                    (nuint)outputBuffer.Length, outputPtr,
-                    out bytesReturned
-                );
-            }
-        }
-#endif
-
-        public int ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
+        public HRESULT ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
             where TIn : unmanaged
         {
             fixed (TIn* inputPtr = &input)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)sizeof(TIn), inputPtr,
+                    (size_t)sizeof(TIn), inputPtr,
                     0, null,
                     out _
                 );
             }
         }
 
-        public int ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out nuint bytesReturned)
+        public HRESULT ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out size_t bytesReturned)
             where TOut : unmanaged
         {
             fixed (TOut* outputPtr = &output)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
                     0, null,
-                    (nuint)sizeof(TOut), outputPtr,
+                    (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
                 );
             }
         }
 
-        public int ExecuteRawDeviceIoControl<TIn, TOut>(
+        public HRESULT ExecuteRawDeviceIoControl<TIn, TOut>(
             uint controlCode,
             in TIn input,
             out TOut output,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
             where TIn : unmanaged
             where TOut : unmanaged
@@ -434,8 +416,8 @@ Interfaces = [
             fixed (TOut* outputPtr = &output)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)sizeof(TIn), inputPtr,
-                    (nuint)sizeof(TOut), outputPtr,
+                    (size_t)sizeof(TIn), inputPtr,
+                    (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
                 );
             }
@@ -444,7 +426,8 @@ Interfaces = [
         })
     ),
 
-    new("IGameInputDispatcher", "415EED2E-98CB-42C2-8F28-B94601074E31", light: false,
+    new("IGameInputDispatcher", "415EED2E-98CB-42C2-8F28-B94601074E31",
+        light: false,
         new("bool", "Dispatch",
             ("uint64_t", "quotaInMicroseconds")
         ),
@@ -494,62 +477,36 @@ Interfaces = [
             ("size_t", "bufferSize"),
             ("void*", "buffer")
         ),
+        new(() => MakeArrayWrappers("size_t", "GetRawData",
+            castLengthTo: "size_t",
+            lengthBeforePtr: true,
+            ("byte[mut]", "buffer")
+        )),
+        new(() => MakeArrayWrappers("bool", "SetRawData",
+            castLengthTo: "size_t",
+            lengthBeforePtr: true,
+            ("byte[]", "buffer")
+        )),
 
         new(() =>
         {
 #>
 
-        public nuint GetRawData(byte[] buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return GetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-
-#if NETSTANDARD2_1_OR_GREATER
-        public nuint GetRawData(scoped System.Span<byte> buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return GetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-#endif
-
-        public nuint GetRawData<T>(out T data)
+        public size_t GetRawData<T>(out T data)
             where T : unmanaged
         {
             fixed (T* ptr = &data)
             {
-                return GetRawData((nuint)sizeof(T), ptr);
+                return GetRawData((size_t)sizeof(T), ptr);
             }
         }
-
-        public bool SetRawData(byte[] buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return SetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-
-#if NETSTANDARD2_1_OR_GREATER
-        public bool SetRawData(scoped System.ReadOnlySpan<byte> buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return SetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-#endif
 
         public bool SetRawData<T>(in T data)
             where T : unmanaged
         {
             fixed (T* ptr = &data)
             {
-                return SetRawData((nuint)sizeof(T), ptr);
+                return SetRawData((size_t)sizeof(T), ptr);
             }
         }
 <#
@@ -570,32 +527,5 @@ Interfaces = [
         new("bool", "ResetAllItems")
     ),
 ];
-
-void MakeArrayWrappers(string returnType, string name, params ParameterDecl[] parameters)
-{
-    // MethodDecl is used here to perform type name replacement like everything else does
-    var decl = new MethodDecl(returnType, name, parameters);
-    var array = decl.Parameters[0];
-#>
-
-        public <#= decl.ReturnType.ToTypeDecl() #> <#= decl.Name #>(<#= array.Type.Name #>[] <#= array.Name #>)
-        {
-            fixed (<#= array.Type.Name #>* ptr = <#= array.Name #>)
-            {
-                return <#= decl.Name #>((uint)<#= array.Name #>.Length, ptr);
-            }
-        }
-
-#if NETSTANDARD2_1_OR_GREATER
-        public <#= decl.ReturnType.ToTypeDecl() #> <#= decl.Name #>(scoped System.Span<<#= array.Type.Name #>> <#= array.Name #>)
-        {
-            fixed (<#= array.Type.Name #>* ptr = <#= array.Name #>)
-            {
-                return <#= decl.Name #>((uint)<#= array.Name #>.Length, ptr);
-            }
-        }
-#endif
-<#
-}
 #>
 <#@ include file="../../SharpGameInput.Common/Source/InterfaceGeneration.t4" #>

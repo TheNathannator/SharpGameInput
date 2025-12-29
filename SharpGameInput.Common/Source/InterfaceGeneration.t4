@@ -580,19 +580,8 @@ foreach (var callback in callbacks)
                 var (_callbackFunc, callbackContext) = gameInput._callbacks.GetCallback(callbackToken);
                 var callbackFunc = (<#= callback.Delegate.Name #>)_callbackFunc;
 
+                <#= callback.Delegate.IsVoid ? "" : "return " #>callbackFunc(
 <#
-    if (callback.Delegate.IsVoid)
-    {
-#>
-                callbackFunc(
-<#
-    }
-    else
-    {
-#>
-                return callbackFunc(
-<#
-    }
 
     for (int i = 0; i < callback.Delegate.Parameters.Length; i++)
     {
@@ -638,3 +627,141 @@ foreach (var callback in callbacks)
 
     #endregion
 }
+<#+
+public void MakeArrayWrappers(
+    string returnTypeDecl,
+    string name,
+
+    string castLengthTo,
+    bool lengthBeforePtr,
+
+    params ParameterDecl[] parameters
+)
+{
+    var returnType = new TypeDecl(returnTypeDecl);
+
+    void MakeArrayMethodBody()
+    {
+#>
+        {
+<#+
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var parameter = parameters[i];
+            if ((parameter.Type.Flags & TypeFlag.Array) != 0)
+            {
+#>
+            fixed (<#= parameter.Type.Name #>* <#= parameter.Name #>Ptr = <#= parameter.Name #>)
+<#+
+            }
+        }
+#>
+            {
+                <#= returnType.IsVoid ? "" : "return " #><#= name #>(
+<#+
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var parameter = parameters[i];
+            // Can't use a comma on the last argument
+            string delimiter = i < parameters.Length - 1 ? "," : "";
+
+            if ((parameter.Type.Flags & TypeFlag.Array) != 0)
+            {
+                string lengthCast = castLengthTo != null ? $"({castLengthTo})" : "";
+                string arrayLength = (parameter.Type.Flags & TypeFlag.NullableArray) != 0
+                    ? lengthCast + $"({parameter.Name}?.Length ?? 0)"
+                    : lengthCast + $"{parameter.Name}.Length";
+                if (lengthBeforePtr)
+                {
+#>
+                    <#= arrayLength #>,
+                    <#= parameter.Name #>Ptr<#= delimiter #>
+<#+
+                }
+                else
+                {
+#>
+                    <#= parameter.Name #>Ptr,
+                    <#= arrayLength #><#= delimiter #>
+<#+
+                }
+            }
+            else
+            {
+#>
+                    <#= parameter.ToFnPointerArgument() #><#= delimiter #>
+<#+
+            }
+        }
+#>
+                );
+            }
+        }
+<#+
+    }
+
+#>
+
+        public <#= returnType.ToTypeDecl() #> <#= name #>(
+<#+
+    for (int i = 0; i < parameters.Length; i++)
+    {
+        var parameter = parameters[i];
+        // Can't use a comma on the last parameter
+        string delimiter = i < parameters.Length - 1 ? "," : "";
+
+#>
+            <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #><#= delimiter #>
+<#+
+    }
+#>
+        )
+<#+
+    MakeArrayMethodBody();
+
+#>
+
+#if NETSTANDARD2_1_OR_GREATER
+        public <#= returnType.ToTypeDecl() #> <#= name #>(
+<#+
+    for (int i = 0; i < parameters.Length; i++)
+    {
+        var parameter = parameters[i];
+        // Can't use a comma on the last parameter
+        string delimiter = i < parameters.Length - 1 ? "," : "";
+
+        if ((parameter.Type.Flags & TypeFlag.Array) != 0)
+        {
+            // Spans are value types, and cannot have null instances
+            parameter.Type.Flags &= ~TypeFlag.NullableArray;
+            parameters[i] = parameter;
+
+            if ((parameter.Type.Flags & TypeFlag.ReadOnlyArray) != 0)
+            {
+#>
+            scoped System.ReadOnlySpan<<#= parameter.Type.Name #>> <#= parameter.Name #><#= delimiter #>
+<#+
+            }
+            else
+            {
+#>
+            scoped System.Span<<#= parameter.Type.Name #>> <#= parameter.Name #><#= delimiter #>
+<#+
+            }
+        }
+        else
+        {
+#>
+            <#= parameter.Type.ToTypeDecl() #> <#= parameter.Name #><#= delimiter #>
+<#+
+        }
+    }
+#>
+        )
+<#+
+    MakeArrayMethodBody();
+#>
+#endif
+<#+
+}
+#>

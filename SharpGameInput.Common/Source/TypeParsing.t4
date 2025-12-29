@@ -67,6 +67,10 @@ public enum TypeFlag
     Interface = 0x10,
     LightInterface = 0x20,
     OwnedInstance = 0x40,
+
+    Array         = 0x100,
+    NullableArray = 0x200,
+    ReadOnlyArray = 0x400,
 }
 
 public struct TypeDecl
@@ -74,6 +78,8 @@ public struct TypeDecl
     public string Name;
     public TypeIndirection Indirection;
     public TypeFlag Flags;
+
+    public bool IsVoid => Name == "void";
 
     public TypeDecl(string declaration)
     {
@@ -123,6 +129,34 @@ public struct TypeDecl
             typeName = typeName["ref ".Length..];
         }
 
+        // Arrays
+        // Initial nullability check; will get re-checked later for the underlying type
+        if (typeName.EndsWith("?"))
+        {
+            flags |= TypeFlag.Nullable;
+            typeName = typeName[..^1];
+        }
+
+        if (typeName.EndsWith("[]"))
+        {
+            flags |= TypeFlag.Array;
+            flags |= TypeFlag.ReadOnlyArray;
+            typeName = typeName[..^2];
+
+        }
+        else if (typeName.EndsWith("[mut]"))
+        {
+            flags |= TypeFlag.Array;
+            typeName = typeName[..^5];
+        }
+
+        if ((flags & TypeFlag.Array) != 0 && (flags & TypeFlag.Nullable) != 0)
+        {
+            // Transfer initial nullable flag to the array
+            flags &= ~TypeFlag.Nullable;
+            flags |= TypeFlag.NullableArray;
+        }
+
         // Other modifiers
         if (typeName.EndsWith("?"))
         {
@@ -164,6 +198,16 @@ public struct TypeDecl
         else if ((Flags & TypeFlag.Nullable) != 0)
         {
             typeDecl += "?";
+        }
+
+        // Re-apply array declarators
+        if ((Flags & TypeFlag.NullableArray) != 0)
+        {
+            typeDecl += "[]?";
+        }
+        else if ((Flags & TypeFlag.Array) != 0)
+        {
+            typeDecl += "[]";
         }
 
         typeDecl = $"{ToModifierPrefix(Indirection)}{typeDecl}";
@@ -280,7 +324,7 @@ public struct MethodDecl
         _ => throw new System.Diagnostics.UnreachableException($"Invalid visibility {Visibility}")
     };
 
-    public bool IsVoid => ReturnType.Name == "void";
+    public bool IsVoid => ReturnType.IsVoid;
 
     public MethodDecl(string returnType, string name, params ParameterDecl[] parameters)
         : this(Visibility.Public, returnType, name, parameters)
@@ -339,6 +383,9 @@ public struct CallbackDecl
 #endregion
 
 #region Type listings
+
+// These exist to delay type name parsing until it is needed, otherwise it is possible that
+// type parsing will occur before all type declarations have been added.
 
 public struct MethodListing
 {

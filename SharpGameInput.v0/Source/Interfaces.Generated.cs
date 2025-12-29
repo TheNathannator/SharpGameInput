@@ -44,8 +44,8 @@ namespace SharpGameInput.v0
         void*, // context
         IntPtr, // device
         uint64_t, // timestamp
-        GameInputSystemButtons, // currentState
-        GameInputSystemButtons, // previousState
+        GameInputSystemButtons, // currentButtons
+        GameInputSystemButtons, // previousButtons
         void // <return>
     >;
 
@@ -80,8 +80,8 @@ namespace SharpGameInput.v0
         object? context,
         LightIGameInputDevice device,
         uint64_t timestamp,
-        GameInputSystemButtons currentState,
-        GameInputSystemButtons previousState
+        GameInputSystemButtons currentButtons,
+        GameInputSystemButtons previousButtons
     );
 
     public delegate void GameInputKeyboardLayoutCallback(
@@ -566,7 +566,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public int FindDeviceFromPlatformString(string value, out IGameInputDevice device)
+        public HRESULT FindDeviceFromPlatformString(string value, out IGameInputDevice device)
         {
             fixed (char* ptr = value)
             {
@@ -754,20 +754,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetControllerAxisState(float[] stateArray)
+        public uint32_t GetControllerAxisState(
+            float[] stateArray
+        )
         {
-            fixed (float* ptr = stateArray)
+            fixed (float* stateArrayPtr = stateArray)
             {
-                return GetControllerAxisState((uint)stateArray.Length, ptr);
+                return GetControllerAxisState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetControllerAxisState(scoped System.Span<float> stateArray)
+        public uint32_t GetControllerAxisState(
+            scoped System.Span<float> stateArray
+        )
         {
-            fixed (float* ptr = stateArray)
+            fixed (float* stateArrayPtr = stateArray)
             {
-                return GetControllerAxisState((uint)stateArray.Length, ptr);
+                return GetControllerAxisState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -808,20 +818,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetControllerButtonState(ButtonBool[] stateArray)
+        public uint32_t GetControllerButtonState(
+            ButtonBool[] stateArray
+        )
         {
-            fixed (ButtonBool* ptr = stateArray)
+            fixed (ButtonBool* stateArrayPtr = stateArray)
             {
-                return GetControllerButtonState((uint)stateArray.Length, ptr);
+                return GetControllerButtonState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetControllerButtonState(scoped System.Span<ButtonBool> stateArray)
+        public uint32_t GetControllerButtonState(
+            scoped System.Span<ButtonBool> stateArray
+        )
         {
-            fixed (ButtonBool* ptr = stateArray)
+            fixed (ButtonBool* stateArrayPtr = stateArray)
             {
-                return GetControllerButtonState((uint)stateArray.Length, ptr);
+                return GetControllerButtonState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -862,20 +882,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetControllerSwitchState(GameInputSwitchPosition[] stateArray)
+        public uint32_t GetControllerSwitchState(
+            GameInputSwitchPosition[] stateArray
+        )
         {
-            fixed (GameInputSwitchPosition* ptr = stateArray)
+            fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
             {
-                return GetControllerSwitchState((uint)stateArray.Length, ptr);
+                return GetControllerSwitchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetControllerSwitchState(scoped System.Span<GameInputSwitchPosition> stateArray)
+        public uint32_t GetControllerSwitchState(
+            scoped System.Span<GameInputSwitchPosition> stateArray
+        )
         {
-            fixed (GameInputSwitchPosition* ptr = stateArray)
+            fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
             {
-                return GetControllerSwitchState((uint)stateArray.Length, ptr);
+                return GetControllerSwitchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -916,20 +946,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetKeyState(GameInputKeyState[] stateArray)
+        public uint32_t GetKeyState(
+            GameInputKeyState[] stateArray
+        )
         {
-            fixed (GameInputKeyState* ptr = stateArray)
+            fixed (GameInputKeyState* stateArrayPtr = stateArray)
             {
-                return GetKeyState((uint)stateArray.Length, ptr);
+                return GetKeyState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetKeyState(scoped System.Span<GameInputKeyState> stateArray)
+        public uint32_t GetKeyState(
+            scoped System.Span<GameInputKeyState> stateArray
+        )
         {
-            fixed (GameInputKeyState* ptr = stateArray)
+            fixed (GameInputKeyState* stateArrayPtr = stateArray)
             {
-                return GetKeyState((uint)stateArray.Length, ptr);
+                return GetKeyState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -988,20 +1028,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetTouchState(GameInputTouchState[] stateArray)
+        public uint32_t GetTouchState(
+            GameInputTouchState[] stateArray
+        )
         {
-            fixed (GameInputTouchState* ptr = stateArray)
+            fixed (GameInputTouchState* stateArrayPtr = stateArray)
             {
-                return GetTouchState((uint)stateArray.Length, ptr);
+                return GetTouchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetTouchState(scoped System.Span<GameInputTouchState> stateArray)
+        public uint32_t GetTouchState(
+            scoped System.Span<GameInputTouchState> stateArray
+        )
         {
-            fixed (GameInputTouchState* ptr = stateArray)
+            fixed (GameInputTouchState* stateArrayPtr = stateArray)
             {
-                return GetTouchState((uint)stateArray.Length, ptr);
+                return GetTouchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -1319,20 +1369,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetControllerAxisState(float[] stateArray)
+        public uint32_t GetControllerAxisState(
+            float[] stateArray
+        )
         {
-            fixed (float* ptr = stateArray)
+            fixed (float* stateArrayPtr = stateArray)
             {
-                return GetControllerAxisState((uint)stateArray.Length, ptr);
+                return GetControllerAxisState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetControllerAxisState(scoped System.Span<float> stateArray)
+        public uint32_t GetControllerAxisState(
+            scoped System.Span<float> stateArray
+        )
         {
-            fixed (float* ptr = stateArray)
+            fixed (float* stateArrayPtr = stateArray)
             {
-                return GetControllerAxisState((uint)stateArray.Length, ptr);
+                return GetControllerAxisState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -1373,20 +1433,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetControllerButtonState(ButtonBool[] stateArray)
+        public uint32_t GetControllerButtonState(
+            ButtonBool[] stateArray
+        )
         {
-            fixed (ButtonBool* ptr = stateArray)
+            fixed (ButtonBool* stateArrayPtr = stateArray)
             {
-                return GetControllerButtonState((uint)stateArray.Length, ptr);
+                return GetControllerButtonState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetControllerButtonState(scoped System.Span<ButtonBool> stateArray)
+        public uint32_t GetControllerButtonState(
+            scoped System.Span<ButtonBool> stateArray
+        )
         {
-            fixed (ButtonBool* ptr = stateArray)
+            fixed (ButtonBool* stateArrayPtr = stateArray)
             {
-                return GetControllerButtonState((uint)stateArray.Length, ptr);
+                return GetControllerButtonState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -1427,20 +1497,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetControllerSwitchState(GameInputSwitchPosition[] stateArray)
+        public uint32_t GetControllerSwitchState(
+            GameInputSwitchPosition[] stateArray
+        )
         {
-            fixed (GameInputSwitchPosition* ptr = stateArray)
+            fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
             {
-                return GetControllerSwitchState((uint)stateArray.Length, ptr);
+                return GetControllerSwitchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetControllerSwitchState(scoped System.Span<GameInputSwitchPosition> stateArray)
+        public uint32_t GetControllerSwitchState(
+            scoped System.Span<GameInputSwitchPosition> stateArray
+        )
         {
-            fixed (GameInputSwitchPosition* ptr = stateArray)
+            fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
             {
-                return GetControllerSwitchState((uint)stateArray.Length, ptr);
+                return GetControllerSwitchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -1481,20 +1561,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetKeyState(GameInputKeyState[] stateArray)
+        public uint32_t GetKeyState(
+            GameInputKeyState[] stateArray
+        )
         {
-            fixed (GameInputKeyState* ptr = stateArray)
+            fixed (GameInputKeyState* stateArrayPtr = stateArray)
             {
-                return GetKeyState((uint)stateArray.Length, ptr);
+                return GetKeyState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetKeyState(scoped System.Span<GameInputKeyState> stateArray)
+        public uint32_t GetKeyState(
+            scoped System.Span<GameInputKeyState> stateArray
+        )
         {
-            fixed (GameInputKeyState* ptr = stateArray)
+            fixed (GameInputKeyState* stateArrayPtr = stateArray)
             {
-                return GetKeyState((uint)stateArray.Length, ptr);
+                return GetKeyState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -1553,20 +1643,30 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public uint32_t GetTouchState(GameInputTouchState[] stateArray)
+        public uint32_t GetTouchState(
+            GameInputTouchState[] stateArray
+        )
         {
-            fixed (GameInputTouchState* ptr = stateArray)
+            fixed (GameInputTouchState* stateArrayPtr = stateArray)
             {
-                return GetTouchState((uint)stateArray.Length, ptr);
+                return GetTouchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public uint32_t GetTouchState(scoped System.Span<GameInputTouchState> stateArray)
+        public uint32_t GetTouchState(
+            scoped System.Span<GameInputTouchState> stateArray
+        )
         {
-            fixed (GameInputTouchState* ptr = stateArray)
+            fixed (GameInputTouchState* stateArrayPtr = stateArray)
             {
-                return GetTouchState((uint)stateArray.Length, ptr);
+                return GetTouchState(
+                    (uint32_t)stateArray.Length,
+                    stateArrayPtr
+                );
             }
         }
 #endif
@@ -2047,75 +2147,81 @@ namespace SharpGameInput.v0
 
         }
 
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
-            byte[] inputBuffer,
-            byte[] outputBuffer,
-            out nuint bytesReturned
+        public HRESULT ExecuteRawDeviceIoControl(
+            uint32_t controlCode,
+            byte[]? inputBuffer,
+            byte[]? outputBuffer,
+            out size_t bytesReturned
         )
         {
-            fixed (byte* inputPtr = inputBuffer)
-            fixed (byte* outputPtr = outputBuffer)
+            fixed (byte* inputBufferPtr = inputBuffer)
+            fixed (byte* outputBufferPtr = outputBuffer)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)inputBuffer.Length, inputPtr,
-                    (nuint)outputBuffer.Length, outputPtr,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
+                    (size_t)(inputBuffer?.Length ?? 0),
+                    inputBufferPtr,
+                    (size_t)(outputBuffer?.Length ?? 0),
+                    outputBufferPtr,
                     out bytesReturned
                 );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
+        public HRESULT ExecuteRawDeviceIoControl(
+            uint32_t controlCode,
             scoped System.ReadOnlySpan<byte> inputBuffer,
             scoped System.Span<byte> outputBuffer,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
         {
-            fixed (byte* inputPtr = inputBuffer)
-            fixed (byte* outputPtr = outputBuffer)
+            fixed (byte* inputBufferPtr = inputBuffer)
+            fixed (byte* outputBufferPtr = outputBuffer)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)inputBuffer.Length, inputPtr,
-                    (nuint)outputBuffer.Length, outputPtr,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
+                    (size_t)inputBuffer.Length,
+                    inputBufferPtr,
+                    (size_t)outputBuffer.Length,
+                    outputBufferPtr,
                     out bytesReturned
                 );
             }
         }
 #endif
 
-        public int ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
+        public HRESULT ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
             where TIn : unmanaged
         {
             fixed (TIn* inputPtr = &input)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)sizeof(TIn), inputPtr,
+                    (size_t)sizeof(TIn), inputPtr,
                     0, null,
                     out _
                 );
             }
         }
 
-        public int ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out nuint bytesReturned)
+        public HRESULT ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out size_t bytesReturned)
             where TOut : unmanaged
         {
             fixed (TOut* outputPtr = &output)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
                     0, null,
-                    (nuint)sizeof(TOut), outputPtr,
+                    (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
                 );
             }
         }
 
-        public int ExecuteRawDeviceIoControl<TIn, TOut>(
+        public HRESULT ExecuteRawDeviceIoControl<TIn, TOut>(
             uint controlCode,
             in TIn input,
             out TOut output,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
             where TIn : unmanaged
             where TOut : unmanaged
@@ -2124,8 +2230,8 @@ namespace SharpGameInput.v0
             fixed (TOut* outputPtr = &output)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)sizeof(TIn), inputPtr,
-                    (nuint)sizeof(TOut), outputPtr,
+                    (size_t)sizeof(TIn), inputPtr,
+                    (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
                 );
             }
@@ -2568,75 +2674,81 @@ namespace SharpGameInput.v0
 
         }
 
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
-            byte[] inputBuffer,
-            byte[] outputBuffer,
-            out nuint bytesReturned
+        public HRESULT ExecuteRawDeviceIoControl(
+            uint32_t controlCode,
+            byte[]? inputBuffer,
+            byte[]? outputBuffer,
+            out size_t bytesReturned
         )
         {
-            fixed (byte* inputPtr = inputBuffer)
-            fixed (byte* outputPtr = outputBuffer)
+            fixed (byte* inputBufferPtr = inputBuffer)
+            fixed (byte* outputBufferPtr = outputBuffer)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)inputBuffer.Length, inputPtr,
-                    (nuint)outputBuffer.Length, outputPtr,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
+                    (size_t)(inputBuffer?.Length ?? 0),
+                    inputBufferPtr,
+                    (size_t)(outputBuffer?.Length ?? 0),
+                    outputBufferPtr,
                     out bytesReturned
                 );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public int ExecuteRawDeviceIoControl(
-            uint controlCode,
+        public HRESULT ExecuteRawDeviceIoControl(
+            uint32_t controlCode,
             scoped System.ReadOnlySpan<byte> inputBuffer,
             scoped System.Span<byte> outputBuffer,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
         {
-            fixed (byte* inputPtr = inputBuffer)
-            fixed (byte* outputPtr = outputBuffer)
+            fixed (byte* inputBufferPtr = inputBuffer)
+            fixed (byte* outputBufferPtr = outputBuffer)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)inputBuffer.Length, inputPtr,
-                    (nuint)outputBuffer.Length, outputPtr,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
+                    (size_t)inputBuffer.Length,
+                    inputBufferPtr,
+                    (size_t)outputBuffer.Length,
+                    outputBufferPtr,
                     out bytesReturned
                 );
             }
         }
 #endif
 
-        public int ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
+        public HRESULT ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
             where TIn : unmanaged
         {
             fixed (TIn* inputPtr = &input)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)sizeof(TIn), inputPtr,
+                    (size_t)sizeof(TIn), inputPtr,
                     0, null,
                     out _
                 );
             }
         }
 
-        public int ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out nuint bytesReturned)
+        public HRESULT ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out size_t bytesReturned)
             where TOut : unmanaged
         {
             fixed (TOut* outputPtr = &output)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
                     0, null,
-                    (nuint)sizeof(TOut), outputPtr,
+                    (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
                 );
             }
         }
 
-        public int ExecuteRawDeviceIoControl<TIn, TOut>(
+        public HRESULT ExecuteRawDeviceIoControl<TIn, TOut>(
             uint controlCode,
             in TIn input,
             out TOut output,
-            out nuint bytesReturned
+            out size_t bytesReturned
         )
             where TIn : unmanaged
             where TOut : unmanaged
@@ -2645,8 +2757,8 @@ namespace SharpGameInput.v0
             fixed (TOut* outputPtr = &output)
             {
                 return ExecuteRawDeviceIoControl(controlCode,
-                    (nuint)sizeof(TIn), inputPtr,
-                    (nuint)sizeof(TOut), outputPtr,
+                    (size_t)sizeof(TIn), inputPtr,
+                    (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
                 );
             }
@@ -3174,57 +3286,77 @@ namespace SharpGameInput.v0
             return result != 0;
         }
 
-        public nuint GetRawData(byte[] buffer)
+        public size_t GetRawData(
+            byte[] buffer
+        )
         {
-            fixed (byte* ptr = buffer)
+            fixed (byte* bufferPtr = buffer)
             {
-                return GetRawData((nuint)buffer.Length, ptr);
+                return GetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public nuint GetRawData(scoped System.Span<byte> buffer)
+        public size_t GetRawData(
+            scoped System.Span<byte> buffer
+        )
         {
-            fixed (byte* ptr = buffer)
+            fixed (byte* bufferPtr = buffer)
             {
-                return GetRawData((nuint)buffer.Length, ptr);
+                return GetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
             }
         }
 #endif
 
-        public nuint GetRawData<T>(out T data)
+        public bool SetRawData(
+            byte[] buffer
+        )
+        {
+            fixed (byte* bufferPtr = buffer)
+            {
+                return SetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public bool SetRawData(
+            scoped System.ReadOnlySpan<byte> buffer
+        )
+        {
+            fixed (byte* bufferPtr = buffer)
+            {
+                return SetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
+            }
+        }
+#endif
+
+        public size_t GetRawData<T>(out T data)
             where T : unmanaged
         {
             fixed (T* ptr = &data)
             {
-                return GetRawData((nuint)sizeof(T), ptr);
+                return GetRawData((size_t)sizeof(T), ptr);
             }
         }
-
-        public bool SetRawData(byte[] buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return SetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-
-#if NETSTANDARD2_1_OR_GREATER
-        public bool SetRawData(scoped System.ReadOnlySpan<byte> buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return SetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-#endif
 
         public bool SetRawData<T>(in T data)
             where T : unmanaged
         {
             fixed (T* ptr = &data)
             {
-                return SetRawData((nuint)sizeof(T), ptr);
+                return SetRawData((size_t)sizeof(T), ptr);
             }
         }
 
@@ -3475,57 +3607,77 @@ namespace SharpGameInput.v0
             return result != 0;
         }
 
-        public nuint GetRawData(byte[] buffer)
+        public size_t GetRawData(
+            byte[] buffer
+        )
         {
-            fixed (byte* ptr = buffer)
+            fixed (byte* bufferPtr = buffer)
             {
-                return GetRawData((nuint)buffer.Length, ptr);
+                return GetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
             }
         }
 
 #if NETSTANDARD2_1_OR_GREATER
-        public nuint GetRawData(scoped System.Span<byte> buffer)
+        public size_t GetRawData(
+            scoped System.Span<byte> buffer
+        )
         {
-            fixed (byte* ptr = buffer)
+            fixed (byte* bufferPtr = buffer)
             {
-                return GetRawData((nuint)buffer.Length, ptr);
+                return GetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
             }
         }
 #endif
 
-        public nuint GetRawData<T>(out T data)
+        public bool SetRawData(
+            byte[] buffer
+        )
+        {
+            fixed (byte* bufferPtr = buffer)
+            {
+                return SetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public bool SetRawData(
+            scoped System.ReadOnlySpan<byte> buffer
+        )
+        {
+            fixed (byte* bufferPtr = buffer)
+            {
+                return SetRawData(
+                    (size_t)buffer.Length,
+                    bufferPtr
+                );
+            }
+        }
+#endif
+
+        public size_t GetRawData<T>(out T data)
             where T : unmanaged
         {
             fixed (T* ptr = &data)
             {
-                return GetRawData((nuint)sizeof(T), ptr);
+                return GetRawData((size_t)sizeof(T), ptr);
             }
         }
-
-        public bool SetRawData(byte[] buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return SetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-
-#if NETSTANDARD2_1_OR_GREATER
-        public bool SetRawData(scoped System.ReadOnlySpan<byte> buffer)
-        {
-            fixed (byte* ptr = buffer)
-            {
-                return SetRawData((nuint)buffer.Length, ptr);
-            }
-        }
-#endif
 
         public bool SetRawData<T>(in T data)
             where T : unmanaged
         {
             fixed (T* ptr = &data)
             {
-                return SetRawData((nuint)sizeof(T), ptr);
+                return SetRawData((size_t)sizeof(T), ptr);
             }
         }
 
@@ -3630,8 +3782,8 @@ namespace SharpGameInput.v0
             void* context,
             IntPtr device,
             uint64_t timestamp,
-            GameInputSystemButtons currentState,
-            GameInputSystemButtons previousState
+            GameInputSystemButtons currentButtons,
+            GameInputSystemButtons previousButtons
         );
 
         private delegate void GameInputKeyboardLayoutCallback_Native(
@@ -3849,8 +4001,8 @@ namespace SharpGameInput.v0
             void* context,
             IntPtr device,
             uint64_t timestamp,
-            GameInputSystemButtons currentState,
-            GameInputSystemButtons previousState
+            GameInputSystemButtons currentButtons,
+            GameInputSystemButtons previousButtons
         )
         {
             IGameInput gameInput = null!;
@@ -3865,8 +4017,8 @@ namespace SharpGameInput.v0
                     callbackContext,
                     new LightIGameInputDevice(device, false),
                     timestamp,
-                    currentState,
-                    previousState
+                    currentButtons,
+                    previousButtons
                 );
             }
             catch (Exception ex)
