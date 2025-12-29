@@ -7,64 +7,38 @@ using SharpGameInput.Common;
 namespace SharpGameInput.v0
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct APP_LOCAL_DEVICE_ID : IEquatable<APP_LOCAL_DEVICE_ID>
+    public struct APP_LOCAL_DEVICE_ID : IEquatable<APP_LOCAL_DEVICE_ID>
     {
-        public const int Size = 32;
+        public const int Size = Common.APP_LOCAL_DEVICE_ID.Size;
 
-        public fixed byte value[Size];
+        internal Common.APP_LOCAL_DEVICE_ID _inner;
+
+        public byte this[int index]
+        {
+            get => _inner[index];
+            set => _inner[index] = value;
+        }
 
         public static bool operator ==(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
-        {
-            fixed (byte* _l = left.value)
-            fixed (byte* _r = left.value)
-            {
-                long* l = (long*)_l;
-                long* r = (long*)_r;
-                return l[0] == r[0] &&
-                    l[1] == r[1] &&
-                    l[2] == r[2] &&
-                    l[3] == r[3];
-            }
-        }
+            => left._inner.Equals(right._inner);
 
         public static bool operator !=(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
             => !(left == right);
 
         public readonly bool Equals(in APP_LOCAL_DEVICE_ID other)
-            => other == this;
+            => this == other;
 
         readonly bool IEquatable<APP_LOCAL_DEVICE_ID>.Equals(APP_LOCAL_DEVICE_ID other)
-            => other == this;
+            => this == other;
 
         public readonly override bool Equals([NotNullWhen(true)] object? obj)
             => obj is APP_LOCAL_DEVICE_ID other && Equals(other);
 
         public override int GetHashCode()
-        {
-            fixed (byte* ptr = value)
-            {
-                long* iPtr = (long*)ptr;
-                return (iPtr[0], iPtr[1], iPtr[2], iPtr[3]).GetHashCode();
-            }
-        }
+            => _inner.GetHashCode();
 
-        public unsafe override string ToString()
-        {
-            const string characters = "0123456789ABCDEF";
-
-            const int bufferSize = Size * 3;
-            char* stringBuffer = stackalloc char[bufferSize];
-            for (int i = 0; i < Size; i++)
-            {
-                byte v = value[i];
-                int stringIndex = i * 3;
-                stringBuffer[stringIndex] = characters[(v & 0xF0) >> 4];
-                stringBuffer[stringIndex + 1] = characters[v & 0x0F];
-                stringBuffer[stringIndex + 2] = '-';
-            }
-
-            return new string(stringBuffer, 0, bufferSize - 1); // Exclude last '-'
-        }
+        public override string ToString()
+            => _inner.ToString();
     }
 
     // This exists because `bool` is not naturally marshallable or blittable in C#
