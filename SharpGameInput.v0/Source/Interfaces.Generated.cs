@@ -101,7 +101,11 @@ namespace SharpGameInput.v0
     /// A wrapper for <c><see langword="bool"/></c>s that enables them to be blitted when marshalling.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Size = sizeof(byte))]
-    public struct ByteBool : IEquatable<ByteBool>
+    public struct ByteBool :
+        IEquatable<ByteBool>,
+        IEquatable<bool>,
+        IComparable<ByteBool>,
+        IComparable<bool>
     {
         private byte _value;
 
@@ -128,11 +132,20 @@ namespace SharpGameInput.v0
         public static bool operator !=(ByteBool left, ByteBool right)
             => !(left == right);
 
+        public readonly override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is ByteBool other && Equals(other);
+
         public readonly bool Equals(ByteBool other)
             => this == other;
 
-        public readonly override bool Equals([NotNullWhen(true)] object? obj)
-            => obj is ByteBool other && Equals(other);
+        public readonly bool Equals(bool other)
+            => this == other;
+
+        public int CompareTo(ByteBool other)
+            => Value.CompareTo(other.Value);
+
+        public int CompareTo(bool other)
+            => Value.CompareTo(other);
 
         public override int GetHashCode()
             => Value.GetHashCode();
@@ -142,9 +155,12 @@ namespace SharpGameInput.v0
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct APP_LOCAL_DEVICE_ID : IEquatable<APP_LOCAL_DEVICE_ID>
+    public unsafe struct APP_LOCAL_DEVICE_ID :
+        IEquatable<APP_LOCAL_DEVICE_ID>,
+        IComparable<APP_LOCAL_DEVICE_ID>
     {
         public const int Size = 32;
+        private const int LongSize = Size / sizeof(ulong);
 
         public fixed byte value[Size];
 
@@ -153,8 +169,8 @@ namespace SharpGameInput.v0
             fixed (byte* _l = left.value)
             fixed (byte* _r = right.value)
             {
-                long* l = (long*)_l;
-                long* r = (long*)_r;
+                ulong* l = (ulong*)_l;
+                ulong* r = (ulong*)_r;
                 return l[0] == r[0] &&
                     l[1] == r[1] &&
                     l[2] == r[2] &&
@@ -165,20 +181,37 @@ namespace SharpGameInput.v0
         public static bool operator !=(in APP_LOCAL_DEVICE_ID left, in APP_LOCAL_DEVICE_ID right)
             => !(left == right);
 
+        public readonly override bool Equals([NotNullWhen(true)] object? obj)
+            => obj is APP_LOCAL_DEVICE_ID other && Equals(other);
+
         public readonly bool Equals(in APP_LOCAL_DEVICE_ID other)
             => this == other;
 
         readonly bool IEquatable<APP_LOCAL_DEVICE_ID>.Equals(APP_LOCAL_DEVICE_ID other)
             => this == other;
 
-        public readonly override bool Equals([NotNullWhen(true)] object? obj)
-            => obj is APP_LOCAL_DEVICE_ID other && Equals(other);
+        public readonly int CompareTo(in APP_LOCAL_DEVICE_ID other)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                int result = value[i].CompareTo(other.value[i]);
+                if (result != 0)
+                {
+                    return result;
+                }
+            }
+
+            return 0;
+        }
+
+        readonly int IComparable<APP_LOCAL_DEVICE_ID>.CompareTo(APP_LOCAL_DEVICE_ID other)
+            => CompareTo(other);
 
         public override int GetHashCode()
         {
             fixed (byte* _p = value)
             {
-                long* data = (long*)_p;
+                ulong* data = (ulong*)_p;
                 return (data[0], data[1], data[2], data[3]).GetHashCode();
             }
         }
