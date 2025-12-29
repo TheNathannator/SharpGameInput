@@ -85,7 +85,18 @@ namespace SharpGameInput.Common
 
         public event Action<Exception>? UnhandledCallbackException;
 
+        ~CallbackRegistrar()
+        {
+            DisposeUnmanagedResources();
+        }
+
         public void Dispose()
+        {
+            DisposeUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        private void DisposeUnmanagedResources()
         {
             _instances.TryRemove(_instanceId, out _);
         }
