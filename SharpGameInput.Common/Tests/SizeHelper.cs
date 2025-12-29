@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -26,51 +27,63 @@ public static class SizeHelper
     }
 
     public static void AssertEnumSize<T>(int expected)
-        where T : unmanaged, System.Enum
+        where T : unmanaged, Enum
     {
         AssertSize<T>(expected, checkMarshal: false);
     }
 
-    public static void AssertField<T, TField>(in T instance, in TField field, string fieldName, int size, nint offset, bool checkMarshal = true)
+    public static void AssertField<T, TField>(in T instance, in TField field, int size, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldExpr = "")
         where T : unmanaged
         where TField : unmanaged
     {
         AssertSize<TField>(size, checkMarshal: false);
-        AssertField(instance, field, fieldName, offset, checkMarshal);
+        AssertField(instance, field, offset, checkMarshal, fieldExpr);
     }
 
-    public static unsafe void AssertField<T, TField>(in T instance, in TField field, string fieldName, nint offset, bool checkMarshal = true)
+    public static unsafe void AssertField<T, TField>(in T instance, in TField field, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldExpr = "")
         where T : unmanaged
         where TField : unmanaged
     {
         fixed (void* fieldPtr = &field)
         {
-            AssertFixed(instance, fieldPtr, fieldName, offset, checkMarshal);
+            AssertFixed(instance, fieldPtr, offset, checkMarshal, fieldExpr);
         }
     }
 
-    public static unsafe void AssertField<T, TField>(in T instance, in TField* field, string fieldName, nint offset, bool checkMarshal = true)
+    public static unsafe void AssertField<T, TField>(in T instance, in TField* field, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldExpr = "")
         where T : unmanaged
         where TField : unmanaged
     {
         fixed (void* fieldPtr = &field)
         {
-            AssertFixed(instance, fieldPtr, fieldName, offset, checkMarshal);
+            AssertFixed(instance, fieldPtr, offset, checkMarshal, fieldExpr);
         }
     }
 
-    public static unsafe void AssertField<T>(in T instance, in void* field, string fieldName, nint offset, bool checkMarshal = true)
+    public static unsafe void AssertField<T>(in T instance, in void* field, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldExpr = "")
         where T : unmanaged
     {
         fixed (void* fieldPtr = &field)
         {
-            AssertFixed(instance, fieldPtr, fieldName, offset, checkMarshal);
+            AssertFixed(instance, fieldPtr, offset, checkMarshal, fieldExpr);
         }
     }
 
-    public static unsafe void AssertFixed<T>(in T instance, void* field, string fieldName, nint offset, bool checkMarshal = true)
+    public static unsafe void AssertFixed<T>(in T instance, void* field, nint offset, bool checkMarshal = true, [CallerArgumentExpression(nameof(field))] string fieldExpr = "")
         where T : unmanaged
     {
+        string fieldName;
+        int fieldStart;
+        if ((fieldStart = fieldExpr.LastIndexOf('.')) >= 0 ||
+            (fieldStart = fieldExpr.LastIndexOf(' ')) >= 0)
+        {
+            fieldName = fieldExpr[++fieldStart..];
+        }
+        else
+        {
+            fieldName = fieldExpr.Trim();
+        }
+
         nint fieldOffset;
         fixed (void* instancePtr = &instance)
         {
