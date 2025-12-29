@@ -19,7 +19,7 @@ Callbacks = [
             ("LightIGameInputReading", "reading"),
             ("bool", "hasOverrunOccurred"),
         ]),
-        Register = new("ignored_t", "RegisterReadingCallback", [
+        Register = new("HRESULT", "RegisterReadingCallback", [
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("float", "analogThreshold"),
@@ -33,7 +33,7 @@ Callbacks = [
             ("GameInputDeviceStatus", "currentStatus"),
             ("GameInputDeviceStatus", "previousStatus"),
         ]),
-        Register = new("ignored_t", "RegisterDeviceCallback", [
+        Register = new("HRESULT", "RegisterDeviceCallback", [
             ("IGameInputDevice?", "device"),
             ("GameInputKind", "inputKind"),
             ("GameInputDeviceStatus", "statusFilter"),
@@ -48,17 +48,17 @@ Callbacks = [
     //         ("uint64_t", "timestamp"),
     //         ("bool", "isPressed"),
     //     ]),
-    //     Register = new("ignored_t", "RegisterGuideButtonCallback", []),
+    //     Register = new("HRESULT", "RegisterGuideButtonCallback", []),
     // },
     new()
     {
         Delegate = new("void", "GameInputSystemButtonCallback", [
             ("LightIGameInputDevice", "device"),
             ("uint64_t", "timestamp"),
-            ("GameInputSystemButtons", "currentState"),
-            ("GameInputSystemButtons", "previousState"),
+            ("GameInputSystemButtons", "currentButtons"),
+            ("GameInputSystemButtons", "previousButtons"),
         ]),
-        Register = new("ignored_t", "RegisterSystemButtonCallback", [
+        Register = new("HRESULT", "RegisterSystemButtonCallback", [
             ("IGameInputDevice?", "device"),
             ("GameInputSystemButtons", "buttonFilter"),
         ]),
@@ -71,7 +71,7 @@ Callbacks = [
             ("uint32_t", "currentLayout"),
             ("uint32_t", "previousLayout"),
         ]),
-        Register = new("ignored_t", "RegisterKeyboardLayoutCallback", [
+        Register = new("HRESULT", "RegisterKeyboardLayoutCallback", [
             ("IGameInputDevice?", "device"),
         ]),
     },
