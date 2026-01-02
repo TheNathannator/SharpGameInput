@@ -81,6 +81,7 @@ Interfaces = [
     new("IGameInput", "11BE2A7E-4254-445A-9C09-FFC40F006918",
         light: false,
         new("uint64_t", "GetCurrentTimestamp"),
+
         new("HRESULT", "GetCurrentReading", 
             ("GameInputKind", "inputKind"),
             ("IGameInputDevice?", "device"),
@@ -199,15 +200,27 @@ Interfaces = [
         )
     ),
 
-    new("IGameInputReading", "2156947A-E1FA-4DE0-A30B-D812931DBD8D", light: true,
+    new("IGameInputReading", "2156947A-E1FA-4DE0-A30B-D812931DBD8D",
+        light: true,
         new("GameInputKind", "GetInputKind"),
         new("uint64_t", "GetSequenceNumber",
             ("GameInputKind", "inputKind")
         ),
         new("uint64_t", "GetTimestamp"),
-        new("void", "GetDevice",
+        new(Visibility.Private, "void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),
+        new(() => {
+#>
+
+        public LightIGameInputDevice GetDevice()
+        {
+            GetDevice(out var device);
+            return device;
+        }
+<#
+        }),
+
         new("bool", "GetRawReport",
             ("out LightIGameInputRawDeviceReport", "report")
         ),
@@ -296,7 +309,8 @@ Interfaces = [
         )
     ),
 
-    new("IGameInputDevice", "31DD86FB-4C1B-408A-868F-439B3CD47125", light: true,
+    new("IGameInputDevice", "31DD86FB-4C1B-408A-868F-439B3CD47125",
+        light: true,
         new("ref readonly GameInputDeviceInfo", "GetDeviceInfo"),
         new("GameInputDeviceStatus", "GetDeviceStatus"),
         new("void", "GetBatteryState",
@@ -431,12 +445,13 @@ Interfaces = [
         new("bool", "Dispatch",
             ("uint64_t", "quotaInMicroseconds")
         ),
-        new("int", "OpenWaitHandle",
+        new("HRESULT", "OpenWaitHandle",
             ("out HANDLE", "waitHandle")
         )
     ),
 
-    new("IGameInputForceFeedbackEffect", "51BDA05E-F742-45D9-B085-9444AE48381D", light: true,
+    new("IGameInputForceFeedbackEffect", "51BDA05E-F742-45D9-B085-9444AE48381D",
+        light: true,
         new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),
@@ -461,7 +476,8 @@ Interfaces = [
         )
     ),
 
-    new("IGameInputRawDeviceReport", "61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC", light: true,
+    new("IGameInputRawDeviceReport", "61F08CF1-1FFC-40CA-A2B8-E1AB8BC5B6DC",
+        light: true,
         new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),

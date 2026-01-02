@@ -93,7 +93,7 @@ public static partial class Checks
     public static unsafe void Check(IGameInputReading left, IGameInputReading right,
         LightIGameInputReading lightLeft, LightIGameInputReading lightRight)
     {
-        left.GetDevice(out var device);
+        var device = left.GetDevice();
         left.GetInputKind();
         left.GetSequenceNumber(GameInputKind.ControllerButton);
         left.GetTimestamp();

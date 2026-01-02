@@ -822,7 +822,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public void GetDevice(
+        private void GetDevice(
             out LightIGameInputDevice device
         )
         {
@@ -838,6 +838,12 @@ namespace SharpGameInput.v0
             );
 
             device = new(device_handle, ownsHandle: true);
+        }
+
+        public LightIGameInputDevice GetDevice()
+        {
+            GetDevice(out var device);
+            return device;
         }
 
         public bool GetRawReport(
@@ -1437,7 +1443,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        public void GetDevice(
+        private void GetDevice(
             out LightIGameInputDevice device
         )
         {
@@ -1453,6 +1459,12 @@ namespace SharpGameInput.v0
             );
 
             device = new(device_handle, ownsHandle: true);
+        }
+
+        public LightIGameInputDevice GetDevice()
+        {
+            GetDevice(out var device);
+            return device;
         }
 
         public bool GetRawReport(
@@ -2938,7 +2950,7 @@ namespace SharpGameInput.v0
             return result != 0;
         }
 
-        public int OpenWaitHandle(
+        public HRESULT OpenWaitHandle(
             out HANDLE waitHandle
         )
         {
@@ -2946,7 +2958,7 @@ namespace SharpGameInput.v0
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out HANDLE, int>)vtable[4];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out HANDLE, HRESULT>)vtable[4];
 
             var result = fnPtr(
                 thisPtr,
