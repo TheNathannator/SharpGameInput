@@ -78,8 +78,8 @@ namespace SharpGameInput.Common
         private readonly nint _instanceId = _nextInstanceId++;
         private readonly ConcurrentDictionary<ulong, (object callback, object? context)> _callbacks = new();
 
-        // Callback can be called while they are actively being registered, so we need to track
-        // what's currently being registered so we can reference
+        // Some callbacks can be invoked while they are in the registration process, so we need to track
+        // what's currently being registered and only allow one registration to be in flight at a time
         private readonly object _registrationLock = new();
         private (object? callback, object? context) _callbackBeingRegistered;
 
