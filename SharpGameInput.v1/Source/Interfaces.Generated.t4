@@ -1,0 +1,320 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#
+Namespace = "SharpGameInput.v1";
+
+UsingDirectives.Add("System");
+
+TypeNameReplacements.Add("GameInputCallbackToken_t", "uint64_t");
+
+FnPointerTypeReplacements.Add("GameInputCallbackToken", "ulong");
+FnPointerTypeReplacements.Add("LightGameInputCallbackToken", "ulong");
+
+Callbacks = [
+    new()
+    {
+        Delegate = new("void", "GameInputReadingCallback", [
+            ("LightIGameInputReading", "reading"),
+        ]),
+        Register = new("HRESULT", "RegisterReadingCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+        ]),
+    },
+    new()
+    {
+        Delegate = new("void", "GameInputDeviceCallback", [
+            ("LightIGameInputDevice", "device"),
+            ("uint64_t", "timestamp"),
+            ("GameInputDeviceStatus", "currentStatus"),
+            ("GameInputDeviceStatus", "previousStatus"),
+        ]),
+        Register = new("HRESULT", "RegisterDeviceCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("GameInputDeviceStatus", "statusFilter"),
+            ("GameInputEnumerationKind", "enumerationKind"),
+        ]),
+    },
+    new()
+    {
+        Delegate = new("void", "GameInputSystemButtonCallback", [
+            ("LightIGameInputDevice", "device"),
+            ("uint64_t", "timestamp"),
+            ("GameInputSystemButtons", "currentButtons"),
+            ("GameInputSystemButtons", "previousButtons"),
+        ]),
+        Register = new("HRESULT", "RegisterSystemButtonCallback", [
+            ("IGameInputDevice?", "device"),
+            ("GameInputSystemButtons", "buttonFilter"),
+        ]),
+    },
+    new()
+    {
+        Delegate = new("void", "GameInputKeyboardLayoutCallback", [
+            ("LightIGameInputDevice", "device"),
+            ("uint64_t", "timestamp"),
+            ("uint32_t", "currentLayout"),
+            ("uint32_t", "previousLayout"),
+        ]),
+        Register = new("HRESULT", "RegisterKeyboardLayoutCallback", [
+            ("IGameInputDevice?", "device"),
+        ]),
+    },
+];
+
+Interfaces = [
+    new("IGameInput", "40FFB7E4-6150-407A-B439-132BADC08D2D",
+        light: false,
+        new("uint64_t", "GetCurrentTimestamp"),
+
+        new("HRESULT", "GetCurrentReading", 
+            ("GameInputKind", "inputKind"),
+            ("IGameInputDevice?", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+        new("HRESULT", "GetNextReading", 
+            ("LightIGameInputReading", "referenceReading"),
+            ("GameInputKind", "inputKind"),
+            ("IGameInputDevice?", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+        new("HRESULT", "GetPreviousReading",
+            ("LightIGameInputReading", "referenceReading"),
+            ("GameInputKind", "inputKind"),
+            ("IGameInputDevice?", "device"),
+            ("out LightIGameInputReading", "reading")
+        ),
+
+        new(Visibility.Private, "HRESULT", "_RegisterReadingCallback",
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("void*?", "context"),
+            ("GameInputReadingCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "HRESULT", "_RegisterDeviceCallback",
+            ("IGameInputDevice?", "device"),
+            ("GameInputKind", "inputKind"),
+            ("GameInputDeviceStatus", "statusFilter"),
+            ("GameInputEnumerationKind", "enumerationKind"),
+            ("void*?", "context"),
+            ("GameInputDeviceCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "HRESULT", "_RegisterSystemButtonCallback",
+            ("IGameInputDevice?", "device"),
+            ("GameInputSystemButtons", "buttonFilter"),
+            ("void*?", "context"),
+            ("GameInputSystemButtonCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "HRESULT", "_RegisterKeyboardLayoutCallback",
+            ("IGameInputDevice?", "device"),
+            ("void*?", "context"),
+            ("GameInputKeyboardLayoutCallback", "callbackFunc"),
+            ("out GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Internal, "void", "StopCallback",
+            ("GameInputCallbackToken_t", "callbackToken")
+        ),
+        new(Visibility.Private, "bool", "_UnregisterCallback",
+            ("GameInputCallbackToken_t", "callbackToken")
+        ),
+
+        new("HRESULT", "CreateDispatcher",
+            ("out IGameInputDispatcher", "dispatcher")
+        ),
+
+        new("HRESULT", "FindDeviceFromId",
+            ("in APP_LOCAL_DEVICE_ID", "value"),
+            ("out IGameInputDevice", "device")
+        ),
+        new("HRESULT", "FindDeviceFromPlatformString",
+            ("wchar_t*", "value"),
+            ("out IGameInputDevice", "device")
+        ),
+        new(() =>
+        {
+#>
+
+        public HRESULT FindDeviceFromPlatformString(string value, out IGameInputDevice device)
+        {
+            fixed (char* ptr = value)
+            {
+                return FindDeviceFromPlatformString(ptr, out device);
+            }
+        }
+<#
+        }),
+
+        new("void", "SetFocusPolicy",
+            ("GameInputFocusPolicy", "policy")
+        )
+    ),
+
+    new("IGameInputReading", "86318E60-0B3C-40D6-BEFA-C62F2D952724",
+        light: true,
+        new("GameInputKind", "GetInputKind"),
+        new("uint64_t", "GetTimestamp"),
+        new(Visibility.Private, "void", "GetDevice",
+            ("out LightIGameInputDevice", "device")
+        ),
+        new(() => {
+#>
+
+        public LightIGameInputDevice GetDevice()
+        {
+            GetDevice(out var device);
+            return device;
+        }
+<#
+        }),
+
+        new("uint32_t", "GetControllerAxisCount"),
+        new("uint32_t", "GetControllerAxisState",
+            ("uint32_t", "stateArrayCount"),
+            ("float*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerAxisState",
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("float[mut]", "stateArray")
+        )),
+
+        new("uint32_t", "GetControllerButtonCount"),
+        new("uint32_t", "GetControllerButtonState",
+            ("uint32_t", "stateArrayCount"),
+            ("ByteBool*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("ByteBool[mut]", "stateArray")
+        )),
+
+        new("uint32_t", "GetControllerSwitchCount"),
+        new("uint32_t", "GetControllerSwitchState",
+            ("uint32_t", "stateArrayCount"),
+            ("GameInputSwitchPosition*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetControllerSwitchState",
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("GameInputSwitchPosition[mut]", "stateArray")
+        )),
+
+        new("uint32_t", "GetKeyCount"),
+        new("uint32_t", "GetKeyState",
+            ("uint32_t", "stateArrayCount"),
+            ("GameInputKeyState*", "stateArray")
+        ),
+        new(() => MakeArrayWrappers("uint32_t", "GetKeyState",
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: true,
+            ("GameInputKeyState[mut]", "stateArray")
+        )),
+
+        new("bool", "GetMouseState",
+            ("out GameInputMouseState", "state")
+        ),
+
+        new("bool", "GetArcadeStickState",
+            ("out GameInputArcadeStickState", "state")
+        ),
+
+        new("bool", "GetFlightStickState",
+            ("out GameInputFlightStickState", "state")
+        ),
+
+        new("bool", "GetGamepadState",
+            ("out GameInputGamepadState", "state")
+        ),
+
+        new("bool", "GetRacingWheelState",
+            ("out GameInputRacingWheelState", "state")
+        ),
+
+        new("bool", "GetUiNavigationState",
+            ("out GameInputUiNavigationState", "state")
+        )
+    ),
+
+    new("IGameInputDevice", "B169652A-4A32-40D7-9FA9-905997952516",
+        light: true,
+        new(Visibility.Private, "void", "GetDeviceInfo",
+            ("out GameInputDeviceInfo*", "info")
+        ),
+        new(() => {
+#>
+
+        public ref readonly GameInputDeviceInfo GetDeviceInfo()
+        {
+            GetDeviceInfo(out var info);
+            return ref *info;
+        }
+<#
+        }),
+
+        new("GameInputDeviceStatus", "GetDeviceStatus"),
+
+        new("HRESULT", "CreateForceFeedbackEffect",
+            ("uint32_t", "motorIndex"),
+            ("in GameInputForceFeedbackParams", "ffbParams"),
+            ("out LightIGameInputForceFeedbackEffect", "effect")
+        ),
+
+        new("bool", "IsForceFeedbackMotorPoweredOn",
+            ("uint32_t", "motorIndex")
+        ),
+
+        new("void", "SetForceFeedbackMotorGain",
+            ("uint32_t", "motorIndex"),
+            ("float", "masterGain")
+        ),
+
+        new("void", "SetRumbleState",
+            ("in GameInputRumbleParams", "rumbleParams")
+        )
+    ),
+
+    new("IGameInputDispatcher", "415EED2E-98CB-42C2-8F28-B94601074E31",
+        light: false,
+        new("bool", "Dispatch",
+            ("uint64_t", "quotaInMicroseconds")
+        ),
+        new("HRESULT", "OpenWaitHandle",
+            ("out HANDLE", "waitHandle")
+        )
+    ),
+
+    new("IGameInputForceFeedbackEffect", "51BDA05E-F742-45D9-B085-9444AE48381D",
+        light: true,
+        new("void", "GetDevice",
+            ("out LightIGameInputDevice", "device")
+        ),
+
+        new("uint32_t", "GetMotorIndex"),
+
+        new("float", "GetGain"),
+        new("void", "SetGain",
+            ("float", "gain")
+        ),
+
+        new("void", "GetParams",
+            ("out GameInputForceFeedbackParams", "ffbParams")
+        ),
+        new("bool", "SetParams",
+            ("in GameInputForceFeedbackParams", "ffbParams")
+        ),
+
+        new("GameInputFeedbackEffectState", "GetState"),
+        new("void", "SetState",
+            ("GameInputFeedbackEffectState", "state")
+        )
+    ),
+];
+#>
+<#@ include file="../../SharpGameInput.Common/Source/InterfaceGeneration.t4" #>
