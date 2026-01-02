@@ -144,7 +144,7 @@ WriteCommonStructs();
             => !(left == right);
 
         public bool Equals([NotNullWhen(true)] GameInputComPtr? ptr)
-            => ptr == this;
+            => this == ptr;
 
         public override bool Equals([NotNullWhen(true)] object? obj)
             => obj is GameInputComPtr ptr && Equals(ptr);
@@ -176,14 +176,14 @@ foreach (var _iface in Interfaces)
 #>
 
         public bool Equals([NotNullWhen(true)] <#= iface.Name #>? ptr)
-            => ptr == this;
+            => this == ptr;
 <#
     if (iface.IsLight)
     {
 #>
 
         public bool Equals(Light<#= iface.Name #> obj)
-            => obj == this;
+            => this == obj;
     }
 
     public unsafe ref partial struct Light<#= iface.Name #>
@@ -248,11 +248,11 @@ foreach (var _iface in Interfaces)
         public static bool operator !=(Light<#= iface.Name #> left, <#= iface.Name #>? right)
             => !(left == right);
 
-        public bool Equals(Light<#= iface.Name #> obj)
-            => obj == this;
+        public readonly bool Equals(Light<#= iface.Name #> obj)
+            => this == obj;
 
-        public bool Equals(<#= iface.Name #> obj)
-            => obj == this;
+        public readonly bool Equals(<#= iface.Name #>? obj)
+            => this == obj;
 
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         [Obsolete("Equals(object) on Light<#= iface.Name #> will always throw an exception. Use the equality operator instead.", true)]

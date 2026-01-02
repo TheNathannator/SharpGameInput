@@ -80,10 +80,10 @@ namespace SharpGameInput.v0
             => !(left == right);
 
         public bool Equals([NotNullWhen(true)] GameInputCallbackToken? obj)
-            => obj == this;
+            => this == obj;
 
         public bool Equals(LightGameInputCallbackToken obj)
-            => obj == this;
+            => this == obj;
 
         public override bool Equals([NotNullWhen(true)] object? obj)
             => obj is GameInputCallbackToken other && Equals(other);
@@ -140,11 +140,11 @@ namespace SharpGameInput.v0
         public static bool operator !=(LightGameInputCallbackToken left, GameInputCallbackToken? right)
             => !(left == right);
 
-        public bool Equals(LightGameInputCallbackToken obj)
-            => obj == this;
+        public readonly bool Equals(LightGameInputCallbackToken obj)
+            => this == obj;
 
-        public bool Equals(GameInputCallbackToken obj)
-            => obj == this;
+        public readonly bool Equals(GameInputCallbackToken? obj)
+            => this == obj;
 
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         [Obsolete("Equals(object) on LightGameInputCallbackToken will always throw an exception. Use the equality operator instead.", true)]

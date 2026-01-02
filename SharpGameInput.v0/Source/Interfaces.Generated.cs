@@ -299,7 +299,7 @@ namespace SharpGameInput.v0
             => !(left == right);
 
         public bool Equals([NotNullWhen(true)] GameInputComPtr? ptr)
-            => ptr == this;
+            => this == ptr;
 
         public override bool Equals([NotNullWhen(true)] object? obj)
             => obj is GameInputComPtr ptr && Equals(ptr);
@@ -757,7 +757,7 @@ namespace SharpGameInput.v0
         }
 
         public bool Equals([NotNullWhen(true)] IGameInput? ptr)
-            => ptr == this;
+            => this == ptr;
     }
 
     [Guid("2156947A-E1FA-4DE0-A30B-D812931DBD8D")]
@@ -1312,10 +1312,10 @@ namespace SharpGameInput.v0
         }
 
         public bool Equals([NotNullWhen(true)] IGameInputReading? ptr)
-            => ptr == this;
+            => this == ptr;
 
         public bool Equals(LightIGameInputReading obj)
-            => obj == this;
+            => this == obj;
     }
 
     public unsafe ref partial struct LightIGameInputReading
@@ -1380,11 +1380,11 @@ namespace SharpGameInput.v0
         public static bool operator !=(LightIGameInputReading left, IGameInputReading? right)
             => !(left == right);
 
-        public bool Equals(LightIGameInputReading obj)
-            => obj == this;
+        public readonly bool Equals(LightIGameInputReading obj)
+            => this == obj;
 
-        public bool Equals(IGameInputReading obj)
-            => obj == this;
+        public readonly bool Equals(IGameInputReading? obj)
+            => this == obj;
 
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         [Obsolete("Equals(object) on LightIGameInputReading will always throw an exception. Use the equality operator instead.", true)]
@@ -2391,10 +2391,10 @@ namespace SharpGameInput.v0
         }
 
         public bool Equals([NotNullWhen(true)] IGameInputDevice? ptr)
-            => ptr == this;
+            => this == ptr;
 
         public bool Equals(LightIGameInputDevice obj)
-            => obj == this;
+            => this == obj;
     }
 
     public unsafe ref partial struct LightIGameInputDevice
@@ -2459,11 +2459,11 @@ namespace SharpGameInput.v0
         public static bool operator !=(LightIGameInputDevice left, IGameInputDevice? right)
             => !(left == right);
 
-        public bool Equals(LightIGameInputDevice obj)
-            => obj == this;
+        public readonly bool Equals(LightIGameInputDevice obj)
+            => this == obj;
 
-        public bool Equals(IGameInputDevice obj)
-            => obj == this;
+        public readonly bool Equals(IGameInputDevice? obj)
+            => this == obj;
 
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         [Obsolete("Equals(object) on LightIGameInputDevice will always throw an exception. Use the equality operator instead.", true)]
@@ -2969,7 +2969,7 @@ namespace SharpGameInput.v0
         }
 
         public bool Equals([NotNullWhen(true)] IGameInputDispatcher? ptr)
-            => ptr == this;
+            => this == ptr;
     }
 
     [Guid("51BDA05E-F742-45D9-B085-9444AE48381D")]
@@ -3119,10 +3119,10 @@ namespace SharpGameInput.v0
         }
 
         public bool Equals([NotNullWhen(true)] IGameInputForceFeedbackEffect? ptr)
-            => ptr == this;
+            => this == ptr;
 
         public bool Equals(LightIGameInputForceFeedbackEffect obj)
-            => obj == this;
+            => this == obj;
     }
 
     public unsafe ref partial struct LightIGameInputForceFeedbackEffect
@@ -3187,11 +3187,11 @@ namespace SharpGameInput.v0
         public static bool operator !=(LightIGameInputForceFeedbackEffect left, IGameInputForceFeedbackEffect? right)
             => !(left == right);
 
-        public bool Equals(LightIGameInputForceFeedbackEffect obj)
-            => obj == this;
+        public readonly bool Equals(LightIGameInputForceFeedbackEffect obj)
+            => this == obj;
 
-        public bool Equals(IGameInputForceFeedbackEffect obj)
-            => obj == this;
+        public readonly bool Equals(IGameInputForceFeedbackEffect? obj)
+            => this == obj;
 
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         [Obsolete("Equals(object) on LightIGameInputForceFeedbackEffect will always throw an exception. Use the equality operator instead.", true)]
@@ -3587,10 +3587,10 @@ namespace SharpGameInput.v0
         }
 
         public bool Equals([NotNullWhen(true)] IGameInputRawDeviceReport? ptr)
-            => ptr == this;
+            => this == ptr;
 
         public bool Equals(LightIGameInputRawDeviceReport obj)
-            => obj == this;
+            => this == obj;
     }
 
     public unsafe ref partial struct LightIGameInputRawDeviceReport
@@ -3655,11 +3655,11 @@ namespace SharpGameInput.v0
         public static bool operator !=(LightIGameInputRawDeviceReport left, IGameInputRawDeviceReport? right)
             => !(left == right);
 
-        public bool Equals(LightIGameInputRawDeviceReport obj)
-            => obj == this;
+        public readonly bool Equals(LightIGameInputRawDeviceReport obj)
+            => this == obj;
 
-        public bool Equals(IGameInputRawDeviceReport obj)
-            => obj == this;
+        public readonly bool Equals(IGameInputRawDeviceReport? obj)
+            => this == obj;
 
 #pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
         [Obsolete("Equals(object) on LightIGameInputRawDeviceReport will always throw an exception. Use the equality operator instead.", true)]
