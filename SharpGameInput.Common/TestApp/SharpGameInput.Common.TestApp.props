@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Source/SharpGameInput.v$(GameInputApiVersion).csproj" />
+    <Using Include="SharpGameInput.v$(GameInputApiVersion)" />
 
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.205">
       <PrivateAssets>all</PrivateAssets>

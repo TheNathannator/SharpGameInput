@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <GameInputApiVersion>0</GameInputApiVersion>
+    <DefineConstants>GAMEINPUT_HAS_RAW_REPORTS;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <Import Project="../../SharpGameInput.Common/TestApp/SharpGameInput.Common.TestApp.props" />

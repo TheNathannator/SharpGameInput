@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using SharpGameInput.v0;
 
 namespace SharpGameInput.TestApp
 {
