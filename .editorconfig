@@ -1,0 +1,14 @@
+root = true
+
+[*]
+indent_style = space
+
+[*.md]
+indent_size = 2
+tab_width = 2
+
+[*.cs]
+indent_size = 4
+tab_width = 4
+
+csharp_indent_case_contents_when_block = false
