@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using SharpGameInput.TestApp.Display;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Tests
 {
     internal class CallbacksTest
     {
@@ -11,35 +11,18 @@ namespace SharpGameInput.TestApp
             ConsoleMenu.WriteMenuHeader("Callbacks");
 
             (string name, Action<IGameInput> func)[] subTests =
-            {
-                ("Reading callback", ReadingCallbackTest),
+            [
+                ("Reading callback", ReadingsTest.Callback),
                 ("Device callback", DeviceCallbackTest),
                 ("System button callback", SystemButtonCallbackTest),
                 ("Keyboard layout callback", KeyboardLayoutCallbackTest),
-            };
+            ];
 
-            int choice = ConsoleMenu.PromptChoice("Select a sub-test", subTests.Select((i) => i.name));
+            int choice = ConsoleMenu.PromptChoice("Select a sub-test", "Exit", subTests.Select((i) => i.name));
             if (choice < 0)
                 return;
 
             subTests[choice].func(gameInput);
-        }
-
-        private static void ReadingCallbackTest(IGameInput gameInput)
-        {
-            if (!gameInput.RegisterReadingCallback(
-                null, GameInputKind.AnyKind, 0,
-                null, ReadingCallback,
-                out var token, out int result
-            ))
-            {
-                ConsolePrinting.PrintPInvokeError("Failed to register reading callback", result);
-                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
-                return;
-            }
-
-            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
-            token.Unregister(5000);
         }
 
         private static void DeviceCallbackTest(IGameInput gameInput)
@@ -55,8 +38,10 @@ namespace SharpGameInput.TestApp
                 return;
             }
 
-            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
-            token.Unregister(5000);
+            using (token)
+            {
+                ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            }
         }
 
         private static void SystemButtonCallbackTest(IGameInput gameInput)
@@ -72,8 +57,10 @@ namespace SharpGameInput.TestApp
                 return;
             }
 
-            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
-            token.Unregister(5000);
+            using (token)
+            {
+                ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            }
         }
 
         private static void KeyboardLayoutCallbackTest(IGameInput gameInput)
@@ -89,24 +76,13 @@ namespace SharpGameInput.TestApp
                 return;
             }
 
-            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
-            token.Unregister(5000);
-        }
-
-        private static void ReadingCallback(
-            LightGameInputCallbackToken callbackToken,
-            object? context,
-            LightIGameInputReading reading,
-            bool hasOverrunOccurred
-        )
-        {
-            using (reading)
+            using (token)
             {
-                ConsolePrinting.Print(reading, null);
+                ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
             }
         }
 
-        private static unsafe void DeviceCallback(
+        private static void DeviceCallback(
             LightGameInputCallbackToken callbackToken,
             object? context,
             LightIGameInputDevice device,
@@ -120,40 +96,17 @@ namespace SharpGameInput.TestApp
             if (isConnected == wasConnected)
                 return;
 
-            ConsolePrinting.WriteTimestamp(timestamp);
-            Console.WriteLine(isConnected ? ": Device connected" : ": Device disconnected");
-
             ref readonly var info = ref device.GetDeviceInfo();
-            Console.WriteLine($"- Name: {GameInputString.ToString(info.displayName)}");
-            Console.WriteLine($"- Hardware IDs: VID_{info.vendorId:X4}&PID_{info.productId:X4}&REV_{info.revisionNumber:X4}");
-            Console.WriteLine($"- Device ID:      {info.deviceId}");
-            Console.WriteLine($"- Device root ID: {info.deviceRootId}");
-            if (!isConnected)
-                return;
 
-            Console.WriteLine($"- Family: {info.deviceFamily}");
-            Console.WriteLine($"- Capabilities: {info.capabilities}");
-            Console.WriteLine($"- Supported inputs: {info.supportedInput}");
-            Console.WriteLine($"- Hardware version: {info.hardwareVersion}");
-            Console.WriteLine($"- Firmware version: {info.firmwareVersion}");
-            Console.WriteLine($"- Interface number: {info.interfaceNumber}");
-            Console.WriteLine($"- Collection number: {info.collectionNumber}");
-            Console.WriteLine($"- Usage: {info.usage.page:X4}:{info.usage.id:X4}");
-
-            Console.WriteLine($"- {info.deviceStringCount} strings");
-            if (info.deviceStrings != null)
+            ConsolePrinting.WriteTimestamp(timestamp);
+            if (isConnected)
             {
-                for (int i = 0; i < info.deviceStringCount; i++)
-                {
-                    Console.WriteLine($"  - {info.deviceStrings[i]}");
-                }
+                Console.WriteLine($": Device {info.deviceId} connected");
+                ConsolePrinting.Print(info);
             }
-
-            Console.WriteLine($"- Descriptor data: {info.deviceDescriptorSize} bytes");
-            if (info.deviceDescriptorData != null && info.deviceDescriptorSize > 0)
+            else
             {
-                var descriptor = new ReadOnlySpan<byte>(info.deviceDescriptorData, (int)info.deviceDescriptorSize);
-                ConsolePrinting.PrintBufferWrapped(descriptor, indentAmount: 2, wrapCount: 32);
+                Console.WriteLine($": Device {info.deviceId} connected");
             }
         }
 

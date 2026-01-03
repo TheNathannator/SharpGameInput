@@ -5,13 +5,17 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
-    public class GameInputCallbackToken : IEquatable<GameInputCallbackToken>
+    public sealed class GameInputCallbackToken : IDisposable,
+#if NETSTANDARD2_1_OR_GREATER
+        IAsyncDisposable,
+#endif
+        IEquatable<GameInputCallbackToken>
     {
         internal const ulong CurrentCallbackToken = 0xFFFFFFFFFFFFFFFF;
         internal const ulong InvalidCallbackToken = 0x0000000000000000;
 
         private IGameInput? _gameInput;
-        internal readonly ulong _callbackToken;
+        internal ulong _callbackToken;
 
         public GameInputCallbackToken(IGameInput gameInput, ulong callbackToken)
         {
@@ -21,6 +25,37 @@ namespace SharpGameInput.v0
 
             _gameInput = gameInput;
             _callbackToken = callbackToken;
+        }
+
+        public void Dispose()
+        {
+            if (_callbackToken != 0)
+            {
+                _gameInput?.UnregisterCallback(_callbackToken, ulong.MaxValue);
+                _gameInput = null;
+                _callbackToken = 0;
+            }
+        }
+
+#if NETSTANDARD2_1_OR_GREATER
+        public async ValueTask DisposeAsync()
+#else
+        public async Task DisposeAsync()
+#endif
+        {
+            if (_callbackToken != 0)
+            {
+                if (_gameInput != null)
+                {
+                    await Task.Run(() =>
+                    {
+                        _gameInput?.UnregisterCallback(_callbackToken, ulong.MaxValue);
+                    });
+                }
+
+                _gameInput = null;
+                _callbackToken = 0;
+            }
         }
 
         public void Stop()
@@ -42,25 +77,21 @@ namespace SharpGameInput.v0
 
         public bool TryUnregister(ulong timeoutInMicroseconds)
         {
-            if (_gameInput == null)
-                return true;
-
-            if (!_gameInput.UnregisterCallback(_callbackToken, timeoutInMicroseconds))
+            if (_gameInput != null && !_gameInput.UnregisterCallback(_callbackToken, timeoutInMicroseconds))
                 return false;
 
             _gameInput = null;
+            _callbackToken = 0;
             return true;
         }
 
         public async Task<bool> TryUnregisterAsync(ulong timeoutInMicroseconds)
         {
-            if (_gameInput == null)
-                return true;
-
-            if (!await Task.Run(() => _gameInput.UnregisterCallback(_callbackToken, timeoutInMicroseconds)))
+            if (_gameInput != null && !await Task.Run(() => _gameInput.UnregisterCallback(_callbackToken, timeoutInMicroseconds)))
                 return false;
 
             _gameInput = null;
+            _callbackToken = 0;
             return true;
         }
 

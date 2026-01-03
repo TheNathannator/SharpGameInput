@@ -5,48 +5,68 @@ using System.Threading;
 using SharpGameInput.TestApp.Display;
 using SharpGameInput.TestApp.Utility;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Tests
 {
-    internal class RawReportTest
+    internal class ReadingsTest
     {
         public static void Run(IGameInput gameInput)
         {
-            ConsoleMenu.WriteMenuHeader("Read Raw Reports");
+            ConsoleMenu.WriteMenuHeader("Readings");
 
             (string name, Action<IGameInput> func)[] subTests =
+            [
+                ("Polling", Polling),
+                ("Polling (Per-Device)", PollingPerDevice),
+                ("Callback", Callback),
+            ];
+
+            int choice = ConsoleMenu.PromptChoice("Select a sub-test", "Exit", subTests.Select((i) => i.name));
+            if (choice >= 0)
             {
-                ("Direct Polling", Direct),
-                ("Polling with Device Callback", WithCallbacks),
-            };
-
-            int choice = ConsoleMenu.PromptChoice("Select a sub-test", subTests.Select((i) => i.name));
-            if (choice < 0)
-                return;
-
-            subTests[choice].func(gameInput);
+                subTests[choice].func(gameInput);
+            }
         }
 
-        public static void Direct(IGameInput gameInput)
+        public static GameInputKind PromptInputKind()
         {
-            Console.WriteLine("Press any key to stop the test.");
+            var kinds = ((GameInputKind[]) Enum.GetValues(typeof(GameInputKind)))
+                .Except([GameInputKind.Unknown, GameInputKind.AnyKind])
+                .ToArray();
+
+            int choice = ConsoleMenu.PromptChoice("Select an input kind", "AnyKind", kinds.Select((i) => i.ToString()));
+            if (choice >= 0)
+            {
+                return kinds[choice];
+            }
+
+            return GameInputKind.AnyKind;
+        }
+
+        public static void Polling(IGameInput gameInput)
+        {
+            var inputKind = PromptInputKind();
+
+            Console.WriteLine("Press any key to stop this test and return to the main menu.");
 
             var lastReport = new ByteBuffer();
             for (; !Console.KeyAvailable; Thread.Sleep(1))
             {
-                PollAndPrintReport(gameInput, null, lastReport);
+                PollAndPrintReport(gameInput, inputKind, null, lastReport);
             }
 
             // Consume keypress
             Console.ReadKey(intercept: true);
         }
 
-        public static void WithCallbacks(IGameInput gameInput)
+        public static void PollingPerDevice(IGameInput gameInput)
         {
+            var inputKind = PromptInputKind();
+
             var deviceThreads = new Dictionary<IGameInputDevice, (Thread thread, EventWaitHandle stopHandle)>();
 
             if (!gameInput.RegisterDeviceCallback(
                 null,
-                GameInputKind.RawDeviceReport,
+                inputKind,
                 GameInputDeviceStatus.Connected,
                 GameInputEnumerationKind.AsyncEnumeration,
                 null,
@@ -66,7 +86,7 @@ namespace SharpGameInput.TestApp
                             using (device)
                             {
                                 var lastReport = new ByteBuffer();
-                                while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, device, lastReport));
+                                while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, inputKind, device, lastReport));
                             }
                         });
                         thread.Start();
@@ -87,10 +107,11 @@ namespace SharpGameInput.TestApp
             ))
             {
                 ConsolePrinting.PrintPInvokeError("Failed to register device callback", result);
+                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
                 return;
             }
 
-            ConsoleMenu.WaitForKey("Press any key to stop the test.");
+            ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
 
             foreach (var (thread, stopHandle) in deviceThreads.Values)
             {
@@ -101,9 +122,46 @@ namespace SharpGameInput.TestApp
             deviceThreads.Clear();
         }
 
-        private static bool PollAndPrintReport(IGameInput gameInput, IGameInputDevice? device, ByteBuffer lastReport)
+        public static void Callback(IGameInput gameInput)
         {
-            int result = gameInput.GetCurrentReading(GameInputKind.RawDeviceReport, device, out var reading);
+            var inputKind = PromptInputKind();
+
+            if (!gameInput.RegisterReadingCallback(
+                null,
+                inputKind,
+#if GAMEINPUT_v0
+                0,
+#endif
+                null,
+#if GAMEINPUT_v0
+                (callbackToken, context, reading, hasOverrunOccurred) =>
+#else
+                (callbackToken, context, reading) =>
+#endif
+                {
+                    using (reading)
+                    {
+                        ConsolePrinting.Print(reading, null);
+                    }
+                },
+                out var token,
+                out int result
+            ))
+            {
+                ConsolePrinting.PrintPInvokeError("Failed to register reading callback", result);
+                ConsoleMenu.WaitForKey("Press any key to return to the main menu...");
+                return;
+            }
+
+            using (token)
+            {
+                ConsoleMenu.WaitForKey("Press any key to stop this test and return to the main menu.");
+            }
+        }
+
+        private static bool PollAndPrintReport(IGameInput gameInput, GameInputKind reportKind, IGameInputDevice? device, ByteBuffer lastReport)
+        {
+            int result = gameInput.GetCurrentReading(reportKind, device, out var reading);
             if (result < 0)
             {
                 if (result == (int)GameInputResult.ReadingNotFound)
@@ -132,7 +190,7 @@ namespace SharpGameInput.TestApp
 
             using (reading)
             {
-                ConsolePrinting.PrintRawReport(reading, lastReport);
+                ConsolePrinting.Print(reading, lastReport);
             }
 
             return true;

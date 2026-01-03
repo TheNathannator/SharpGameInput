@@ -64,17 +64,17 @@ namespace SharpGameInput.TestApp.Display
             }
         }
 
-        public static int PromptChoice(string title, params string[] options)
-            => PromptChoice(title, (IEnumerable<string>)options);
+        public static int PromptChoice(string title, string defaultOption, params string[] options)
+            => PromptChoice(title, defaultOption, (IEnumerable<string>)options);
 
-        public static int PromptChoice(string title, IEnumerable<string> options)
+        public static int PromptChoice(string title, string defaultOption, IEnumerable<string> options)
         {
             // Title
             Console.WriteLine($"{title}:");
 
             // Options
             int count = 0;
-            Console.WriteLine($"0. Exit");
+            Console.WriteLine($"0. {defaultOption}");
             foreach (string option in options)
             {
                 Console.WriteLine($"{++count}. {option}");

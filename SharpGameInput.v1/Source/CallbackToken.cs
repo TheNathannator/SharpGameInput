@@ -4,10 +4,10 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v1
 {
-    public class GameInputCallbackToken : IDisposable, IEquatable<GameInputCallbackToken>
+    public sealed class GameInputCallbackToken : IDisposable, IEquatable<GameInputCallbackToken>
     {
         private IGameInput? _gameInput;
-        internal readonly ulong _callbackToken;
+        internal ulong _callbackToken;
 
         public GameInputCallbackToken(IGameInput gameInput, ulong callbackToken)
         {
@@ -19,23 +19,15 @@ namespace SharpGameInput.v1
             _callbackToken = callbackToken;
         }
 
-        ~GameInputCallbackToken()
-        {
-            DisposeUnmanagedResources();
-        }
-
         public void Dispose()
-        {
-            DisposeUnmanagedResources();
-            GC.SuppressFinalize(this);
-        }
-
-        private void DisposeUnmanagedResources()
         {
             if (_callbackToken != 0)
             {
+                // The return value here is ignored, as the only reason false will be returned
+                // is if the callback specified by the given token doesn't exist
                 _gameInput?.UnregisterCallback(_callbackToken);
                 _gameInput = null;
+                _callbackToken = 0;
             }
         }
 

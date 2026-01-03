@@ -1,5 +1,9 @@
+#if GAMEINPUT_v0 || GAMEINPUT_v3
+#define HAS_RAW_REPORTS
+#endif
+
 using System;
-#if GAMEINPUT_HAS_RAW_REPORTS
+#if HAS_RAW_REPORTS
 using System.Buffers;
 #endif
 using SharpGameInput.TestApp.Utility;
@@ -31,7 +35,7 @@ namespace SharpGameInput.TestApp.Display
         public static void Print(LightIGameInputReading reading, ByteBuffer? lastReport)
         {
             bool handled =
-#if GAMEINPUT_HAS_RAW_REPORTS
+#if HAS_RAW_REPORTS
                 PrintRawReport(reading, lastReport) ||
 #endif
                 PrintGamepadReading(reading, lastReport);
@@ -44,7 +48,7 @@ namespace SharpGameInput.TestApp.Display
             }
         }
 
-#if GAMEINPUT_HAS_RAW_REPORTS
+#if HAS_RAW_REPORTS
         public static bool PrintRawReport(LightIGameInputReading reading, ByteBuffer? lastReport)
         {
             if (!reading.GetRawReport(out var rawReport))
@@ -71,7 +75,7 @@ namespace SharpGameInput.TestApp.Display
             return false;
         }
 
-#if GAMEINPUT_HAS_RAW_REPORTS
+#if HAS_RAW_REPORTS
         public static void Print(LightIGameInputRawDeviceReport rawReport, ulong timestamp, ByteBuffer? lastReport)
         {
             const int maxStackSize = 64;

@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using System.Text;
 using SharpGameInput.Common;
 
 namespace SharpGameInput.v1
@@ -293,6 +294,18 @@ namespace SharpGameInput.v1
         {
             ThrowHelper.CheckRange(index, (int)forceFeedbackMotorCount);
             return ref _forceFeedbackMotorInfo[index];
+        }
+
+        public readonly string GetDisplayName()
+        {
+            int length = Utility.StringLength(displayName);
+            return Encoding.UTF8.GetString(displayName, length);
+        }
+
+        public readonly string GetPnpPath()
+        {
+            int length = Utility.StringLength(pnpPath);
+            return Encoding.UTF8.GetString(pnpPath, length);
         }
     }
 
