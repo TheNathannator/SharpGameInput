@@ -44,7 +44,7 @@ namespace SharpGameInput.TestApp.Display
             {
                 var inputs = reading.GetInputKind();
                 WriteTimestamp(reading.GetTimestamp());
-                Console.WriteLine($": {inputs} (0x{inputs:X8})");
+                Console.WriteLine($": {inputs} (0x{inputs:X})");
             }
         }
 
@@ -125,8 +125,8 @@ namespace SharpGameInput.TestApp.Display
                 WriteTimestamp(timestamp);
                 Console.Write($": buttons {(int)state.buttons:8X}");
                 Console.Write($"  LT {state.leftTrigger:F3} RT {state.rightTrigger:F3}");
-                Console.Write($"  LX {state.leftThumbstickX:3} LY {state.leftThumbstickY:3}");
-                Console.Write($"  RX {state.rightThumbstickX:3} RY {state.rightThumbstickY:3}");
+                Console.Write($"  LX {state.leftThumbstickX:F3} LY {state.leftThumbstickY:F3}");
+                Console.Write($"  RX {state.rightThumbstickX:F3} RY {state.rightThumbstickY:F3}");
                 Console.WriteLine();
             }
         }
