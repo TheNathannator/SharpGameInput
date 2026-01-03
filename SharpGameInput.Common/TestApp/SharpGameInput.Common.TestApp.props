@@ -17,6 +17,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Condition="'$(TargetFramework)' == 'net48'" Include="System.Memory" Version="4.5.5" />
+    <PackageReference Condition="'$(TargetFramework)' == 'net48'" Include="Shim.System.Text.Rune" Version="6.0.2" />
   </ItemGroup>
 
   <ItemGroup>

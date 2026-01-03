@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers;
+using System.Text;
 using SharpGameInput.TestApp.Utility;
 
 namespace SharpGameInput.TestApp.Display
@@ -36,6 +37,7 @@ namespace SharpGameInput.TestApp.Display
 #if HAS_RAW_REPORTS
                 PrintRawReport(reading, lastReport) ||
 #endif
+                PrintKeyboardReading(reading, lastReport) ||
                 PrintGamepadReading(reading, lastReport);
 
             if (!handled && (lastReport == null || lastReport.Write(reading.GetTimestamp())))
@@ -97,6 +99,85 @@ namespace SharpGameInput.TestApp.Display
             return true;
         }
 #endif
+
+        public static bool PrintKeyboardReading(LightIGameInputReading reading, ByteBuffer? lastReport)
+        {
+            const int maxStackSize = 16;
+
+            int keyCount = (int)reading.GetKeyCount();
+            if (keyCount < 1 && (reading.GetInputKind() & GameInputKind.Keyboard) == 0)
+            {
+                return false;
+            }
+
+            GameInputKeyState[]? poolBuffer = null;
+            Span<GameInputKeyState> keyBuffer = keyCount > maxStackSize
+                ? (poolBuffer = ArrayPool<GameInputKeyState>.Shared.Rent(keyCount))
+                : stackalloc GameInputKeyState[maxStackSize];
+
+            try
+            {
+                unsafe
+                {
+                    fixed (GameInputKeyState* ptr = keyBuffer)
+                    {
+                        int readKeys = (int)reading.GetKeyState((uint)keyBuffer.Length, ptr);
+                        keyBuffer = keyBuffer.Slice(0, Math.Min(readKeys, keyBuffer.Length));
+                    }
+                }
+
+                if (lastReport == null || lastReport.Write(keyBuffer))
+                {
+                    WriteTimestamp(reading.GetTimestamp());
+                    if (keyBuffer.Length == 0)
+                    {
+                        Console.Write(": <none>");
+                    }
+                    else
+                    {
+                        Span<char> charBuffer = stackalloc char[4];
+
+                        Console.Write(": ");
+                        for (int i = 0; i < keyBuffer.Length; i++)
+                        {
+                            ref readonly var key = ref keyBuffer[i];
+                            if (key.virtualKey == 0 && key.scanCode == 0)
+                            {
+                                break;
+                            }
+
+                            if (i != 0)
+                            {
+                                Console.Write(", ");
+                            }
+
+                            if (key.codePoint == 0 || !Rune.TryCreate(key.codePoint, out var rune))
+                            {
+                                Console.Write($"<{key.scanCode:X8}>");
+                                continue;
+                            }
+
+                            int written = rune.EncodeToUtf16(charBuffer);
+                            for (int c = 0; c < written; c++)
+                            {
+                                Console.Write(charBuffer[c]);
+                            }
+                        }
+                    }
+
+                    Console.WriteLine();
+                }
+
+                return true;
+            }
+            finally
+            {
+                if (poolBuffer != null)
+                {
+                    ArrayPool<GameInputKeyState>.Shared.Return(poolBuffer);
+                }
+            }
+        }
 
         public static bool PrintGamepadReading(LightIGameInputReading reading, ByteBuffer? lastReport)
         {

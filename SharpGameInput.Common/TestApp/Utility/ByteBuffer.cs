@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace SharpGameInput.TestApp.Utility
 {
@@ -6,6 +7,11 @@ namespace SharpGameInput.TestApp.Utility
     {
         private byte[] _buffer = new byte[16];
         private int _length = 0;
+
+        public bool Write(Span<byte> data)
+        {
+            return Write((ReadOnlySpan<byte>)data);
+        }
 
         public bool Write(ReadOnlySpan<byte> data)
         {
@@ -19,6 +25,18 @@ namespace SharpGameInput.TestApp.Utility
             _length = data.Length;
 
             return true;
+        }
+
+        public bool Write<T>(Span<T> data)
+            where T : unmanaged
+        {
+            return Write(MemoryMarshal.AsBytes(data));
+        }
+
+        public bool Write<T>(ReadOnlySpan<T> data)
+            where T : unmanaged
+        {
+            return Write(MemoryMarshal.AsBytes(data));
         }
 
         public unsafe bool Write<T>(in T value)

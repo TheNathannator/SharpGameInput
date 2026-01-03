@@ -33,6 +33,7 @@ namespace SharpGameInput.TestApp.Tests
                 .Except([GameInputKind.Unknown, GameInputKind.AnyKind])
                 .ToArray();
 
+            Console.WriteLine();
             int choice = ConsoleMenu.PromptChoice("Select an input kind", "AnyKind", kinds.Select((i) => i.ToString()));
             if (choice >= 0)
             {
@@ -46,16 +47,13 @@ namespace SharpGameInput.TestApp.Tests
         {
             var inputKind = PromptInputKind();
 
-            Console.WriteLine("Press any key to stop this test and return to the main menu.");
+            Console.WriteLine("Press Enter to stop this test and return to the main menu.");
 
             var lastReport = new ByteBuffer();
-            for (; !Console.KeyAvailable; Thread.Sleep(1))
+            for (; !Console.KeyAvailable || Console.ReadKey(intercept: true).Key != ConsoleKey.Enter; Thread.Sleep(1))
             {
                 PollAndPrintReport(gameInput, inputKind, null, lastReport);
             }
-
-            // Consume keypress
-            Console.ReadKey(intercept: true);
         }
 
         public static void PollingPerDevice(IGameInput gameInput)
