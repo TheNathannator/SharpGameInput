@@ -3,9 +3,7 @@
 #endif
 
 using System;
-#if HAS_RAW_REPORTS
 using System.Buffers;
-#endif
 using SharpGameInput.TestApp.Utility;
 
 namespace SharpGameInput.TestApp.Display
@@ -40,7 +38,7 @@ namespace SharpGameInput.TestApp.Display
 #endif
                 PrintGamepadReading(reading, lastReport);
 
-            if (!handled)
+            if (!handled && (lastReport == null || lastReport.Write(reading.GetTimestamp())))
             {
                 var inputs = reading.GetInputKind();
                 WriteTimestamp(reading.GetTimestamp());
@@ -53,82 +51,71 @@ namespace SharpGameInput.TestApp.Display
         {
             if (!reading.GetRawReport(out var rawReport))
             {
-                using (rawReport)
-                {
-                    Print(rawReport, reading.GetTimestamp(), lastReport);
-                }
-                return true;
+                return false;
             }
 
-            return false;
+            using (rawReport)
+            {
+                const int maxStackSize = 64;
+
+                uint reportId = rawReport.GetReportInfo().id;
+                int reportSize = (int)rawReport.GetRawDataSize();
+
+                byte[]? poolBuffer = null;
+                Span<byte> buffer = reportSize > maxStackSize
+                    ? (poolBuffer = ArrayPool<byte>.Shared.Rent(reportSize))
+                    : stackalloc byte[maxStackSize];
+
+                try
+                {
+                    unsafe
+                    {
+                        fixed (byte* ptr = buffer)
+                        {
+                            int readSize = (int)rawReport.GetRawData((UIntPtr)buffer.Length, ptr);
+                            buffer = buffer.Slice(0, Math.Min(readSize, buffer.Length));
+                        }
+                    }
+
+                    if (lastReport == null || lastReport.Write(buffer))
+                    {
+                        WriteTimestamp(reading.GetTimestamp());
+                        Console.Write($": [{buffer.Length:D3}] {reportId:X2}: ");
+                        WriteBuffer(buffer);
+                        Console.WriteLine();
+                    }
+                }
+                finally
+                {
+                    if (poolBuffer != null)
+                    {
+                        ArrayPool<byte>.Shared.Return(poolBuffer);
+                    }
+                }
+            }
+
+            return true;
         }
 #endif
 
         public static bool PrintGamepadReading(LightIGameInputReading reading, ByteBuffer? lastReport)
         {
-            if (reading.GetGamepadState(out var state))
+            if (!reading.GetGamepadState(out var state))
             {
-                Print(state, reading.GetTimestamp(), lastReport);
-                return true;
+                return false;
             }
 
-            return false;
-        }
-
-#if HAS_RAW_REPORTS
-        public static void Print(LightIGameInputRawDeviceReport rawReport, ulong timestamp, ByteBuffer? lastReport)
-        {
-            const int maxStackSize = 64;
-
-            uint reportId = rawReport.GetReportInfo().id;
-            int reportSize = (int)rawReport.GetRawDataSize();
-
-            byte[]? poolBuffer = null;
-            Span<byte> buffer = reportSize > maxStackSize
-                ? (poolBuffer = ArrayPool<byte>.Shared.Rent(reportSize))
-                : stackalloc byte[maxStackSize];
-
-            try
+            if (lastReport == null || lastReport.Write(state))
             {
-                unsafe
-                {
-                    fixed (byte* ptr = buffer)
-                    {
-                        int readSize = (int)rawReport.GetRawData((UIntPtr)buffer.Length, ptr);
-                        buffer = buffer.Slice(0, Math.Min(readSize, buffer.Length));
-                    }
-                }
-
-                if (lastReport?.Write(buffer) ?? true)
-                {
-                    WriteTimestamp(timestamp);
-                    Console.Write($": [{buffer.Length:D3}] {reportId:X2}: ");
-                    WriteBuffer(buffer);
-                    Console.WriteLine();
-                }
-
-            }
-            finally
-            {
-                if (poolBuffer != null)
-                {
-                    ArrayPool<byte>.Shared.Return(poolBuffer);
-                }
-            }
-        }
-#endif
-
-        public static void Print(in GameInputGamepadState state, ulong timestamp, ByteBuffer? lastReport)
-        {
-            if (lastReport?.Write(state) ?? true)
-            {
-                WriteTimestamp(timestamp);
+                WriteTimestamp(reading.GetTimestamp());
                 Console.Write($": buttons {(int)state.buttons:8X}");
                 Console.Write($"  LT {state.leftTrigger:F3} RT {state.rightTrigger:F3}");
                 Console.Write($"  LX {state.leftThumbstickX:F3} LY {state.leftThumbstickY:F3}");
                 Console.Write($"  RX {state.rightThumbstickX:F3} RY {state.rightThumbstickY:F3}");
                 Console.WriteLine();
             }
+
+            return true;
         }
     }
 }
