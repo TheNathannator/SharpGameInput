@@ -7,7 +7,7 @@ using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Gdi;
 using Windows.Win32.UI.WindowsAndMessaging;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Display
 {
     using static PInvoke;
 

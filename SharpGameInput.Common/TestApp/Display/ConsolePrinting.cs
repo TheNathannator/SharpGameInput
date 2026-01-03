@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Display
 {
     internal static partial class ConsolePrinting
     {

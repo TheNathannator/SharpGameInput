@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Display
 {
     internal static partial class ConsoleMenu
     {

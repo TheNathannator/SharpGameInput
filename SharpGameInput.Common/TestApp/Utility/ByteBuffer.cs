@@ -1,6 +1,6 @@
 using System;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Utility
 {
     public class ByteBuffer
     {

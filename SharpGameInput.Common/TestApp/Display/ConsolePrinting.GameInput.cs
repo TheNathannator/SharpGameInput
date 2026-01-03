@@ -1,10 +1,10 @@
 using System;
-
 #if GAMEINPUT_HAS_RAW_REPORTS
 using System.Buffers;
 #endif
+using SharpGameInput.TestApp.Utility;
 
-namespace SharpGameInput.TestApp
+namespace SharpGameInput.TestApp.Display
 {
     internal static partial class ConsolePrinting
     {

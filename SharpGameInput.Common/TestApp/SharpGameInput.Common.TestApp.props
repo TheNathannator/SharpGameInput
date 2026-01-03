@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)/*.cs" LinkBase="Common" />
+    <Compile Include="$(MSBuildThisFileDirectory)/**/*.cs" LinkBase="Common" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)/NativeMethods.txt" LinkBase="Common" />
   </ItemGroup>
 
