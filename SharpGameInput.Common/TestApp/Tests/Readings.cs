@@ -127,11 +127,11 @@ namespace SharpGameInput.TestApp.Tests
             if (!gameInput.RegisterReadingCallback(
                 null,
                 inputKind,
-#if GAMEINPUT_v0
+#if GAMEINPUT_V0
                 0,
 #endif
                 null,
-#if GAMEINPUT_v0
+#if GAMEINPUT_V0
                 (callbackToken, context, reading, hasOverrunOccurred) =>
 #else
                 (callbackToken, context, reading) =>

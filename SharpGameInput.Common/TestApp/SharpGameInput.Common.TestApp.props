@@ -6,8 +6,48 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>12</LangVersion>
-    <DefineConstants>$(DefineConstants);GAMEINPUT_v$(GameInputApiVersion)</DefineConstants>
   </PropertyGroup>
+
+  <UsingTask
+    TaskName="MakeVersionDefines"
+    TaskFactory="RoslynCodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Version ParameterType="System.Int32" />
+      <InputDefines ParameterType="System.String" />
+      <OutputDefines ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+          string defines = InputDefines;
+
+          string def = $"GAMEINPUT_V{Version}";
+          if (string.IsNullOrEmpty(defines))
+          {
+            defines = def;
+          }
+          else
+          {
+            defines += ";" + def;
+          }
+
+          for (int i = 0; i <= Version; i++)
+          {
+            defines += $";GAMEINPUT_V{i}_OR_GREATER";
+          }
+
+          OutputDefines = defines;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="CreateProperties" BeforeTargets="BeforeResolveReferences">
+    <MakeVersionDefines Version="$(GameInputApiVersion)" InputDefines="$(DefineConstants)">
+      <Output TaskParameter="OutputDefines" PropertyName="DefineConstants" />
+    </MakeVersionDefines>
+  </Target>
 
   <ItemGroup>
     <ProjectReference Include="../Source/SharpGameInput.v$(GameInputApiVersion).csproj" />
