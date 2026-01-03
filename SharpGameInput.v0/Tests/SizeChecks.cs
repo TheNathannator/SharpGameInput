@@ -556,9 +556,9 @@ public class SizeChecks
         AssertField(instance, instance.inputReportInfo,             160);
         AssertField(instance, instance.outputReportInfo,            168);
         AssertField(instance, instance.featureReportInfo,           176);
-        AssertField(instance, instance.controllerAxisInfo,          184);
-        AssertField(instance, instance.controllerButtonInfo,        192);
-        AssertField(instance, instance.controllerSwitchInfo,        200);
+        AssertField(instance, instance._controllerAxisInfo,          184);
+        AssertField(instance, instance._controllerButtonInfo,        192);
+        AssertField(instance, instance._controllerSwitchInfo,        200);
         AssertField(instance, instance.keyboardInfo,                208);
         AssertField(instance, instance.mouseInfo,                   216);
         AssertField(instance, instance.touchSensorInfo,             224);
@@ -568,8 +568,8 @@ public class SizeChecks
         AssertField(instance, instance.gamepadInfo,                 256);
         AssertField(instance, instance.racingWheelInfo,             264);
         AssertField(instance, instance.uiNavigationInfo,            272);
-        AssertField(instance, instance.forceFeedbackMotorInfo,      280);
-        AssertField(instance, instance.hapticFeedbackMotorInfo,     288);
+        AssertField(instance, instance._forceFeedbackMotorInfo,      280);
+        AssertField(instance, instance._hapticFeedbackMotorInfo,     288);
         AssertField(instance, instance.displayName,                 296);
         AssertField(instance, instance.deviceStrings,               304);
         AssertField(instance, instance.deviceDescriptorData,        312);

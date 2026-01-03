@@ -263,47 +263,57 @@ namespace SharpGameInput.v1
         public uint32_t controllerAxisCount;
         internal GameInputControllerAxisInfo* _controllerAxisInfo;
 
-        public ref readonly GameInputControllerAxisInfo GetControllerAxisInfo(int index)
-        {
-            ThrowHelper.CheckRange(index, (int)controllerAxisCount);
-            return ref _controllerAxisInfo[index];
-        }
-
         public uint32_t controllerButtonCount;
         internal GameInputControllerButtonInfo* _controllerButtonInfo;
-
-        public ref readonly GameInputControllerButtonInfo GetControllerButtonInfo(int index)
-        {
-            ThrowHelper.CheckRange(index, (int)controllerButtonCount);
-            return ref _controllerButtonInfo[index];
-        }
 
         public uint32_t controllerSwitchCount;
         internal GameInputControllerSwitchInfo* _controllerSwitchInfo;
 
-        public ref readonly GameInputControllerSwitchInfo GetControllerSwitchInfo(int index)
-        {
-            ThrowHelper.CheckRange(index, (int)controllerSwitchCount);
-            return ref _controllerSwitchInfo[index];
-        }
-
         public uint32_t forceFeedbackMotorCount;
         internal GameInputForceFeedbackMotorInfo* _forceFeedbackMotorInfo;
 
-        public ref readonly GameInputForceFeedbackMotorInfo GetForceFeedbackMotorInfo(int index)
+        public GameInputControllerAxisInfo* GetControllerAxisInfo(int index)
         {
-            ThrowHelper.CheckRange(index, (int)forceFeedbackMotorCount);
-            return ref _forceFeedbackMotorInfo[index];
+            ThrowHelper.CheckRange(index, (int)controllerAxisCount);
+            return _controllerAxisInfo + index;
         }
 
-        public readonly string GetDisplayName()
+        public GameInputControllerButtonInfo* GetControllerButtonInfo(int index)
         {
+            ThrowHelper.CheckRange(index, (int)controllerButtonCount);
+            return _controllerButtonInfo + index;
+        }
+
+        public GameInputControllerSwitchInfo* GetControllerSwitchInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)controllerSwitchCount);
+            return _controllerSwitchInfo + index;
+        }
+
+        public GameInputForceFeedbackMotorInfo* GetForceFeedbackMotorInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)forceFeedbackMotorCount);
+            return _forceFeedbackMotorInfo + index;
+        }
+
+        public readonly string? GetDisplayName()
+        {
+            if (displayName == null)
+            {
+                return null;
+            }
+
             int length = Utility.StringLength(displayName);
             return Encoding.UTF8.GetString(displayName, length);
         }
 
-        public readonly string GetPnpPath()
+        public readonly string? GetPnpPath()
         {
+            if (pnpPath == null)
+            {
+                return null;
+            }
+
             int length = Utility.StringLength(pnpPath);
             return Encoding.UTF8.GetString(pnpPath, length);
         }

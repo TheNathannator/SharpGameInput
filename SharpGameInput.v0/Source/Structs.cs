@@ -481,9 +481,9 @@ namespace SharpGameInput.v0
         public GameInputRawDeviceReportInfo* inputReportInfo;
         public GameInputRawDeviceReportInfo* outputReportInfo;
         public GameInputRawDeviceReportInfo* featureReportInfo;
-        public GameInputControllerAxisInfo* controllerAxisInfo;
-        public GameInputControllerButtonInfo* controllerButtonInfo;
-        public GameInputControllerSwitchInfo* controllerSwitchInfo;
+        internal GameInputControllerAxisInfo* _controllerAxisInfo;
+        internal GameInputControllerButtonInfo* _controllerButtonInfo;
+        internal GameInputControllerSwitchInfo* _controllerSwitchInfo;
         public GameInputKeyboardInfo* keyboardInfo;
         public GameInputMouseInfo* mouseInfo;
         public GameInputTouchSensorInfo* touchSensorInfo;
@@ -493,11 +493,46 @@ namespace SharpGameInput.v0
         public GameInputGamepadInfo* gamepadInfo;
         public GameInputRacingWheelInfo* racingWheelInfo;
         public GameInputUiNavigationInfo* uiNavigationInfo;
-        public GameInputForceFeedbackMotorInfo* forceFeedbackMotorInfo;
-        public GameInputHapticFeedbackMotorInfo* hapticFeedbackMotorInfo;
+        internal GameInputForceFeedbackMotorInfo* _forceFeedbackMotorInfo;
+        internal GameInputHapticFeedbackMotorInfo* _hapticFeedbackMotorInfo;
         public GameInputString* displayName;
         public GameInputString* deviceStrings;
         public void* deviceDescriptorData;
+
+        public GameInputControllerAxisInfo* GetControllerAxisInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)controllerAxisCount);
+            return _controllerAxisInfo + index;
+        }
+
+        public GameInputControllerButtonInfo* GetControllerButtonInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)controllerButtonCount);
+            return _controllerButtonInfo + index;
+        }
+
+        public GameInputControllerSwitchInfo* GetControllerSwitchInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)controllerSwitchCount);
+            return _controllerSwitchInfo + index;
+        }
+
+        public GameInputForceFeedbackMotorInfo* GetForceFeedbackMotorInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)forceFeedbackMotorCount);
+            return _forceFeedbackMotorInfo + index;
+        }
+
+        public GameInputHapticFeedbackMotorInfo* GetHapticFeedbackMotorInfo(int index)
+        {
+            ThrowHelper.CheckRange(index, (int)hapticFeedbackMotorCount);
+            return _hapticFeedbackMotorInfo + index;
+        }
+
+        public readonly string? GetDisplayName()
+        {
+            return GameInputString.ToString(displayName);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
