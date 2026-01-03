@@ -102,17 +102,7 @@ namespace SharpGameInput.TestApp
         {
             using (reading)
             {
-                // Check report type
-                // We only read raw reports here for simplicity
-                var kind = reading.GetInputKind();
-                if ((kind & GameInputKind.RawDeviceReport) == 0)
-                {
-                    Console.WriteLine(kind.ToString());
-                    return;
-                }
-
-                byte[]? dummy = null;
-                ConsolePrinting.PrintRawReport(reading, ref dummy);
+                ConsolePrinting.Print(reading, null);
             }
         }
 

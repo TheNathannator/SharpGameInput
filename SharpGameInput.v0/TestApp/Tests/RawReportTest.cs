@@ -29,10 +29,10 @@ namespace SharpGameInput.TestApp
         {
             Console.WriteLine("Press any key to stop the test.");
 
-            byte[] lastReport = Array.Empty<byte>();
+            var lastReport = new ByteBuffer();
             for (; !Console.KeyAvailable; Thread.Sleep(1))
             {
-                PollAndPrintReport(gameInput, null, ref lastReport);
+                PollAndPrintReport(gameInput, null, lastReport);
             }
 
             // Consume keypress
@@ -64,8 +64,8 @@ namespace SharpGameInput.TestApp
                         {
                             using (device)
                             {
-                                byte[] lastReport = Array.Empty<byte>();
-                                while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, device, ref lastReport));
+                                var lastReport = new ByteBuffer();
+                                while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, device, lastReport));
                             }
                         });
                         thread.Start();
@@ -100,7 +100,7 @@ namespace SharpGameInput.TestApp
             deviceThreads.Clear();
         }
 
-        private static bool PollAndPrintReport(IGameInput gameInput, IGameInputDevice? device, ref byte[] lastReport)
+        private static bool PollAndPrintReport(IGameInput gameInput, IGameInputDevice? device, ByteBuffer lastReport)
         {
             int result = gameInput.GetCurrentReading(GameInputKind.RawDeviceReport, device, out var reading);
             if (result < 0)
@@ -131,7 +131,7 @@ namespace SharpGameInput.TestApp
 
             using (reading)
             {
-                ConsolePrinting.PrintRawReport(reading, ref lastReport!);
+                ConsolePrinting.PrintRawReport(reading, lastReport);
             }
 
             return true;

@@ -6,23 +6,46 @@ namespace SharpGameInput.TestApp
 {
     internal static partial class ConsolePrinting
     {
-        public static bool PrintRawReport(LightIGameInputReading reading, ref byte[]? lastReport)
+        public static void Print(LightIGameInputReading reading, ByteBuffer? lastReport)
+        {
+            bool handled =
+                PrintRawReport(reading, lastReport) ||
+                PrintGamepadReading(reading, lastReport);
+
+            if (!handled)
+            {
+                var inputs = reading.GetInputKind();
+                WriteTimestamp(reading.GetTimestamp());
+                Console.WriteLine($": {inputs} (0x{inputs:X8})");
+            }
+        }
+
+        public static bool PrintRawReport(LightIGameInputReading reading, ByteBuffer? lastReport)
         {
             if (!reading.GetRawReport(out var rawReport))
             {
-                Console.WriteLine("Could not get raw report!");
-                return false;
+                using (rawReport)
+                {
+                    Print(rawReport, reading.GetTimestamp(), lastReport);
+                }
+                return true;
             }
 
-            using (rawReport)
-            {
-                Print(rawReport, reading.GetTimestamp(), ref lastReport);
-            }
-
-            return true;
+            return false;
         }
 
-        public static void Print(LightIGameInputRawDeviceReport rawReport, ulong timestamp, ref byte[]? lastReport)
+        public static bool PrintGamepadReading(LightIGameInputReading reading, ByteBuffer? lastReport)
+        {
+            if (reading.GetGamepadState(out var state))
+            {
+                Print(state, reading.GetTimestamp(), lastReport);
+                return true;
+            }
+
+            return false;
+        }
+
+        public static void Print(LightIGameInputRawDeviceReport rawReport, ulong timestamp, ByteBuffer? lastReport)
         {
             const int maxStackSize = 64;
 
@@ -45,33 +68,14 @@ namespace SharpGameInput.TestApp
                     }
                 }
 
-                if (lastReport != null)
+                if (lastReport?.Write(buffer) ?? true)
                 {
-                    // Ignore unchanged reports
-                    // GameInput does not update timestamps when only third-party-defined data changes,
-                    // so we have to compare state memory manually to see when things actually change
-                    if (buffer.SequenceEqual(lastReport))
-                    {
-                        return;
-                    }
-
-                    if (lastReport.Length != buffer.Length)
-                    {
-                        lastReport = buffer.ToArray();
-                    }
-                    else
-                    {
-                        buffer.CopyTo(lastReport);
-                    }
+                    WriteTimestamp(timestamp);
+                    Console.Write($": [{buffer.Length:D3}] {reportId:X2}: ");
+                    WriteBuffer(buffer);
+                    Console.WriteLine();
                 }
 
-                WriteTimestamp(timestamp);
-                Console.Write(": Report ID: ");
-                Console.Write(reportId);
-                Console.Write(", size: ");
-                Console.Write(buffer.Length);
-                Console.Write(", ");
-                PrintBuffer(buffer);
             }
             finally
             {
@@ -79,6 +83,19 @@ namespace SharpGameInput.TestApp
                 {
                     ArrayPool<byte>.Shared.Return(poolBuffer);
                 }
+            }
+        }
+
+        public static void Print(in GameInputGamepadState state, ulong timestamp, ByteBuffer? lastReport)
+        {
+            if (lastReport?.Write(state) ?? true)
+            {
+                WriteTimestamp(timestamp);
+                Console.Write($": buttons {(int)state.buttons:8X}");
+                Console.Write($"  LT {state.leftTrigger:F3} RT {state.rightTrigger:F3}");
+                Console.Write($"  LX {state.leftThumbstickX:3} LY {state.leftThumbstickY:3}");
+                Console.Write($"  RX {state.rightThumbstickX:3} RY {state.rightThumbstickY:3}");
+                Console.WriteLine();
             }
         }
     }

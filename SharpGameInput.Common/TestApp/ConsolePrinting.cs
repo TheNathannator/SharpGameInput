@@ -21,13 +21,12 @@ namespace SharpGameInput.TestApp
 #endif
         }
 
-        public static void PrintBuffer(ReadOnlySpan<byte> buffer)
+        public static void WriteBuffer(ReadOnlySpan<byte> buffer)
         {
             const string characters = "0123456789ABCDEF";
 
             if (buffer.IsEmpty)
             {
-                Console.WriteLine();
                 return;
             }
 
@@ -44,7 +43,7 @@ namespace SharpGameInput.TestApp
             // Exclude last '-'
             stringBuffer = stringBuffer.Slice(0, stringBuffer.Length - 1);
 
-            Console.WriteLine(stringBuffer.ToString());
+            Console.Write(stringBuffer.ToString());
         }
 
         public static void PrintBufferWrapped(ReadOnlySpan<byte> bytes, int indentAmount = 0, int wrapCount = 16)
