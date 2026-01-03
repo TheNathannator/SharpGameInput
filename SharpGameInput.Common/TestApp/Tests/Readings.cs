@@ -49,7 +49,7 @@ namespace SharpGameInput.TestApp.Tests
 
             Console.WriteLine("Press Enter to stop this test and return to the main menu.");
 
-            var lastReport = new ByteBuffer();
+            var lastReport = new StateBuffer();
             for (; !Console.KeyAvailable || Console.ReadKey(intercept: true).Key != ConsoleKey.Enter; Thread.Sleep(1))
             {
                 PollAndPrintReport(gameInput, inputKind, null, lastReport);
@@ -83,7 +83,7 @@ namespace SharpGameInput.TestApp.Tests
                         {
                             using (device)
                             {
-                                var lastReport = new ByteBuffer();
+                                var lastReport = new StateBuffer();
                                 while (!stopHandle.WaitOne(0) && PollAndPrintReport(gameInput, inputKind, device, lastReport));
                             }
                         });
@@ -157,7 +157,7 @@ namespace SharpGameInput.TestApp.Tests
             }
         }
 
-        private static bool PollAndPrintReport(IGameInput gameInput, GameInputKind reportKind, IGameInputDevice? device, ByteBuffer lastReport)
+        private static bool PollAndPrintReport(IGameInput gameInput, GameInputKind reportKind, IGameInputDevice? device, StateBuffer lastReport)
         {
             int result = gameInput.GetCurrentReading(reportKind, device, out var reading);
             if (result < 0)
