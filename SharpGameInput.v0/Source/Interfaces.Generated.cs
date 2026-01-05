@@ -2344,12 +2344,16 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public HRESULT ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
+        public HRESULT ExecuteRawDeviceIoControl<TIn>(
+            uint32_t controlCode,
+            in TIn input
+        )
             where TIn : unmanaged
         {
             fixed (TIn* inputPtr = &input)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
                     (size_t)sizeof(TIn), inputPtr,
                     0, null,
                     out _
@@ -2357,12 +2361,17 @@ namespace SharpGameInput.v0
             }
         }
 
-        public HRESULT ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out size_t bytesReturned)
+        public HRESULT ExecuteRawDeviceIoControl<TOut>(
+            uint32_t controlCode,
+            out TOut output,
+            out size_t bytesReturned
+        )
             where TOut : unmanaged
         {
             fixed (TOut* outputPtr = &output)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
                     0, null,
                     (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
@@ -2371,7 +2380,7 @@ namespace SharpGameInput.v0
         }
 
         public HRESULT ExecuteRawDeviceIoControl<TIn, TOut>(
-            uint controlCode,
+            uint32_t controlCode,
             in TIn input,
             out TOut output,
             out size_t bytesReturned
@@ -2382,7 +2391,8 @@ namespace SharpGameInput.v0
             fixed (TIn* inputPtr = &input)
             fixed (TOut* outputPtr = &output)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
                     (size_t)sizeof(TIn), inputPtr,
                     (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
@@ -2871,12 +2881,16 @@ namespace SharpGameInput.v0
         }
 #endif
 
-        public HRESULT ExecuteRawDeviceIoControl<TIn>(uint controlCode, in TIn input)
+        public HRESULT ExecuteRawDeviceIoControl<TIn>(
+            uint32_t controlCode,
+            in TIn input
+        )
             where TIn : unmanaged
         {
             fixed (TIn* inputPtr = &input)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
                     (size_t)sizeof(TIn), inputPtr,
                     0, null,
                     out _
@@ -2884,12 +2898,17 @@ namespace SharpGameInput.v0
             }
         }
 
-        public HRESULT ExecuteRawDeviceIoControl<TOut>(uint controlCode, out TOut output, out size_t bytesReturned)
+        public HRESULT ExecuteRawDeviceIoControl<TOut>(
+            uint32_t controlCode,
+            out TOut output,
+            out size_t bytesReturned
+        )
             where TOut : unmanaged
         {
             fixed (TOut* outputPtr = &output)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
                     0, null,
                     (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
@@ -2898,7 +2917,7 @@ namespace SharpGameInput.v0
         }
 
         public HRESULT ExecuteRawDeviceIoControl<TIn, TOut>(
-            uint controlCode,
+            uint32_t controlCode,
             in TIn input,
             out TOut output,
             out size_t bytesReturned
@@ -2909,7 +2928,8 @@ namespace SharpGameInput.v0
             fixed (TIn* inputPtr = &input)
             fixed (TOut* outputPtr = &output)
             {
-                return ExecuteRawDeviceIoControl(controlCode,
+                return ExecuteRawDeviceIoControl(
+                    controlCode,
                     (size_t)sizeof(TIn), inputPtr,
                     (size_t)sizeof(TOut), outputPtr,
                     out bytesReturned
