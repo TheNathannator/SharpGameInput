@@ -26,7 +26,10 @@ namespace SharpGameInput.TestApp.Utility
             if (_poolArray is {} array)
             {
                 ArrayPool<T>.Shared.Return(array);
+                _poolArray = null;
             }
+
+            _array = default;
         }
     }
 }
