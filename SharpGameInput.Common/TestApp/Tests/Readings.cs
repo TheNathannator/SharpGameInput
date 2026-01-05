@@ -139,7 +139,7 @@ namespace SharpGameInput.TestApp.Tests
                 {
                     using (reading)
                     {
-                        ConsolePrinting.Print(reading, null);
+                        ConsolePrinting.Print(reading, inputKind, null);
                     }
                 },
                 out var token,
@@ -188,7 +188,7 @@ namespace SharpGameInput.TestApp.Tests
 
             using (reading)
             {
-                ConsolePrinting.Print(reading, lastReport);
+                ConsolePrinting.Print(reading, reportKind, lastReport);
             }
 
             return true;

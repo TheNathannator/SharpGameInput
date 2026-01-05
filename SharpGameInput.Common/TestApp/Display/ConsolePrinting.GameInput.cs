@@ -31,10 +31,18 @@ namespace SharpGameInput.TestApp.Display
             Console.Write($"{time} ({timeSinceStartup})");
         }
 
-        public static void Print(LightIGameInputReading reading, StateBuffer? lastReport)
+        public static void Print(LightIGameInputReading reading, GameInputKind filterKinds, StateBuffer? lastReport)
         {
+            if (filterKinds == GameInputKind.AnyKind)
+            {
+                // Filter out reading kinds that can overlap with other kinds
+                // They will still be considered in the default case, but should not interfere
+                // with printing a more specific report kind where possible
+                filterKinds &= GameInputKind.Controller | GameInputKind.UiNavigation;
+            }
+
             var inputs = reading.GetInputKind();
-            switch (inputs)
+            switch (inputs & filterKinds)
             {
 #if HAS_RAW_REPORTS
                 case GameInputKind.RawDeviceReport:
@@ -43,11 +51,17 @@ namespace SharpGameInput.TestApp.Display
                     break;
                 }
 #endif
-                // Complexities afoot, handled in default case
-                // case GameInputKind.ControllerAxis:
-                // case GameInputKind.ControllerButton:
-                // case GameInputKind.ControllerSwitch:
-                // case GameInputKind.Controller:
+                case GameInputKind.ControllerAxis:
+                case GameInputKind.ControllerButton:
+                case GameInputKind.ControllerSwitch:
+                case GameInputKind.ControllerAxis | GameInputKind.ControllerButton:
+                case GameInputKind.ControllerAxis | GameInputKind.ControllerSwitch:
+                case GameInputKind.ControllerButton | GameInputKind.ControllerSwitch:
+                case GameInputKind.ControllerAxis | GameInputKind.ControllerButton | GameInputKind.ControllerSwitch:
+                {
+                    PrintControllerReading(reading, lastReport);
+                    break;
+                }
                 case GameInputKind.Keyboard:
                 {
                     PrintKeyboardReading(reading, lastReport);
@@ -100,6 +114,12 @@ namespace SharpGameInput.TestApp.Display
                     if ((inputs & GameInputKind.Controller) != 0)
                     {
                         PrintControllerReading(reading, lastReport);
+                        break;
+                    }
+
+                    if ((inputs & GameInputKind.UiNavigation) != 0)
+                    {
+                        PrintUiNavigationReading(reading, lastReport);
                         break;
                     }
 
@@ -195,6 +215,10 @@ namespace SharpGameInput.TestApp.Display
                     Console.WriteLine();
                 }
             }
+            else
+            {
+                lastReport?.Append([]);
+            }
 
             int switchCount = (int)reading.GetControllerSwitchCount();
             if (switchCount > 0)
@@ -235,6 +259,10 @@ namespace SharpGameInput.TestApp.Display
                     Console.WriteLine();
                 }
             }
+            else
+            {
+                lastReport?.Append([]);
+            }
 
             int axisCount = (int)reading.GetControllerAxisCount();
             if (axisCount > 0)
@@ -274,6 +302,10 @@ namespace SharpGameInput.TestApp.Display
 
                     Console.WriteLine();
                 }
+            }
+            else
+            {
+                lastReport?.Append([]);
             }
 
             return true;
