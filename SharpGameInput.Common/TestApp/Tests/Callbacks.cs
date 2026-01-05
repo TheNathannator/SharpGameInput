@@ -106,7 +106,7 @@ namespace SharpGameInput.TestApp.Tests
             }
             else
             {
-                Console.WriteLine($": Device {info.deviceId} connected");
+                Console.WriteLine($": Device {info.deviceId} disconnected");
             }
         }
 
