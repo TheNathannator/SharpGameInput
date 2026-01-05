@@ -244,15 +244,24 @@ Interfaces = [
 
     new("IGameInputDevice", "B169652A-4A32-40D7-9FA9-905997952516",
         light: true,
-        new(Visibility.Private, "void", "GetDeviceInfo",
+        new("HRESULT", "GetDeviceInfo",
             ("out GameInputDeviceInfo*", "info")
         ),
         new(() => {
 #>
 
+        /// <remarks>
+        /// Convenience overload to avoid unsafe code requirement.
+        /// Will throw if <see cref="GetDeviceInfo(out GameInputDeviceInfo*)"/> returns an error!
+        /// </remarks>
         public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
-            GetDeviceInfo(out var info);
+            var result = GetDeviceInfo(out var info);
+            if (result < 0)
+            {
+                throw new Exception($"Failed to get device info: 0x{result:X8}");
+            }
+
             return ref *info;
         }
 <#

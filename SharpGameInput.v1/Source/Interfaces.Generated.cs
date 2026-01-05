@@ -1591,7 +1591,7 @@ namespace SharpGameInput.v1
             return new(handle, ownsHandle: true);
         }
 
-        private void GetDeviceInfo(
+        public HRESULT GetDeviceInfo(
             out GameInputDeviceInfo* info
         )
         {
@@ -1599,18 +1599,28 @@ namespace SharpGameInput.v1
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out GameInputDeviceInfo*, void>)vtable[3];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out GameInputDeviceInfo*, HRESULT>)vtable[3];
 
-            fnPtr(
+            var result = fnPtr(
                 thisPtr,
                 out info
             );
 
+            return result;
         }
 
+        /// <remarks>
+        /// Convenience overload to avoid unsafe code requirement.
+        /// Will throw if <see cref="GetDeviceInfo(out GameInputDeviceInfo*)"/> returns an error!
+        /// </remarks>
         public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
-            GetDeviceInfo(out var info);
+            var result = GetDeviceInfo(out var info);
+            if (result < 0)
+            {
+                throw new Exception($"Failed to get device info: 0x{result:X8}");
+            }
+
             return ref *info;
         }
 
@@ -1790,7 +1800,7 @@ namespace SharpGameInput.v1
         public override int GetHashCode()
             => handle.GetHashCode();
 
-        private void GetDeviceInfo(
+        public HRESULT GetDeviceInfo(
             out GameInputDeviceInfo* info
         )
         {
@@ -1798,18 +1808,28 @@ namespace SharpGameInput.v1
 
             var thisPtr = handle;
             var vtable = *(void***)thisPtr;
-            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out GameInputDeviceInfo*, void>)vtable[3];
+            var fnPtr = (delegate* unmanaged[Stdcall]<IntPtr, out GameInputDeviceInfo*, HRESULT>)vtable[3];
 
-            fnPtr(
+            var result = fnPtr(
                 thisPtr,
                 out info
             );
 
+            return result;
         }
 
+        /// <remarks>
+        /// Convenience overload to avoid unsafe code requirement.
+        /// Will throw if <see cref="GetDeviceInfo(out GameInputDeviceInfo*)"/> returns an error!
+        /// </remarks>
         public ref readonly GameInputDeviceInfo GetDeviceInfo()
         {
-            GetDeviceInfo(out var info);
+            var result = GetDeviceInfo(out var info);
+            if (result < 0)
+            {
+                throw new Exception($"Failed to get device info: 0x{result:X8}");
+            }
+
             return ref *info;
         }
 
