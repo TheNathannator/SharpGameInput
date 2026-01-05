@@ -130,7 +130,7 @@ namespace SharpGameInput.TestApp.Display
                 using var _buffer = new StackOrPoolArray<byte>(reportSize, stackalloc byte[64]);
                 var buffer = _buffer.Array;
 
-                unsafe
+                if (buffer.Length > 0) unsafe
                 {
                     fixed (byte* ptr = buffer)
                     {
@@ -290,7 +290,7 @@ namespace SharpGameInput.TestApp.Display
             using var _keyBuffer = new StackOrPoolArray<GameInputKeyState>(keyCount, stackalloc GameInputKeyState[16]);
             var keyBuffer = _keyBuffer.Array;
 
-            unsafe
+            if (keyBuffer.Length > 0) unsafe
             {
                 fixed (GameInputKeyState* ptr = keyBuffer)
                 {
@@ -378,7 +378,7 @@ namespace SharpGameInput.TestApp.Display
             using var _touchBuffer = new StackOrPoolArray<GameInputTouchState>(touchCount, stackalloc GameInputTouchState[8]);
             var touchBuffer = _touchBuffer.Array;
 
-            unsafe
+            if (touchBuffer.Length > 0) unsafe
             {
                 fixed (GameInputTouchState* ptr = touchBuffer)
                 {
