@@ -84,6 +84,13 @@ namespace SharpGameInput.TestApp.Display
                     break;
                 }
 #endif
+#if GAMEINPUT_V2_OR_GREATER
+                case GameInputKind.Sensors:
+                {
+                    PrintSensorsReading(reading, lastReport);
+                    break;
+                }
+#endif
                 case GameInputKind.ArcadeStick:
                 {
                     PrintArcadeStickReading(reading, lastReport);
@@ -461,10 +468,34 @@ namespace SharpGameInput.TestApp.Display
                 WriteTimestamp(reading.GetTimestamp());
                 Console.WriteLine(
                     "\n" +
-                    $"  accel    X {state.accelerationX:F3,-7} Y {state.accelerationY:F3,-7} Z {state.accelerationZ:F3,-7}\n" +
-                    $"  angular  X {state.angularVelocityX:F3,-7} Y {state.angularVelocityY:F3,-7} Z {state.angularVelocityZ:F3,-7}\n" +
-                    $"  magnetic X {state.magneticFieldX:F3,-7} Y {state.magneticFieldY:F3,-7} Z {state.magneticFieldZ:F3,-7}\n" +
-                    $"  orient   W {state.orientationW:F3,-7} X {state.orientationX:F3,-7} Y {state.orientationY:F3,-7} Z {state.orientationZ:F3,-7}"
+                    $"  acceleration X {state.accelerationX:F3,-7} Y {state.accelerationY:F3,-7} Z {state.accelerationZ:F3,-7}\n" +
+                    $"  rotation     X {state.angularVelocityX:F3,-7} Y {state.angularVelocityY:F3,-7} Z {state.angularVelocityZ:F3,-7}\n" +
+                    $"  compass      X {state.magneticFieldX:F3,-7} Y {state.magneticFieldY:F3,-7} Z {state.magneticFieldZ:F3,-7}\n" +
+                    $"  orientation  W {state.orientationW:F3,-7} X {state.orientationX:F3,-7} Y {state.orientationY:F3,-7} Z {state.orientationZ:F3,-7}"
+                );
+            }
+
+            return true;
+        }
+#endif
+
+#if GAMEINPUT_V2_OR_GREATER
+        public static bool PrintSensorsReading(LightIGameInputReading reading, StateBuffer? lastReport)
+        {
+            if (!reading.GetSensorsState(out var state))
+            {
+                return false;
+            }
+
+            if (lastReport == null || lastReport.Write(state))
+            {
+                WriteTimestamp(reading.GetTimestamp());
+                Console.WriteLine(
+                    "\n" +
+                    $"  acceleration X {state.accelerationInGX:F3,-7} Y {state.accelerationInGY:F3,-7} Z {state.accelerationInGZ:F3,-7}\n" +
+                    $"  rotation     X {state.angularVelocityInRadPerSecX:F3,-7} Y {state.angularVelocityInRadPerSecY:F3,-7} Z {state.angularVelocityInRadPerSecZ:F3,-7}\n" +
+                    $"  compass      ° {state.headingInDegreesFromMagneticNorth:F3}\n" +
+                    $"  orientation  W {state.orientationW:F3,-7} X {state.orientationX:F3,-7} Y {state.orientationY:F3,-7} Z {state.orientationZ:F3,-7}"
                 );
             }
 

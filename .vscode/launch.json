@@ -46,6 +46,28 @@
             "stopAtEntry": false
         },
         {
+            "name": "SharpGameInput.v2.TestApp (net8.0)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "console": "externalTerminal",
+            "program": "${workspaceFolder}/SharpGameInput.v2/TestApp/bin/Debug/net8.0-windows/SharpGameInput.v2.TestApp.dll",
+            "cwd": "${workspaceFolder}/SharpGameInput.v2/TestApp",
+            "args": [],
+            "stopAtEntry": false
+        },
+        {
+            "name": "SharpGameInput.v2.TestApp (net48)",
+            "type": "clr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "console": "externalTerminal",
+            "program": "${workspaceFolder}/SharpGameInput.v2/TestApp/bin/Debug/net48/SharpGameInput.v2.TestApp.exe",
+            "cwd": "${workspaceFolder}/SharpGameInput.v2/TestApp",
+            "args": [],
+            "stopAtEntry": false
+        },
+        {
             "name": "Attach",
             "type": "coreclr",
             "request": "attach"
