@@ -6,12 +6,23 @@ namespace SharpGameInput.TestApp
     {
         private static void Main()
         {
-            if (!WindowHack.StartWindow())
+            // Initialize GameInput
+            if (!GameInput.Create(out var gameInput, out int result))
             {
+                ConsolePrinting.PrintPInvokeError("Failed to create IGameInput", result);
+                ConsoleMenu.WaitForKey("Press any key to exit...");
                 return;
             }
 
-            TestMain.Run();
+            using (gameInput)
+            {
+                if (!WindowHack.StartWindow())
+                {
+                    return;
+                }
+
+                TestMain.Run(gameInput);
+            }
         }
     }
 }
