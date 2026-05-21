@@ -134,7 +134,7 @@ namespace SharpGameInput.TestApp.Display
                     if (lastReport == null || lastReport.Write(timestamp))
                     {
                         WriteTimestamp(timestamp);
-                        Console.WriteLine($": {inputs} (0x{inputs})");
+                        Console.WriteLine($": {inputs} (0x{(int)inputs})");
                     }
                     break;
                 }
