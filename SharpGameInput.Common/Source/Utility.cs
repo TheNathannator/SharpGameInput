@@ -9,13 +9,16 @@ namespace SharpGameInput.Common
                 return 0;
             }
 
-            int count = 0;
-            while (*str != 0)
+            checked
             {
-                count++;
-            }
+                char_t* end = str;
+                while (*end != 0)
+                {
+                    end++;
+                }
 
-            return count;
+                return (int)(end - str);
+            }
         }
 
         public static unsafe int StringLength(wchar_t* str)
@@ -25,13 +28,16 @@ namespace SharpGameInput.Common
                 return 0;
             }
 
-            int count = 0;
-            while (*str != 0)
+            checked
             {
-                count++;
-            }
+                wchar_t* end = str;
+                while (*end != 0)
+                {
+                    end++;
+                }
 
-            return count;
+                return (int)(end - str);
+            }
         }
     }
 }
