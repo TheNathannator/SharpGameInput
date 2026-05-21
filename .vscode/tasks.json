@@ -14,23 +14,36 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build-release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/SharpGameInput.slnx",
+                "/property:Configuration=Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "label": "publish",
             "dependsOn": [
-                "publish_netstandard2.0",
-                "publish_netstandard2.1",
-                "publish_net8.0",
+                "publish-netstandard2.0",
+                "publish-netstandard2.1",
+                "publish-net8.0-windows",
             ],
             "dependsOrder": "sequence",
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish_netstandard2.0",
+            "label": "publish-netstandard2.0",
             "hide": true,
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/source/SharpGameInput.csproj",
+                "${workspaceFolder}/SharpGameInput.slnx",
                 "/property:Configuration=Release",
                 "/property:TargetFramework=netstandard2.0",
                 "/property:GenerateFullPaths=true",
@@ -39,13 +52,13 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish_netstandard2.1",
+            "label": "publish-netstandard2.1",
             "hide": true,
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/source/SharpGameInput.csproj",
+                "${workspaceFolder}/SharpGameInput.slnx",
                 "/property:Configuration=Release",
                 "/property:TargetFramework=netstandard2.1",
                 "/property:GenerateFullPaths=true",
@@ -54,15 +67,15 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish_net8.0",
+            "label": "publish-net8.0-windows",
             "hide": true,
             "command": "dotnet",
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/source/SharpGameInput.csproj",
+                "${workspaceFolder}/SharpGameInput.slnx",
                 "/property:Configuration=Release",
-                "/property:TargetFramework=net8.0",
+                "/property:TargetFramework=net8.0-windows",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
