@@ -565,7 +565,7 @@ foreach (var callback in callbacks)
 #if NET5_0_OR_GREATER
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
-#if UNITY_STANDALONE
+#if SHARPGAMEINPUT_UNITY
         [AOT.MonoPInvokeCallback(typeof(<#= callback.Delegate.Name #>_Native))]
 #endif
         private static <#= callback.Delegate.ReturnType.ToFnPointerType() #> _<#= callback.Delegate.Name #>(

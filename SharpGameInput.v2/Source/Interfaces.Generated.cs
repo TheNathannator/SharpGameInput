@@ -2840,7 +2840,7 @@ namespace SharpGameInput.v2
 #if NET5_0_OR_GREATER
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
-#if UNITY_STANDALONE
+#if SHARPGAMEINPUT_UNITY
         [AOT.MonoPInvokeCallback(typeof(GameInputReadingCallback_Native))]
 #endif
         private static void _GameInputReadingCallback(
@@ -2871,7 +2871,7 @@ namespace SharpGameInput.v2
 #if NET5_0_OR_GREATER
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
-#if UNITY_STANDALONE
+#if SHARPGAMEINPUT_UNITY
         [AOT.MonoPInvokeCallback(typeof(GameInputDeviceCallback_Native))]
 #endif
         private static void _GameInputDeviceCallback(
@@ -2908,7 +2908,7 @@ namespace SharpGameInput.v2
 #if NET5_0_OR_GREATER
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
-#if UNITY_STANDALONE
+#if SHARPGAMEINPUT_UNITY
         [AOT.MonoPInvokeCallback(typeof(GameInputSystemButtonCallback_Native))]
 #endif
         private static void _GameInputSystemButtonCallback(
@@ -2945,7 +2945,7 @@ namespace SharpGameInput.v2
 #if NET5_0_OR_GREATER
         [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
 #endif
-#if UNITY_STANDALONE
+#if SHARPGAMEINPUT_UNITY
         [AOT.MonoPInvokeCallback(typeof(GameInputKeyboardLayoutCallback_Native))]
 #endif
         private static void _GameInputKeyboardLayoutCallback(
