@@ -6,6 +6,26 @@ namespace SharpGameInput.Common.Tests;
 
 public static class SizeHelper
 {
+    private struct Alignment<T>
+        where T : unmanaged
+    {
+        public byte first;
+        public T second;
+    }
+
+    private static unsafe int AlignOf<T>()
+        where T : unmanaged
+    {
+        var align = new Alignment<T>();
+        return (int)((byte*)Unsafe.AsPointer(ref align.second) - (byte*)Unsafe.AsPointer(ref align.first));
+    }
+
+    private static int AlignOfMarshal<T>()
+        where T : unmanaged
+    {
+        return (int)Marshal.OffsetOf<Alignment<T>>("second");
+    }
+
     public static unsafe void AssertSize<T>(int expected, bool checkMarshal = true)
         where T : unmanaged
     {
@@ -20,13 +40,27 @@ public static class SizeHelper
         });
     }
 
-    public static void AssertSize<T>(in T _, int expected, bool checkMarshal = true)
+    public static void AssertAlignment<T>(int expected, bool checkMarshal = true)
         where T : unmanaged
     {
-        AssertSize<T>(expected, checkMarshal);
+        Assert.Multiple(() =>
+        {
+            Assert.That(AlignOf<T>(), Is.EqualTo(expected), $"{typeof(T).Name} is the wrong alignment with Unsafe");
+            if (checkMarshal)
+            {
+                Assert.That(AlignOfMarshal<T>(), Is.EqualTo(expected), $"{typeof(T).Name} is the wrong alignment with Marshal");
+            }
+        });
     }
 
-    public static void AssertEnumSize<T>(int expected)
+    public static void AssertStruct<T>(in T _, int size, int alignment, bool checkMarshal = true)
+        where T : unmanaged
+    {
+        AssertSize<T>(size, checkMarshal);
+        AssertAlignment<T>(alignment, checkMarshal);
+    }
+
+    public static void AssertEnum<T>(int expected)
         where T : unmanaged, Enum
     {
         AssertSize<T>(expected, checkMarshal: false);
