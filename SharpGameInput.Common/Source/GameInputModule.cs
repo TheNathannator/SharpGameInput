@@ -66,7 +66,7 @@ namespace SharpGameInput.Common
             }
             else
             {
-                Debug.WriteLine("(!!UNREACHABLE!!) GameInput module was loaded successfully, but no interface creation methods were retrieved!");
+                Trace.WriteLine("(!!UNREACHABLE!!) GameInput module was loaded successfully, but no interface creation methods were retrieved!");
                 result = HRESULT.E_FAIL;
             }
 
@@ -135,16 +135,16 @@ namespace SharpGameInput.Common
 
             if (!File.Exists(finalPath))
             {
-                Debug.WriteLine($"[SharpGameInput] No versions of GameInput found!");
+                Trace.WriteLine($"[SharpGameInput] No versions of GameInput found!");
                 return HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_DLL_NOT_FOUND);
             }
 
-            Debug.WriteLine($"[SharpGameInput] Loading GameInput from {finalPath}");
+            Trace.WriteLine($"[SharpGameInput] Loading GameInput from {finalPath}");
             var module = LoadLibrary(finalPath);
             if (module == null || module.IsInvalid)
             {
                 var error = (WIN32_ERROR)Marshal.GetLastWin32Error();
-                Debug.WriteLine($"[SharpGameInput] Failed to load GameInput: {error}");
+                Trace.WriteLine($"[SharpGameInput] Failed to load GameInput: {error}");
                 return HRESULT_FROM_WIN32(error);
             }
 
@@ -163,7 +163,7 @@ namespace SharpGameInput.Common
                 if (_gameInputCreate == null && _gameInputInitialize == null)
                 {
                     module.Dispose();
-                    Debug.WriteLine($"[SharpGameInput] Could not find init procedure in GameInput module!");
+                    Trace.WriteLine($"[SharpGameInput] Could not find init procedure in GameInput module!");
                     return HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_PROC_NOT_FOUND);
                 }
             }
