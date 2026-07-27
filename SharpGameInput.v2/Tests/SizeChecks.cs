@@ -61,6 +61,7 @@ public class SizeChecks
         GameInputMouseState instance = default;
         AssertStruct(instance, 56, 8);
         AssertField(instance, instance.buttons,           4, 0);
+        AssertField(instance, instance.positions,         4, 4);
         AssertField(instance, instance.positionX,         8, 8);
         AssertField(instance, instance.positionY,         8, 16);
         AssertField(instance, instance.absolutePositionX, 8, 24);
@@ -403,6 +404,7 @@ public class SizeChecks
     {
         GameInputForceFeedbackEnvelope instance = default;
         AssertStruct(instance, 48, 8);
+        AssertField(instance, instance.attackDuration,  8, 0);
         AssertField(instance, instance.sustainDuration, 8, 8);
         AssertField(instance, instance.releaseDuration, 8, 16);
         AssertField(instance, instance.attackGain,      4, 24);
