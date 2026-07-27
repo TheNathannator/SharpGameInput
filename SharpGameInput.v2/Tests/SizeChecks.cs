@@ -18,9 +18,9 @@ public class SizeChecks
     [Test] public void GameInputArcadeStickButtons() => AssertEnumSize<GameInputArcadeStickButtons>(4);
     [Test] public void GameInputFlightStickButtons() => AssertEnumSize<GameInputFlightStickButtons>(4);
     [Test] public void GameInputGamepadButtons() => AssertEnumSize<GameInputGamepadButtons>(4);
-    [Test] public void GameInputRacingWheelButtons  () => AssertEnumSize<GameInputRacingWheelButtons>(4);
+    [Test] public void GameInputRacingWheelButtons() => AssertEnumSize<GameInputRacingWheelButtons>(4);
     [Test] public void GameInputUiNavigationButtons() => AssertEnumSize<GameInputUiNavigationButtons>(4);
-    [Test] public void GameInputSystemButtons  () => AssertEnumSize<GameInputSystemButtons  >(4);
+    [Test] public void GameInputSystemButtons() => AssertEnumSize<GameInputSystemButtons>(4);
     [Test] public void GameInputDeviceStatus() => AssertEnumSize<GameInputDeviceStatus>(4);
     [Test] public void GameInputDeviceFamily() => AssertEnumSize<GameInputDeviceFamily>(4);
     [Test] public void GameInputLabel() => AssertEnumSize<GameInputLabel>(4);
