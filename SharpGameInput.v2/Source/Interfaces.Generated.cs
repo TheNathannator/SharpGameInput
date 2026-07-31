@@ -15,9 +15,9 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v2
 {
-    using HRESULT = int;
-    using HANDLE = System.IntPtr;
     using GameInputCallbackToken_t = uint64_t;
+    using HRESULT = int;
+    using HANDLE = IntPtr;
 
     #region Callback definitions
 
@@ -1835,9 +1835,9 @@ namespace SharpGameInput.v2
                 return DirectInputEscape(
                     command,
                     bufferInPtr,
-                    (uint32_t)bufferIn.Length,
+                    (uint32_t)(bufferIn?.Length ?? 0),
                     bufferOutPtr,
-                    (uint32_t)bufferOut.Length,
+                    (uint32_t)(bufferOut?.Length ?? 0),
                     out bufferOutSizeWritten
                 );
             }
@@ -2192,9 +2192,9 @@ namespace SharpGameInput.v2
                 return DirectInputEscape(
                     command,
                     bufferInPtr,
-                    (uint32_t)bufferIn.Length,
+                    (uint32_t)(bufferIn?.Length ?? 0),
                     bufferOutPtr,
-                    (uint32_t)bufferOut.Length,
+                    (uint32_t)(bufferOut?.Length ?? 0),
                     out bufferOutSizeWritten
                 );
             }

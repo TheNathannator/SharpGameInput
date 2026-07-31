@@ -15,9 +15,9 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v1
 {
-    using HRESULT = int;
-    using HANDLE = System.IntPtr;
     using GameInputCallbackToken_t = uint64_t;
+    using HRESULT = int;
+    using HANDLE = IntPtr;
 
     #region Callback definitions
 

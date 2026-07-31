@@ -1,0 +1,445 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#+
+#region Type declaration data
+
+public enum Visibility
+{
+    Public,
+    Internal,
+    Private,
+}
+
+public enum Indirection
+{
+    None,
+    In,
+    Out,
+    Ref,
+    RefReadonly,
+}
+
+[Flags]
+public enum Modifiers
+{
+    None = 0,
+
+    Nullable = 0x01,
+    Pointer  = 0x02,
+
+    Interface = 0x10,
+    LightInterface = 0x20,
+    OwnedInstance = 0x40,
+
+    Array         = 0x100,
+    NullableArray = 0x200,
+    ReadOnlyArray = 0x400,
+}
+
+public struct ParameterDecl(string typeDecl, string name)
+{
+    public string TypeDecl = typeDecl;
+    public string Name = name;
+
+    public static implicit operator ParameterDecl((string TypeDecl, string Name) parameter)
+        => new(parameter.TypeDecl, parameter.Name);
+}
+
+public struct MethodDecl
+{
+    public Visibility Visibility;
+    public string ReturnTypeDecl;
+    public string Name;
+    public ParameterDecl[] Parameters;
+
+    public bool IsCustom;
+    public Action<TypeLibrary> CustomAction;
+
+    public bool IsVoid => ReturnTypeDecl == "void";
+
+    public MethodDecl(string returnTypeDecl, string name, params ParameterDecl[] parameters)
+        : this(Visibility.Public, returnTypeDecl, name, parameters)
+    {
+    }
+
+    public MethodDecl(Visibility visibility, string returnTypeDecl, string name, params ParameterDecl[] parameters)
+    {
+        Visibility = visibility;
+        ReturnTypeDecl = returnTypeDecl;
+        Name = name;
+        Parameters = parameters;
+
+        IsCustom = false;
+        CustomAction = null;
+    }
+
+    public MethodDecl(Action<TypeLibrary> customAction)
+    {
+        Visibility = Visibility.Public;
+        ReturnTypeDecl = "";
+        Name = "";
+        Parameters = Array.Empty<ParameterDecl>();
+
+        IsCustom = true;
+        CustomAction = customAction;
+    }
+}
+
+public struct InterfaceDecl(string name, string guid, bool light, params MethodDecl[] methods)
+{
+    public string Name = name;
+    public string Guid = guid;
+    public bool IsLight = light;
+    public MethodDecl[] Methods = methods;
+}
+
+public struct CallbackDecl(MethodDecl @delegate, MethodDecl register)
+{
+    public MethodDecl Delegate = @delegate;
+    public MethodDecl Register = register;
+}
+
+#endregion
+
+public struct ParsedType(string name, Indirection indirection, Modifiers modifiers)
+{
+    public string Name = name;
+    public Indirection Indirection = indirection;
+    public Modifiers Modifiers = modifiers;
+
+    public bool IsVoid => Name == "void";
+}
+
+public class TypeLibrary
+{
+    // Type aliases to create in the generated C# source.
+    // Replacements are performed recursively, so one replacement can alias directly to another.
+    public readonly Dictionary<string, string> TypeAliases = new();
+
+    // Type declarations to be entirely replaced before parsing them.
+    // Replacements are performed recursively, so one replacement can alias directly to another.
+    public readonly Dictionary<string, string> TypeDeclReplacements = new();
+
+    // Type names to be substituted in function pointer declarations.
+    // These replacements are NOT performed recursively
+    public readonly Dictionary<string, string> FnPointerTypeReplacements = new();
+
+    public InterfaceDecl[] Interfaces;
+    public CallbackDecl[] Callbacks;
+
+    public IEnumerable<(string, string)> EnumerateTypeAliases()
+    {
+        foreach (var (alias, _replacement) in TypeAliases)
+        {
+            string replacement = _replacement;
+            while (TypeAliases.TryGetValue(replacement, out string extraReplacement))
+            {
+                replacement = extraReplacement;
+            }
+
+            yield return (alias, replacement);
+        }
+    }
+
+    public ParsedType ParseTypeDecl(string declaration)
+    {
+        // Swap out full declarations for their underlying declarations
+        while (TypeDeclReplacements.TryGetValue(declaration, out string declReplacement))
+        {
+            declaration = declReplacement;
+        }
+
+        if (Callbacks.Any((c) => c.Delegate.Name == declaration))
+        {
+            declaration += "_NativePtr";
+        }
+
+        string typeName = declaration;
+        var modifiers = Modifiers.None;
+        var indirection = Indirection.None;
+
+        // Pseudo-syntax for nullable pointer types;
+        // not actually supported in C#
+        if (declaration.EndsWith("*?"))
+        {
+            declaration = declaration[..^1];
+        }
+
+        // Pseudo-syntax for owned interface instances that need to be released
+        if (typeName.StartsWith("owned "))
+        {
+            modifiers |= Modifiers.OwnedInstance;
+            typeName = typeName["owned ".Length..];
+        }
+
+        // Value indirection
+        if (typeName.StartsWith("in "))
+        {
+            indirection = Indirection.In;
+            typeName = typeName["in ".Length..];
+        }
+        else if (typeName.StartsWith("out "))
+        {
+            indirection = Indirection.Out;
+            typeName = typeName["out ".Length..];
+        }
+        else if (typeName.StartsWith("ref readonly "))
+        {
+            indirection = Indirection.RefReadonly;
+            typeName = typeName["ref readonly ".Length..];
+        }
+        else if (typeName.StartsWith("ref "))
+        {
+            indirection = Indirection.Ref;
+            typeName = typeName["ref ".Length..];
+        }
+
+        // Arrays
+        // Initial nullability check; will get re-checked later for the underlying type
+        if (typeName.EndsWith("?"))
+        {
+            modifiers |= Modifiers.Nullable;
+            typeName = typeName[..^1];
+        }
+
+        if (typeName.EndsWith("[]"))
+        {
+            modifiers |= Modifiers.Array;
+            modifiers |= Modifiers.ReadOnlyArray;
+            typeName = typeName[..^2];
+
+        }
+        else if (typeName.EndsWith("[mut]"))
+        {
+            modifiers |= Modifiers.Array;
+            typeName = typeName[..^5];
+        }
+
+        if ((modifiers & Modifiers.Array) != 0 && (modifiers & Modifiers.Nullable) != 0)
+        {
+            // Transfer initial nullable flag to the array
+            modifiers &= ~Modifiers.Nullable;
+            modifiers |= Modifiers.NullableArray;
+        }
+
+        // Other modifiers
+        if (typeName.EndsWith("?"))
+        {
+            modifiers |= Modifiers.Nullable;
+            typeName = typeName[..^1];
+        }
+        if (typeName.EndsWith("*"))
+        {
+            modifiers |= Modifiers.Pointer;
+            typeName = typeName[..^1];
+        }
+
+        foreach (var iface in Interfaces)
+        {
+            if (typeName == iface.Name)
+            {
+                modifiers |= Modifiers.Interface;
+                modifiers &= ~Modifiers.Pointer; // Interfaces are marshalled
+                break;
+            }
+            else if (iface.IsLight &&
+                typeName.StartsWith("Light") &&
+                typeName["Light".Length..] == iface.Name)
+            {
+                modifiers |= (Modifiers.Interface | Modifiers.LightInterface);
+                modifiers &= ~Modifiers.Pointer; // Interfaces are marshalled
+            }
+        }
+
+        return new(typeName, indirection, modifiers);
+    }
+
+    public string ToCodeType(string typeDecl)
+    {
+        var type = ParseTypeDecl(typeDecl);
+        return ToCodeType(type);
+    }
+
+    public string ToCodeType(ParsedType type)
+    {
+        string typeDecl = type.Name;
+
+        // Re-apply type modifiers
+        if ((type.Modifiers & Modifiers.Pointer) != 0)
+        {
+            typeDecl += "*";
+        }
+        // Note that pointers cannot be nullable; the `else` is important here
+        else if ((type.Modifiers & Modifiers.Nullable) != 0)
+        {
+            typeDecl += "?";
+        }
+
+        // Re-apply array declarators
+        if ((type.Modifiers & Modifiers.NullableArray) != 0)
+        {
+            typeDecl += "[]?";
+        }
+        else if ((type.Modifiers & Modifiers.Array) != 0)
+        {
+            typeDecl += "[]";
+        }
+
+        typeDecl = $"{ToPrefix(type.Indirection)}{typeDecl}";
+
+        return typeDecl;
+    }
+
+    public string ToFnPointerType(string typeDecl)
+    {
+        var type = ParseTypeDecl(typeDecl);
+        return ToFnPointerType(type);
+    }
+
+    public string ToFnPointerType(ParsedType type)
+    {
+        string resultType = type.Name;
+
+        // Interfaces need to be marshalled
+        if ((type.Modifiers & Modifiers.Interface) != 0)
+        {
+            resultType = "IntPtr";
+        }
+        else if (FnPointerTypeReplacements.TryGetValue(resultType, out string replacement))
+        {
+            resultType = replacement;
+        }
+
+        resultType = ToPrefix(type.Indirection) + resultType;
+
+        // Re-apply pointer modifier
+        if ((type.Modifiers & Modifiers.Pointer) != 0)
+        {
+            resultType += '*';
+        }
+
+        return resultType;
+    }
+
+    public string ToCodeParameter(ParameterDecl parameter)
+    {
+        return $"{ToCodeType(parameter.TypeDecl)} {parameter.Name}";
+    }
+
+    public string ToFnPointerParameter(ParameterDecl parameter)
+    {
+        return $"{ToFnPointerType(parameter.TypeDecl)} {parameter.Name}";
+    }
+
+    public string ToFnPointerArgument(ParameterDecl parameter)
+    {
+        string argument = parameter.Name;
+        var paramType = ParseTypeDecl(parameter.TypeDecl);
+
+        // Interfaces need to be marshalled
+        if ((paramType.Modifiers & Modifiers.Interface) != 0)
+        {
+            if (paramType.Indirection == Indirection.Out)
+            {
+                // Interface handle being returned
+                // Combines with modifier prefix to create `out IntPtr name_handle`
+                argument = $"IntPtr {parameter.Name}_handle";
+            }
+            else if ((paramType.Modifiers & Modifiers.Nullable) != 0)
+            {
+                // Optional interface instance
+                argument = $"{parameter.Name}?.DangerousGetHandle() ?? IntPtr.Zero";
+            }
+            else
+            {
+                // Required interface instance
+                argument = $"{parameter.Name}.DangerousGetHandle()";
+            }
+        }
+
+        // Booleans need to be marshalled
+        if (paramType.Name == "bool" && paramType.Modifiers == Modifiers.None)
+        {
+            argument = $"{parameter.Name} ? (byte)1 : (byte)0";
+        }
+
+        argument = ToPrefix(paramType.Indirection) + argument;
+
+        return argument;
+    }
+
+    public string MarshalFromFnPointerParameter(ParameterDecl parameter)
+    {
+        var paramType = ParseTypeDecl(parameter.TypeDecl);
+        return MarshalFromFnPointerParameter(paramType, parameter.Name);
+    }
+
+    public string MarshalFromFnPointerParameter(ParsedType paramType, string paramName)
+    {
+        string result = paramName;
+
+        // Interfaces need to be marshalled
+        if ((paramType.Modifiers & Modifiers.Interface) != 0)
+        {
+            string owned = (paramType.Modifiers & Modifiers.OwnedInstance) != 0 ? "true" : "false";
+            result = $"new {paramType.Name}({paramName}, {owned})";
+        }
+
+        // Booleans need to be marshalled
+        if (paramType.Name == "bool" && paramType.Modifiers == Modifiers.None)
+        {
+            result = $"{paramName} != 0";
+        }
+
+        result = ToPrefix(paramType.Indirection) + result;
+
+        return result;
+    }
+
+    public string ToCodeMethodFront(MethodDecl method)
+    {
+        return $"{ToModifier(method.Visibility)} {ToCodeType(method.ReturnTypeDecl)} {method.Name}";
+    }
+
+    public string MethodToFnPointerType(MethodDecl method)
+    {
+        if (method.IsCustom)
+        {
+            throw new InvalidOperationException($"Cannot create string representation of custom-action methods");
+        }
+
+        var args = method.Parameters
+            .Select(p => ToFnPointerType(p.TypeDecl))
+            .Append(ToFnPointerType(method.ReturnTypeDecl));
+
+        return $"delegate* unmanaged[Stdcall]<{string.Join(", ", args)}>";
+    }
+
+    public string ToModifier(Visibility visibility)
+    {
+        return visibility switch
+        {
+            Visibility.Public => "public",
+            Visibility.Internal => "internal",
+            Visibility.Private => "private",
+            _ => "",
+        };
+    }
+
+    public string ToPrefix(Indirection indirection)
+    {
+        return indirection switch
+        {
+            Indirection.In => "in ",
+            Indirection.Out => "out ",
+            Indirection.Ref => "ref ",
+            Indirection.RefReadonly => "ref readonly ",
+            _ => "",
+        };
+    }
+}
+
+#>

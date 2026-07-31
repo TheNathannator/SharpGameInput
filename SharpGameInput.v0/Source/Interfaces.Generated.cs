@@ -15,9 +15,9 @@ using SharpGameInput.Common;
 
 namespace SharpGameInput.v0
 {
-    using HRESULT = int;
-    using HANDLE = System.IntPtr;
     using GameInputCallbackToken_t = uint64_t;
+    using HRESULT = int;
+    using HANDLE = IntPtr;
 
     #region Callback definitions
 
@@ -2334,9 +2334,9 @@ namespace SharpGameInput.v0
             {
                 return ExecuteRawDeviceIoControl(
                     controlCode,
-                    (size_t)inputBuffer.Length,
+                    (size_t)(inputBuffer?.Length ?? 0),
                     inputBufferPtr,
-                    (size_t)outputBuffer.Length,
+                    (size_t)(outputBuffer?.Length ?? 0),
                     outputBufferPtr,
                     out bytesReturned
                 );
@@ -2871,9 +2871,9 @@ namespace SharpGameInput.v0
             {
                 return ExecuteRawDeviceIoControl(
                     controlCode,
-                    (size_t)inputBuffer.Length,
+                    (size_t)(inputBuffer?.Length ?? 0),
                     inputBufferPtr,
-                    (size_t)outputBuffer.Length,
+                    (size_t)(outputBuffer?.Length ?? 0),
                     outputBufferPtr,
                     out bytesReturned
                 );

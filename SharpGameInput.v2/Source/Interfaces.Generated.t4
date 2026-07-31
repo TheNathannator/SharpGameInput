@@ -2,17 +2,27 @@
 <#@ output extension=".cs" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/GeneratedFileHeader.t4" once="true" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/InterfaceGeneration.t4" once="true" #>
 <#
-Namespace = "SharpGameInput.v2";
-
 UsingDirectives.Add("System");
 
-TypeNameReplacements.Add("GameInputCallbackToken_t", "uint64_t");
+var library = new TypeLibrary()
+{
+    TypeAliases =
+    {
+        { "GameInputCallbackToken_t", "uint64_t" },
+    },
+    FnPointerTypeReplacements =
+    {
+        { "GameInputCallbackToken", "ulong" },
+        { "LightGameInputCallbackToken", "ulong" },
+    },
+};
 
-FnPointerTypeReplacements.Add("GameInputCallbackToken", "ulong");
-FnPointerTypeReplacements.Add("LightGameInputCallbackToken", "ulong");
+AddDefaultReplacements(library);
 
-Callbacks = [
+library.Callbacks = [
     new()
     {
         Delegate = new("void", "GameInputReadingCallback", [
@@ -65,7 +75,7 @@ Callbacks = [
     },
 ];
 
-Interfaces = [
+library.Interfaces = [
     new("IGameInput", "BBAA66D2-837A-40F7-A303-917D500955F4",
         light: false,
         new("uint64_t", "GetCurrentTimestamp"),
@@ -136,7 +146,7 @@ Interfaces = [
             ("wchar_t*", "value"),
             ("out IGameInputDevice", "device")
         ),
-        new(() =>
+        new((library) =>
         {
 #>
 
@@ -162,7 +172,7 @@ Interfaces = [
         new(Visibility.Private, "void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),
-        new(() => {
+        new((library) => {
 #>
 
         public LightIGameInputDevice GetDevice()
@@ -178,7 +188,8 @@ Interfaces = [
             ("uint32_t", "stateArrayCount"),
             ("float*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint32_t", "GetControllerAxisState",
+        new((library) => MakeArrayWrappers("uint32_t", "GetControllerAxisState",
+            library,
             castLengthTo: "uint32_t",
             lengthBeforePtr: true,
             ("float[mut]", "stateArray")
@@ -189,7 +200,8 @@ Interfaces = [
             ("uint32_t", "stateArrayCount"),
             ("ByteBool*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
+        new((library) => MakeArrayWrappers("uint32_t", "GetControllerButtonState",
+            library,
             castLengthTo: "uint32_t",
             lengthBeforePtr: true,
             ("ByteBool[mut]", "stateArray")
@@ -200,7 +212,8 @@ Interfaces = [
             ("uint32_t", "stateArrayCount"),
             ("GameInputSwitchPosition*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint32_t", "GetControllerSwitchState",
+        new((library) => MakeArrayWrappers("uint32_t", "GetControllerSwitchState",
+            library,
             castLengthTo: "uint32_t",
             lengthBeforePtr: true,
             ("GameInputSwitchPosition[mut]", "stateArray")
@@ -211,7 +224,8 @@ Interfaces = [
             ("uint32_t", "stateArrayCount"),
             ("GameInputKeyState*", "stateArray")
         ),
-        new(() => MakeArrayWrappers("uint32_t", "GetKeyState",
+        new((library) => MakeArrayWrappers("uint32_t", "GetKeyState",
+            library,
             castLengthTo: "uint32_t",
             lengthBeforePtr: true,
             ("GameInputKeyState[mut]", "stateArray")
@@ -251,7 +265,7 @@ Interfaces = [
         new("HRESULT", "GetDeviceInfo",
             ("out GameInputDeviceInfo*", "info")
         ),
-        new(() => {
+        new((library) => {
 #>
 
         /// <remarks>
@@ -303,7 +317,8 @@ Interfaces = [
             ("uint32_t", "bufferOutSize"),
             ("out uint32_t", "bufferOutSizeWritten")
         ),
-        new(() => MakeArrayWrappers("HRESULT", "DirectInputEscape",
+        new((library) => MakeArrayWrappers("HRESULT", "DirectInputEscape",
+            library,
             castLengthTo: "uint32_t",
             lengthBeforePtr: false,
             ("uint32_t", "command"),
@@ -311,7 +326,7 @@ Interfaces = [
             ("byte[mut]?", "bufferOut"),
             ("out uint32_t", "bufferOutSizeWritten")
         )),
-        new(() =>
+        new((library) =>
         {
 #>
 
@@ -411,4 +426,8 @@ Interfaces = [
     ),
 ];
 #>
-<#@ include file="../../SharpGameInput.Common/Source/InterfaceGeneration.t4" #>
+<# WriteGeneratedFileHeader(); #>
+namespace SharpGameInput.v2
+{
+<# WriteInterfaces(library); #>
+}
