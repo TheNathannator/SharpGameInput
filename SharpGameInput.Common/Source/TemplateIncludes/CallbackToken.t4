@@ -1,0 +1,15 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ include file="FileGeneration.t4" once="true" #>
+<#
+UsingDirectives.Add("System");
+UsingDirectives.Add("System.Diagnostics.CodeAnalysis");
+UsingDirectives.Add("SharpGameInput.Common");
+
+void WriteCallbackToken()
+{
+#>
+<#@ include file="../InlineFiles/CallbackToken.inl.cs" #>
+<#
+}
+#>

@@ -1,0 +1,11 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/CallbackToken.t4" once="true" #>
+<#
+MakeGeneratedFile("SharpGameInput.v2", () =>
+{
+#>
+<# WriteCallbackToken(); #>
+<#
+});
+#>

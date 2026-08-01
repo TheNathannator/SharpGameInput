@@ -1,10 +1,5 @@
-using System;
-using System.Diagnostics.CodeAnalysis;
-using SharpGameInput.Common;
-
-namespace SharpGameInput.v1
-{
-    public sealed class GameInputCallbackToken : IDisposable, IEquatable<GameInputCallbackToken>
+    public sealed class GameInputCallbackToken : IDisposable,
+        IEquatable<GameInputCallbackToken>
     {
         private IGameInput? _gameInput;
         internal ulong _callbackToken;
@@ -125,4 +120,3 @@ namespace SharpGameInput.v1
         public override int GetHashCode()
             => _callbackToken.GetHashCode();
     }
-}
