@@ -115,10 +115,6 @@ public struct ParsedType(string name, Indirection indirection, Modifiers modifie
 
 public class TypeLibrary
 {
-    // Type aliases to create in the generated C# source.
-    // Replacements are performed recursively, so one replacement can alias directly to another.
-    public readonly Dictionary<string, string> TypeAliases = new();
-
     // Type declarations to be entirely replaced before parsing them.
     // Replacements are performed recursively, so one replacement can alias directly to another.
     public readonly Dictionary<string, string> TypeDeclReplacements = new();
@@ -129,20 +125,6 @@ public class TypeLibrary
 
     public InterfaceDecl[] Interfaces;
     public CallbackDecl[] Callbacks;
-
-    public IEnumerable<(string, string)> EnumerateTypeAliases()
-    {
-        foreach (var (alias, _replacement) in TypeAliases)
-        {
-            string replacement = _replacement;
-            while (TypeAliases.TryGetValue(replacement, out string extraReplacement))
-            {
-                replacement = extraReplacement;
-            }
-
-            yield return (alias, replacement);
-        }
-    }
 
     public ParsedType ParseTypeDecl(string declaration)
     {

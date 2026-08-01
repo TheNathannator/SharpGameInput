@@ -1,26 +1,9 @@
 <#@ template hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#@ import namespace="System.Linq" #>
-<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/GeneratedFileHeader.t4" once="true" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/FileGeneration.t4" once="true" #>
 <#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/InterfaceGeneration.t4" once="true" #>
 <#
-UsingDirectives.Add("System");
-
-var library = new TypeLibrary()
-{
-    TypeAliases =
-    {
-        { "GameInputCallbackToken_t", "uint64_t" },
-    },
-    FnPointerTypeReplacements =
-    {
-        { "GameInputCallbackToken", "ulong" },
-        { "LightGameInputCallbackToken", "ulong" },
-    },
-};
-
-AddDefaultReplacements(library);
+var library = MakeInterfaceTypeLibrary();
 
 library.Callbacks = [
     new()
@@ -571,9 +554,11 @@ library.Interfaces = [
         new("bool", "ResetAllItems")
     ),
 ];
-#>
-<# WriteGeneratedFileHeader(); #>
-namespace SharpGameInput.v0
+
+MakeGeneratedFile("SharpGameInput.v0", () =>
 {
+#>
 <# WriteInterfaces(library); #>
-}
+<#
+});
+#>

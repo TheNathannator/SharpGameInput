@@ -1,26 +1,9 @@
 <#@ template hostspecific="false" language="C#" #>
 <#@ output extension=".cs" #>
-<#@ import namespace="System.Collections.Generic" #>
-<#@ import namespace="System.Linq" #>
-<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/GeneratedFileHeader.t4" once="true" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/FileGeneration.t4" once="true" #>
 <#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/InterfaceGeneration.t4" once="true" #>
 <#
-UsingDirectives.Add("System");
-
-var library = new TypeLibrary()
-{
-    TypeAliases =
-    {
-        { "GameInputCallbackToken_t", "uint64_t" },
-    },
-    FnPointerTypeReplacements =
-    {
-        { "GameInputCallbackToken", "ulong" },
-        { "LightGameInputCallbackToken", "ulong" },
-    },
-};
-
-AddDefaultReplacements(library);
+var library = MakeInterfaceTypeLibrary();
 
 library.Callbacks = [
     new()
@@ -76,7 +59,7 @@ library.Callbacks = [
 ];
 
 library.Interfaces = [
-    new("IGameInput", "40FFB7E4-6150-407A-B439-132BADC08D2D",
+    new("IGameInput", "BBAA66D2-837A-40F7-A303-917D500955F4",
         light: false,
         new("uint64_t", "GetCurrentTimestamp"),
 
@@ -165,7 +148,7 @@ library.Interfaces = [
         )
     ),
 
-    new("IGameInputReading", "86318E60-0B3C-40D6-BEFA-C62F2D952724",
+    new("IGameInputReading", "65F06483-DB76-40B7-B745-F591FAE55FC9",
         light: true,
         new("GameInputKind", "GetInputKind"),
         new("uint64_t", "GetTimestamp"),
@@ -235,6 +218,10 @@ library.Interfaces = [
             ("out GameInputMouseState", "state")
         ),
 
+        new("bool", "GetSensorsState",
+            ("out GameInputSensorsState", "state")
+        ),
+
         new("bool", "GetArcadeStickState",
             ("out GameInputArcadeStickState", "state")
         ),
@@ -256,7 +243,7 @@ library.Interfaces = [
         )
     ),
 
-    new("IGameInputDevice", "B169652A-4A32-40D7-9FA9-905997952516",
+    new("IGameInputDevice", "39A0C9F2-F055-4089-96E7-25B2756D3077",
         light: true,
         new("HRESULT", "GetDeviceInfo",
             ("out GameInputDeviceInfo*", "info")
@@ -280,6 +267,9 @@ library.Interfaces = [
         }
 <#
         }),
+        new("HRESULT", "GetHapticInfo",
+            ("out GameInputHapticInfo", "info")
+        ),
 
         new("GameInputDeviceStatus", "GetDeviceStatus"),
 
@@ -300,7 +290,86 @@ library.Interfaces = [
 
         new("void", "SetRumbleState",
             ("in GameInputRumbleParams", "rumbleParams")
+        ),
+
+        new("HRESULT", "DirectInputEscape",
+            ("uint32_t", "command"),
+            ("void*", "bufferIn"),
+            ("uint32_t", "bufferInSize"),
+            ("void*", "bufferOut"),
+            ("uint32_t", "bufferOutSize"),
+            ("out uint32_t", "bufferOutSizeWritten")
+        ),
+        new((library) => MakeArrayWrappers("HRESULT", "DirectInputEscape",
+            library,
+            castLengthTo: "uint32_t",
+            lengthBeforePtr: false,
+            ("uint32_t", "command"),
+            ("byte[]?", "bufferIn"),
+            ("byte[mut]?", "bufferOut"),
+            ("out uint32_t", "bufferOutSizeWritten")
+        )),
+        new((library) =>
+        {
+#>
+
+        public HRESULT DirectInputEscape<TIn>(
+            uint32_t command,
+            in TIn input
         )
+            where TIn : unmanaged
+        {
+            fixed (TIn* inputPtr = &input)
+            {
+                return DirectInputEscape(
+                    command,
+                    inputPtr, (uint32_t)sizeof(TIn),
+                    null, 0,
+                    out _
+                );
+            }
+        }
+
+        public HRESULT DirectInputEscape<TOut>(
+            uint32_t command,
+            out TOut output,
+            out uint32_t bytesReturned
+        )
+            where TOut : unmanaged
+        {
+            fixed (TOut* outputPtr = &output)
+            {
+                return DirectInputEscape(
+                    command,
+                    null, 0,
+                    outputPtr, (uint32_t)sizeof(TOut),
+                    out bytesReturned
+                );
+            }
+        }
+
+        public HRESULT DirectInputEscape<TIn, TOut>(
+            uint32_t command,
+            in TIn input,
+            out TOut output,
+            out uint32_t bytesReturned
+        )
+            where TIn : unmanaged
+            where TOut : unmanaged
+        {
+            fixed (TIn* inputPtr = &input)
+            fixed (TOut* outputPtr = &output)
+            {
+                return DirectInputEscape(
+                    command,
+                    inputPtr, (uint32_t)sizeof(TIn),
+                    outputPtr, (uint32_t)sizeof(TOut),
+                    out bytesReturned
+                );
+            }
+        }
+<#
+        })
     ),
 
     new("IGameInputDispatcher", "415EED2E-98CB-42C2-8F28-B94601074E31",
@@ -313,7 +382,7 @@ library.Interfaces = [
         )
     ),
 
-    new("IGameInputForceFeedbackEffect", "51BDA05E-F742-45D9-B085-9444AE48381D",
+    new("IGameInputForceFeedbackEffect", "FF61096A-3373-4093-A1DF-6D31846B3511",
         light: true,
         new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
@@ -339,9 +408,11 @@ library.Interfaces = [
         )
     ),
 ];
-#>
-<# WriteGeneratedFileHeader(); #>
-namespace SharpGameInput.v1
+
+MakeGeneratedFile("SharpGameInput.v2", () =>
 {
+#>
 <# WriteInterfaces(library); #>
-}
+<#
+});
+#>

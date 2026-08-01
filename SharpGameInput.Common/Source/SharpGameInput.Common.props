@@ -40,6 +40,10 @@
 
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)/*.cs" LinkBase="Common" />
+    <!-- Types included in a text template that don't depend on template data are separated
+      into their own files for ease of maintenance (namely, syntax highlighting);
+      these should not be included in the actual project -->
+    <Compile Remove="$(MSBuildThisFileDirectory)/*.inl.cs" />
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)/NativeMethods.txt" LinkBase="Common" />
   </ItemGroup>
 

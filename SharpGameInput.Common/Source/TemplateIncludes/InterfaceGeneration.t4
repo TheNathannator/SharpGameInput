@@ -3,42 +3,42 @@
 <#@ import namespace="System" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
-<#@ include file="GeneratedFileHeader.t4" once="true" #>
+<#@ include file="FileGeneration.t4" once="true" #>
 <#@ include file="TypeParsing.t4" once="true" #>
-<#@ include file="CommonStructs.t4" once="true" #>
 <#
 UsingDirectives.Add("System");
 UsingDirectives.Add("System.Diagnostics.CodeAnalysis");
+UsingDirectives.Add("System.Runtime.CompilerServices");
 UsingDirectives.Add("System.Runtime.ConstrainedExecution");
 UsingDirectives.Add("System.Runtime.InteropServices");
 UsingDirectives.Add("SharpGameInput.Common");
+
+TypeAliases.Add("HRESULT", "int");
+TypeAliases.Add("HANDLE", "IntPtr");
+TypeAliases.Add("GameInputCallbackToken_t", "uint64_t");
 #>
 <#
-void AddDefaultReplacements(TypeLibrary library)
+TypeLibrary MakeInterfaceTypeLibrary()
 {
-    library.TypeAliases.Add("HRESULT", "int");
-    library.TypeAliases.Add("HANDLE", "IntPtr");
-
-    library.TypeDeclReplacements.Add("REFIID", "ref IID");
-    library.TypeDeclReplacements.Add("IUnknown*", "IntPtr");
-
-    library.FnPointerTypeReplacements.Add("object", "void*");
-    library.FnPointerTypeReplacements.Add("bool", "byte");
+    return new()
+    {
+        TypeDeclReplacements =
+        {
+            { "REFIID", "ref IID" },
+            { "IUnknown*", "IntPtr" },
+        },
+        FnPointerTypeReplacements =
+        {
+            {"object", "void*"},
+            {"bool", "byte"},
+            {"GameInputCallbackToken", "ulong"},
+            {"LightGameInputCallbackToken", "ulong"},
+        },
+    };
 }
 
 void WriteInterfaces(TypeLibrary library)
 {
-    foreach (var (alias, replacement) in library.EnumerateTypeAliases())
-    {
-#>
-    using <#= alias #> = <#= replacement #>;
-<#
-    }
-#>
-
-    #region Callback definitions
-
-<#
     // Apply shared callback parameters
     for (int i = 0; i < library.Callbacks.Length; i++)
     {
@@ -51,6 +51,10 @@ void WriteInterfaces(TypeLibrary library)
         ];
     }
 
+#>
+    #region Native callback definitions
+
+<#
     foreach (var callback in library.Callbacks)
     {
         var del = callback.Delegate;
@@ -69,7 +73,12 @@ void WriteInterfaces(TypeLibrary library)
 
 <#
     }
+#>
+    #endregion
 
+    #region Managed callback definitions
+
+<#
     foreach (var callback in library.Callbacks)
     {
         var del = callback.Delegate;
@@ -93,85 +102,9 @@ void WriteInterfaces(TypeLibrary library)
 #>
     #endregion
 
-    #region Common structures
-
-<#
-WriteCommonStructs();
-#>
-
-    #endregion
-
     #region Interface definitions
 
-    public abstract class GameInputComPtr : CriticalFinalizerObject,
-        IDisposable,
-        IEquatable<GameInputComPtr>
-    {
-        protected internal IntPtr handle;
-        private readonly bool ownsHandle;
-
-        public bool IsInvalid => handle == IntPtr.Zero;
-
-        internal GameInputComPtr(IntPtr handle, bool ownsHandle)
-        {
-            this.handle = handle;
-            this.ownsHandle = ownsHandle;
-        }
-
-        ~GameInputComPtr() => Dispose(false);
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-                DisposeManagedResources();
-            DisposeUnmanagedResources();
-        }
-
-        protected virtual void DisposeManagedResources()
-        {
-        }
-
-        protected virtual void DisposeUnmanagedResources()
-        {
-            if (handle != IntPtr.Zero && ownsHandle)
-            {
-                Marshal.Release(handle);
-                handle = IntPtr.Zero;
-            }
-        }
-
-        public IntPtr DangerousGetHandle() => handle;
-
-        public static bool operator ==(GameInputComPtr? left, GameInputComPtr? right)
-        {
-            if (ReferenceEquals(left, right))
-                return true;
-
-            if (left is null || right is null)
-                return false;
-
-            // GameInput interfaces can be compared directly by pointer for equality
-            return left.handle == right.handle;
-        }
-
-        public static bool operator !=(GameInputComPtr? left, GameInputComPtr? right)
-            => !(left == right);
-
-        public bool Equals([NotNullWhen(true)] GameInputComPtr? ptr)
-            => this == ptr;
-
-        public override bool Equals([NotNullWhen(true)] object? obj)
-            => obj is GameInputComPtr ptr && Equals(ptr);
-
-        public override int GetHashCode()
-            => handle.GetHashCode();
-    }
+<#@ include file="../InlineFiles/GameInputComPtr.inl.cs" #>
 <#
     foreach (var iface in library.Interfaces)
     {
@@ -353,7 +286,7 @@ WriteCommonStructs();
         var del = callback.Delegate;
 #>
         private static readonly <#= del.Name #>_NativePtr _<#= del.Name #>Ptr = (<#= del.Name #>_NativePtr)
-            System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(_<#= del.Name #>Delegate);
+            Marshal.GetFunctionPointerForDelegate(_<#= del.Name #>Delegate);
 <#
     }
 #>
@@ -408,7 +341,7 @@ WriteCommonStructs();
 #>
 
 #if NET5_0_OR_GREATER
-        [System.Runtime.InteropServices.UnmanagedCallersOnly(CallConvs = new[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+        [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvStdcall) })]
 #endif
 #if SHARPGAMEINPUT_UNITY
         [AOT.MonoPInvokeCallback(typeof(<#= del.Name #>_Native))]
@@ -482,6 +415,11 @@ WriteCommonStructs();
     #endregion
 <#
 }
+
+// -----------------------------------------
+// END MAIN TEMPLATE
+// All following code is for helper methods.
+// -----------------------------------------
 
 void WriteInterfaceMethods(TypeLibrary library, in InterfaceDecl iface)
 {

@@ -1,0 +1,12 @@
+<#@ template hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/FileGeneration.t4" once="true" #>
+<#@ include file="../../SharpGameInput.Common/Source/TemplateIncludes/CommonStructs.t4" once="true" #>
+<#
+MakeGeneratedFile("SharpGameInput.v0", () =>
+{
+#>
+<# WriteCommonStructs(); #>
+<#
+});
+#>
