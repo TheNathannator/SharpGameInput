@@ -49,8 +49,6 @@ public static partial class Checks
     {
         left.Unregister(5000);
         left.TryUnregister(5000);
-        left.UnregisterAsync(5000).Wait();
-        left.TryUnregisterAsync(5000).Wait();
 
         left.Stop();
         lightLeft.Stop();
