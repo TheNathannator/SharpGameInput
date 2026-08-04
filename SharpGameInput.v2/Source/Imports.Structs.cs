@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Text;
 using SharpGameInput.Common;
 
 namespace SharpGameInput.v2
@@ -337,24 +336,12 @@ namespace SharpGameInput.v2
 
         public readonly string? GetDisplayName()
         {
-            if (displayName == null)
-            {
-                return null;
-            }
-
-            int length = Utility.StringLength(displayName);
-            return Encoding.UTF8.GetString(displayName, length);
+            return StringHelper.FromUtf8(displayName);
         }
 
         public readonly string? GetPnpPath()
         {
-            if (pnpPath == null)
-            {
-                return null;
-            }
-
-            int length = Utility.StringLength(pnpPath);
-            return Encoding.UTF8.GetString(pnpPath, length);
+            return StringHelper.FromUtf8(pnpPath);
         }
     }
 
