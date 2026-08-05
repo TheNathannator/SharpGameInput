@@ -311,25 +311,25 @@ namespace SharpGameInput.v2
         public uint32_t forceFeedbackMotorCount;
         internal GameInputForceFeedbackMotorInfo* _forceFeedbackMotorInfo;
 
-        public GameInputControllerAxisInfo* GetControllerAxisInfo(int index)
+        public readonly GameInputControllerAxisInfo* GetControllerAxisInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)controllerAxisCount);
             return _controllerAxisInfo + index;
         }
 
-        public GameInputControllerButtonInfo* GetControllerButtonInfo(int index)
+        public readonly GameInputControllerButtonInfo* GetControllerButtonInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)controllerButtonCount);
             return _controllerButtonInfo + index;
         }
 
-        public GameInputControllerSwitchInfo* GetControllerSwitchInfo(int index)
+        public readonly GameInputControllerSwitchInfo* GetControllerSwitchInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)controllerSwitchCount);
             return _controllerSwitchInfo + index;
         }
 
-        public GameInputForceFeedbackMotorInfo* GetForceFeedbackMotorInfo(int index)
+        public readonly GameInputForceFeedbackMotorInfo* GetForceFeedbackMotorInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)forceFeedbackMotorCount);
             return _forceFeedbackMotorInfo + index;

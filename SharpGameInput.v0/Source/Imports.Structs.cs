@@ -257,7 +257,7 @@ namespace SharpGameInput.v0
         public GameInputRawDeviceReportInfo* inputReport;
         public GameInputRawDeviceReportItemInfo* inputReportItem;
 
-        public GameInputLabel GetPositionLabel(int index)
+        public readonly GameInputLabel GetPositionLabel(int index)
         {
             ThrowHelper.CheckRange(index, PositionLabelCount);
             return (GameInputLabel)_positionLabels[index];
@@ -499,31 +499,31 @@ namespace SharpGameInput.v0
         public GameInputString* deviceStrings;
         public void* deviceDescriptorData;
 
-        public GameInputControllerAxisInfo* GetControllerAxisInfo(int index)
+        public readonly GameInputControllerAxisInfo* GetControllerAxisInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)controllerAxisCount);
             return _controllerAxisInfo + index;
         }
 
-        public GameInputControllerButtonInfo* GetControllerButtonInfo(int index)
+        public readonly GameInputControllerButtonInfo* GetControllerButtonInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)controllerButtonCount);
             return _controllerButtonInfo + index;
         }
 
-        public GameInputControllerSwitchInfo* GetControllerSwitchInfo(int index)
+        public readonly GameInputControllerSwitchInfo* GetControllerSwitchInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)controllerSwitchCount);
             return _controllerSwitchInfo + index;
         }
 
-        public GameInputForceFeedbackMotorInfo* GetForceFeedbackMotorInfo(int index)
+        public readonly GameInputForceFeedbackMotorInfo* GetForceFeedbackMotorInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)forceFeedbackMotorCount);
             return _forceFeedbackMotorInfo + index;
         }
 
-        public GameInputHapticFeedbackMotorInfo* GetHapticFeedbackMotorInfo(int index)
+        public readonly GameInputHapticFeedbackMotorInfo* GetHapticFeedbackMotorInfo(int index)
         {
             ThrowHelper.CheckRange(index, (int)hapticFeedbackMotorCount);
             return _hapticFeedbackMotorInfo + index;
