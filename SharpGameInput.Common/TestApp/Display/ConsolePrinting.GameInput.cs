@@ -1,3 +1,19 @@
+#if GAMEINPUT_V1_OR_GREATER
+#define HAS_ABS_MOUSE
+#endif
+
+#if GAMEINPUT_V0
+#define HAS_TOUCH_REPORTS
+#endif
+
+#if GAMEINPUT_V0
+#define HAS_MOTION_REPORTS
+#endif
+
+#if GAMEINPUT_V2_OR_LATER
+#define HAS_SENSOR_REPORTS
+#endif
+
 #if GAMEINPUT_V0 || GAMEINPUT_V3_OR_LATER
 #define HAS_RAW_REPORTS
 #endif
@@ -72,19 +88,21 @@ namespace SharpGameInput.TestApp.Display
                     PrintMouseReading(reading, lastReport);
                     break;
                 }
-#if GAMEINPUT_V0
+#if HAS_TOUCH_REPORTS
                 case GameInputKind.Touch:
                 {
                     PrintTouchReading(reading, lastReport);
                     break;
                 }
+#endif
+#if HAS_MOTION_REPORTS
                 case GameInputKind.Motion:
                 {
                     PrintMotionReading(reading, lastReport);
                     break;
                 }
 #endif
-#if GAMEINPUT_V2_OR_GREATER
+#if HAS_SENSOR_REPORTS
                 case GameInputKind.Sensors:
                 {
                     PrintSensorsReading(reading, lastReport);
@@ -395,7 +413,7 @@ namespace SharpGameInput.TestApp.Display
                 WriteTimestamp(reading.GetTimestamp());
                 Console.Write($": buttons {state.buttons}");
                 Console.Write($"  X {state.positionX} Y {state.positionY}");
-#if GAMEINPUT_V1_OR_GREATER
+#if HAS_ABS_MOUSE
                 Console.Write($"  abs X {state.absolutePositionX} Y {state.absolutePositionY}");
 #endif
                 Console.Write($"  wheel X {state.wheelX} Y {state.wheelY}");
@@ -405,7 +423,7 @@ namespace SharpGameInput.TestApp.Display
             return true;
         }
 
-#if GAMEINPUT_V0
+#if HAS_TOUCH_REPORTS
         public static bool PrintTouchReading(LightIGameInputReading reading, StateBuffer? lastReport)
         {
             int touchCount = (int)reading.GetTouchCount();
@@ -455,7 +473,9 @@ namespace SharpGameInput.TestApp.Display
 
             return true;
         }
+#endif
 
+#if HAS_MOTION_REPORTS
         public static bool PrintMotionReading(LightIGameInputReading reading, StateBuffer? lastReport)
         {
             if (!reading.GetMotionState(out var state))
@@ -479,7 +499,7 @@ namespace SharpGameInput.TestApp.Display
         }
 #endif
 
-#if GAMEINPUT_V2_OR_GREATER
+#if HAS_SENSOR_REPORTS
         public static bool PrintSensorsReading(LightIGameInputReading reading, StateBuffer? lastReport)
         {
             if (!reading.GetSensorsState(out var state))
