@@ -10,6 +10,10 @@ namespace SharpGameInput.v2
         DeviceNotFound = unchecked((int)0x838A0002),
         ReadingNotFound = unchecked((int)0x838A0003),
         ReferenceReadingTooOld = unchecked((int)0x838A0004),
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        TimestampOutOfRange = unchecked((int)0x838A0005),
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        InsufficientForceFeedbackResources = unchecked((int)0x838A0006),
         FeedbackNotSupported = unchecked((int)0x838A0007),
         ObjectNoLongerExists = unchecked((int)0x838A0008),
         CallbackNotFound = unchecked((int)0x838A0009),
@@ -21,6 +25,8 @@ namespace SharpGameInput.v2
     public enum GameInputKind
     {
         Unknown          = 0x00000000,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        RawDeviceReport  = 0x00000001,
         ControllerAxis   = 0x00000002,
         ControllerButton = 0x00000004,
         ControllerSwitch = 0x00000008,
@@ -28,6 +34,10 @@ namespace SharpGameInput.v2
         Keyboard         = 0x00000010,
         Mouse            = 0x00000020,
         Sensors          = 0x00000040,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        Touch            = 0x00000100,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        Motion           = 0x00001000,
         ArcadeStick      = 0x00010000,
         FlightStick      = 0x00020000,
         Gamepad          = 0x00040000,
@@ -46,9 +56,15 @@ namespace SharpGameInput.v2
     [Flags]
     public enum GameInputFocusPolicy
     {
-        DefaultFocusPolicy             = 0x00000000,
+        Default                        = 0x00000000,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        DisableBackgroundInput         = 0x00000001,
         ExclusiveForegroundInput       = 0x00000002,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        DisableBackgroundGuideButton   = 0x00000004,
         ExclusiveForegroundGuideButton = 0x00000008,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        DisableBackgroundShareButton   = 0x00000010,
         ExclusiveForegroundShareButton = 0x00000020,
         EnableBackgroundInput          = 0x00000040,
         EnableBackgroundGuideButton    = 0x00000080,
@@ -228,6 +244,22 @@ namespace SharpGameInput.v2
     {
         NoStatus        = 0x00000000,
         Connected       = 0x00000001,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        InputEnabled    = 0x00000002,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        OutputEnabled   = 0x00000004,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        RawIoEnabled    = 0x00000008,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        AudioCapture    = 0x00000010,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        AudioRender     = 0x00000020,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        Synchronized    = 0x00000040,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        Wireless        = 0x00000080,
+        [Obsolete("This value is not available in GameInput v2. It is only retained here for display purposes.")]
+        UserIdle        = 0x00100000,
         HapticInfoReady = 0x00200000,
         AnyStatus       = unchecked((int)0xFFFFFFFF)
     }
