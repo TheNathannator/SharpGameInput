@@ -155,6 +155,7 @@ namespace SharpGameInput.v2
         public bool_t hasWheelY;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct GameInputSensorsInfo
     {
         public GameInputSensorsKind supportedSensors;
