@@ -14,6 +14,10 @@
 #define HAS_SENSOR_REPORTS
 #endif
 
+#if GAMEINPUT_V3_OR_LATER
+#define HAS_UI_NAVIGATION_REPORTS
+#endif
+
 #if GAMEINPUT_V0 || GAMEINPUT_V3_OR_LATER
 #define HAS_RAW_REPORTS
 #endif
@@ -54,7 +58,11 @@ namespace SharpGameInput.TestApp.Display
                 // Filter out reading kinds that can overlap with other kinds
                 // They will still be considered in the default case, but should not interfere
                 // with printing a more specific report kind where possible
-                filterKinds &= GameInputKind.Controller | GameInputKind.UiNavigation;
+                filterKinds &= GameInputKind.Controller
+#if HAS_UI_NAVIGATION
+                    | GameInputKind.UiNavigation
+#endif
+                ;
             }
 
             var inputs = reading.GetInputKind();
@@ -129,11 +137,13 @@ namespace SharpGameInput.TestApp.Display
                     PrintRacingWheelReading(reading, lastReport);
                     break;
                 }
+#if HAS_UI_NAVIGATION
                 case GameInputKind.UiNavigation:
                 {
                     PrintUiNavigationReading(reading, lastReport);
                     break;
                 }
+#endif
                 default:
                 {
                     if ((inputs & GameInputKind.Controller) != 0)
@@ -142,11 +152,13 @@ namespace SharpGameInput.TestApp.Display
                         break;
                     }
 
+#if HAS_UI_NAVIGATION
                     if ((inputs & GameInputKind.UiNavigation) != 0)
                     {
                         PrintUiNavigationReading(reading, lastReport);
                         break;
                     }
+#endif
 
                     ulong timestamp = reading.GetTimestamp();
                     if (lastReport == null || lastReport.Write(timestamp))
@@ -605,6 +617,7 @@ namespace SharpGameInput.TestApp.Display
             return true;
         }
 
+#if HAS_UI_NAVIGATION
         public static bool PrintUiNavigationReading(LightIGameInputReading reading, StateBuffer? lastReport)
         {
             if (!reading.GetUiNavigationState(out var state))
@@ -621,5 +634,6 @@ namespace SharpGameInput.TestApp.Display
 
             return true;
         }
+#endif
     }
 }

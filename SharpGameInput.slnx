@@ -25,4 +25,10 @@
     <Project Path="SharpGameInput.v2/Tests/SharpGameInput.v2.Tests.csproj" />
   </Folder>
 
+  <Folder Name="/SharpGameInput.v3/">
+    <Project Path="SharpGameInput.v3/Source/SharpGameInput.v3.csproj" />
+    <Project Path="SharpGameInput.v3/TestApp/SharpGameInput.v3.TestApp.csproj" />
+    <Project Path="SharpGameInput.v3/Tests/SharpGameInput.v3.Tests.csproj" />
+  </Folder>
+
 </Solution>

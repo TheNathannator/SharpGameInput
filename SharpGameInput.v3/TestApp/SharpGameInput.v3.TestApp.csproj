@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <GameInputApiVersion>3</GameInputApiVersion>
+  </PropertyGroup>
+
+  <Import Project="../../SharpGameInput.Common/TestApp/SharpGameInput.Common.TestApp.props" />
+
+</Project>
