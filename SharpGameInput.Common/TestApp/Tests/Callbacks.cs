@@ -98,6 +98,7 @@ namespace SharpGameInput.TestApp.Tests
 
             ref readonly var info = ref device.GetDeviceInfo();
 
+            Console.WriteLine($"==================================================");
             ConsolePrinting.WriteTimestamp(timestamp);
             if (isConnected)
             {

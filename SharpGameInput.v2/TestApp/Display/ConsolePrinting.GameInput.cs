@@ -19,9 +19,9 @@ namespace SharpGameInput.TestApp.Display
             Console.WriteLine($"- Device root ID: {info.deviceRootId}");
             Console.WriteLine($"-----");
             Console.WriteLine($"- Family: {info.deviceFamily}");
-            Console.WriteLine($"- Supported inputs: {info.supportedInput}");
-            Console.WriteLine($"- Supported rumble: {info.supportedRumbleMotors}");
-            Console.WriteLine($"- Supported system buttons: {info.supportedSystemButtons}");
+            Console.WriteLine($"- Supported inputs: {info.supportedInput} (0x{(int)info.supportedInput:X8})");
+            Console.WriteLine($"- Supported rumble: {info.supportedRumbleMotors} (0x{(int)info.supportedRumbleMotors:X8})");
+            Console.WriteLine($"- Supported system buttons: {info.supportedSystemButtons} (0x{(int)info.supportedSystemButtons:X8})");
         }
     }
 }
