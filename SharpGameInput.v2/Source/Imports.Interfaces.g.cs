@@ -554,7 +554,7 @@ namespace SharpGameInput.v2
             return result;
         }
 
-        private void GetDevice(
+        public void GetDevice(
             out LightIGameInputDevice device
         )
         {
@@ -570,12 +570,6 @@ namespace SharpGameInput.v2
             );
 
             device = new(device_handle, ownsHandle: true);
-        }
-
-        public LightIGameInputDevice GetDevice()
-        {
-            GetDevice(out var device);
-            return device;
         }
 
         public uint32_t GetControllerAxisCount()
@@ -1074,7 +1068,7 @@ namespace SharpGameInput.v2
             return result;
         }
 
-        private void GetDevice(
+        public void GetDevice(
             out LightIGameInputDevice device
         )
         {
@@ -1090,12 +1084,6 @@ namespace SharpGameInput.v2
             );
 
             device = new(device_handle, ownsHandle: true);
-        }
-
-        public LightIGameInputDevice GetDevice()
-        {
-            GetDevice(out var device);
-            return device;
         }
 
         public uint32_t GetControllerAxisCount()

@@ -152,19 +152,9 @@ library.Interfaces = [
         light: true,
         new("GameInputKind", "GetInputKind"),
         new("uint64_t", "GetTimestamp"),
-        new(Visibility.Private, "void", "GetDevice",
+        new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),
-        new((library) => {
-#>
-
-        public LightIGameInputDevice GetDevice()
-        {
-            GetDevice(out var device);
-            return device;
-        }
-<#
-        }),
 
         new("uint32_t", "GetControllerAxisCount"),
         new("uint32_t", "GetControllerAxisState",

@@ -690,7 +690,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        private void GetDevice(
+        public void GetDevice(
             out LightIGameInputDevice device
         )
         {
@@ -706,12 +706,6 @@ namespace SharpGameInput.v0
             );
 
             device = new(device_handle, ownsHandle: true);
-        }
-
-        public LightIGameInputDevice GetDevice()
-        {
-            GetDevice(out var device);
-            return device;
         }
 
         public bool GetRawReport(
@@ -1311,7 +1305,7 @@ namespace SharpGameInput.v0
             return result;
         }
 
-        private void GetDevice(
+        public void GetDevice(
             out LightIGameInputDevice device
         )
         {
@@ -1327,12 +1321,6 @@ namespace SharpGameInput.v0
             );
 
             device = new(device_handle, ownsHandle: true);
-        }
-
-        public LightIGameInputDevice GetDevice()
-        {
-            GetDevice(out var device);
-            return device;
         }
 
         public bool GetRawReport(

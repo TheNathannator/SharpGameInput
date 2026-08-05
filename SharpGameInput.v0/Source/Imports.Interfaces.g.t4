@@ -200,19 +200,9 @@ library.Interfaces = [
             ("GameInputKind", "inputKind")
         ),
         new("uint64_t", "GetTimestamp"),
-        new(Visibility.Private, "void", "GetDevice",
+        new("void", "GetDevice",
             ("out LightIGameInputDevice", "device")
         ),
-        new((library) => {
-#>
-
-        public LightIGameInputDevice GetDevice()
-        {
-            GetDevice(out var device);
-            return device;
-        }
-<#
-        }),
 
         new("bool", "GetRawReport",
             ("out LightIGameInputRawDeviceReport", "report")
