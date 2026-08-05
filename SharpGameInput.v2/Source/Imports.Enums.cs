@@ -13,6 +13,8 @@ namespace SharpGameInput.v2
         FeedbackNotSupported = unchecked((int)0x838A0007),
         ObjectNoLongerExists = unchecked((int)0x838A0008),
         CallbackNotFound = unchecked((int)0x838A0009),
+        HapticInfoNotFound = unchecked((int)0x838A000A),
+        AggregateOperationNotSupported = unchecked((int)0x838A000B),
     }
 
     [Flags]
