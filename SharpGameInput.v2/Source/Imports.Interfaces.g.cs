@@ -629,7 +629,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerAxisState(
-            scoped System.Span<float> stateArray
+            scoped Span<float> stateArray
         )
         {
             fixed (float* stateArrayPtr = stateArray)
@@ -693,7 +693,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ByteBool> stateArray
+            scoped Span<ByteBool> stateArray
         )
         {
             fixed (ByteBool* stateArrayPtr = stateArray)
@@ -757,7 +757,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerSwitchState(
-            scoped System.Span<GameInputSwitchPosition> stateArray
+            scoped Span<GameInputSwitchPosition> stateArray
         )
         {
             fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
@@ -821,7 +821,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetKeyState(
-            scoped System.Span<GameInputKeyState> stateArray
+            scoped Span<GameInputKeyState> stateArray
         )
         {
             fixed (GameInputKeyState* stateArrayPtr = stateArray)
@@ -1149,7 +1149,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerAxisState(
-            scoped System.Span<float> stateArray
+            scoped Span<float> stateArray
         )
         {
             fixed (float* stateArrayPtr = stateArray)
@@ -1213,7 +1213,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ByteBool> stateArray
+            scoped Span<ByteBool> stateArray
         )
         {
             fixed (ByteBool* stateArrayPtr = stateArray)
@@ -1277,7 +1277,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerSwitchState(
-            scoped System.Span<GameInputSwitchPosition> stateArray
+            scoped Span<GameInputSwitchPosition> stateArray
         )
         {
             fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
@@ -1341,7 +1341,7 @@ namespace SharpGameInput.v2
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetKeyState(
-            scoped System.Span<GameInputKeyState> stateArray
+            scoped Span<GameInputKeyState> stateArray
         )
         {
             fixed (GameInputKeyState* stateArrayPtr = stateArray)
@@ -1692,8 +1692,8 @@ namespace SharpGameInput.v2
 #if NETSTANDARD2_1_OR_GREATER
         public HRESULT DirectInputEscape(
             uint32_t command,
-            scoped System.ReadOnlySpan<byte> bufferIn,
-            scoped System.Span<byte> bufferOut,
+            scoped ReadOnlySpan<byte> bufferIn,
+            scoped Span<byte> bufferOut,
             out uint32_t bufferOutSizeWritten
         )
         {
@@ -1703,9 +1703,9 @@ namespace SharpGameInput.v2
                 return DirectInputEscape(
                     command,
                     bufferInPtr,
-                    (uint32_t)(bufferIn?.Length ?? 0),
+                    (uint32_t)bufferIn.Length,
                     bufferOutPtr,
-                    (uint32_t)(bufferOut?.Length ?? 0),
+                    (uint32_t)bufferOut.Length,
                     out bufferOutSizeWritten
                 );
             }
@@ -2049,8 +2049,8 @@ namespace SharpGameInput.v2
 #if NETSTANDARD2_1_OR_GREATER
         public HRESULT DirectInputEscape(
             uint32_t command,
-            scoped System.ReadOnlySpan<byte> bufferIn,
-            scoped System.Span<byte> bufferOut,
+            scoped ReadOnlySpan<byte> bufferIn,
+            scoped Span<byte> bufferOut,
             out uint32_t bufferOutSizeWritten
         )
         {
@@ -2060,9 +2060,9 @@ namespace SharpGameInput.v2
                 return DirectInputEscape(
                     command,
                     bufferInPtr,
-                    (uint32_t)(bufferIn?.Length ?? 0),
+                    (uint32_t)bufferIn.Length,
                     bufferOutPtr,
-                    (uint32_t)(bufferOut?.Length ?? 0),
+                    (uint32_t)bufferOut.Length,
                     out bufferOutSizeWritten
                 );
             }

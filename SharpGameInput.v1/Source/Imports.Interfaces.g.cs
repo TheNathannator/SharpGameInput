@@ -629,7 +629,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerAxisState(
-            scoped System.Span<float> stateArray
+            scoped Span<float> stateArray
         )
         {
             fixed (float* stateArrayPtr = stateArray)
@@ -693,7 +693,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ByteBool> stateArray
+            scoped Span<ByteBool> stateArray
         )
         {
             fixed (ByteBool* stateArrayPtr = stateArray)
@@ -757,7 +757,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerSwitchState(
-            scoped System.Span<GameInputSwitchPosition> stateArray
+            scoped Span<GameInputSwitchPosition> stateArray
         )
         {
             fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
@@ -821,7 +821,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetKeyState(
-            scoped System.Span<GameInputKeyState> stateArray
+            scoped Span<GameInputKeyState> stateArray
         )
         {
             fixed (GameInputKeyState* stateArrayPtr = stateArray)
@@ -1131,7 +1131,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerAxisState(
-            scoped System.Span<float> stateArray
+            scoped Span<float> stateArray
         )
         {
             fixed (float* stateArrayPtr = stateArray)
@@ -1195,7 +1195,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ByteBool> stateArray
+            scoped Span<ByteBool> stateArray
         )
         {
             fixed (ByteBool* stateArrayPtr = stateArray)
@@ -1259,7 +1259,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerSwitchState(
-            scoped System.Span<GameInputSwitchPosition> stateArray
+            scoped Span<GameInputSwitchPosition> stateArray
         )
         {
             fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
@@ -1323,7 +1323,7 @@ namespace SharpGameInput.v1
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetKeyState(
-            scoped System.Span<GameInputKeyState> stateArray
+            scoped Span<GameInputKeyState> stateArray
         )
         {
             fixed (GameInputKeyState* stateArrayPtr = stateArray)

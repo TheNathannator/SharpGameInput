@@ -28,15 +28,20 @@ public enum Modifiers
     None = 0,
 
     Nullable = 0x01,
-    Pointer  = 0x02,
+    ReadOnly = 0x02,
+    Scoped   = 0x04,
+    Pointer  = 0x08,
 
-    Interface = 0x10,
-    LightInterface = 0x20,
-    OwnedInstance = 0x40,
+    NullableElements = 0x10,
+    ReadOnlyElements = 0x20,
+    PointerElements  = 0x40,
 
-    Array         = 0x100,
-    NullableArray = 0x200,
-    ReadOnlyArray = 0x400,
+    Array = 0x100,
+    Span  = 0x200,
+
+    Interface      = 0x1000,
+    LightInterface = 0x2000,
+    OwnedInterface = 0x4000,
 }
 
 public struct ParameterDecl(string typeDecl, string name)
@@ -143,18 +148,21 @@ public class TypeLibrary
         var modifiers = Modifiers.None;
         var indirection = Indirection.None;
 
-        // Pseudo-syntax for nullable pointer types;
-        // not actually supported in C#
-        if (declaration.EndsWith("*?"))
+        // Prefix modifiers
+        if (typeName.StartsWith("const "))
         {
-            declaration = declaration[..^1];
+            modifiers |= Modifiers.ReadOnly;
+            typeName = typeName["const ".Length..];
         }
-
-        // Pseudo-syntax for owned interface instances that need to be released
-        if (typeName.StartsWith("owned "))
+        if (typeName.StartsWith("owned ")) // Pseudo-syntax for owned interface instances that need to be released
         {
-            modifiers |= Modifiers.OwnedInstance;
+            modifiers |= Modifiers.OwnedInterface;
             typeName = typeName["owned ".Length..];
+        }
+        if (typeName.StartsWith("scoped "))
+        {
+            modifiers |= Modifiers.Scoped;
+            typeName = typeName["scoped ".Length..];
         }
 
         // Value indirection
@@ -179,35 +187,8 @@ public class TypeLibrary
             typeName = typeName["ref ".Length..];
         }
 
-        // Arrays
-        // Initial nullability check; will get re-checked later for the underlying type
-        if (typeName.EndsWith("?"))
-        {
-            modifiers |= Modifiers.Nullable;
-            typeName = typeName[..^1];
-        }
-
-        if (typeName.EndsWith("[]"))
-        {
-            modifiers |= Modifiers.Array;
-            modifiers |= Modifiers.ReadOnlyArray;
-            typeName = typeName[..^2];
-
-        }
-        else if (typeName.EndsWith("[mut]"))
-        {
-            modifiers |= Modifiers.Array;
-            typeName = typeName[..^5];
-        }
-
-        if ((modifiers & Modifiers.Array) != 0 && (modifiers & Modifiers.Nullable) != 0)
-        {
-            // Transfer initial nullable flag to the array
-            modifiers &= ~Modifiers.Nullable;
-            modifiers |= Modifiers.NullableArray;
-        }
-
-        // Other modifiers
+        // Postfix modifiers
+        // A pseudo-syntax for nullable pointer types is supported by using *?
         if (typeName.EndsWith("?"))
         {
             modifiers |= Modifiers.Nullable;
@@ -219,6 +200,52 @@ public class TypeLibrary
             typeName = typeName[..^1];
         }
 
+        // Arrays
+        if (typeName.EndsWith("[]"))
+        {
+            modifiers |= Modifiers.Array;
+            modifiers |= Modifiers.ReadOnlyElements;
+            typeName = typeName[..^2];
+        }
+        else if (typeName.EndsWith("[mut]"))
+        {
+            modifiers |= Modifiers.Array;
+            typeName = typeName[..^5];
+        }
+
+        // Array element modifiers
+        if ((modifiers & Modifiers.Array) != 0)
+        {
+            if (typeName.EndsWith("?"))
+            {
+                modifiers |= Modifiers.NullableElements;
+                typeName = typeName[..^1];
+            }
+            if (typeName.EndsWith("*"))
+            {
+                modifiers |= Modifiers.PointerElements;
+                typeName = typeName[..^1];
+            }
+        }
+
+        // Special types
+
+        // Spans
+        if (typeName.StartsWith("Span"))
+        {
+            modifiers |= Modifiers.Span;
+
+            typeName = ExtractGenericType(typeName);
+        }
+        else if (typeName.StartsWith("ReadOnlySpan"))
+        {
+            modifiers |= Modifiers.Span;
+            modifiers |= Modifiers.ReadOnlyElements;
+
+            typeName = ExtractGenericType(typeName);
+        }
+
+        // Interfaces
         foreach (var iface in Interfaces)
         {
             if (typeName == iface.Name)
@@ -247,32 +274,63 @@ public class TypeLibrary
 
     public string ToCodeType(ParsedType type)
     {
-        string typeDecl = type.Name;
+        string typeName = type.Name;
+        string prefix = "";
+        string postfix = "";
 
-        // Re-apply type modifiers
+        // Prefix modifiers
+        if ((type.Modifiers & Modifiers.Scoped) != 0)
+        {
+            prefix += "scoped ";
+        }
+
+        prefix += ToPrefix(type.Indirection);
+
+        // Postfix modifiers
         if ((type.Modifiers & Modifiers.Pointer) != 0)
         {
-            typeDecl += "*";
+            postfix += "*";
         }
-        // Note that pointers cannot be nullable; the `else` is important here
+        // Note that pointers cannot be explicitly nullable in C#; the `else` is important here
         else if ((type.Modifiers & Modifiers.Nullable) != 0)
         {
-            typeDecl += "?";
+            postfix += "?";
         }
 
-        // Re-apply array declarators
-        if ((type.Modifiers & Modifiers.NullableArray) != 0)
+        // Array elements
+        string elementSuffix;
+        if ((type.Modifiers & Modifiers.PointerElements) != 0)
         {
-            typeDecl += "[]?";
+            elementSuffix = "*";
         }
-        else if ((type.Modifiers & Modifiers.Array) != 0)
+        // Note that pointers cannot be explicitly nullable in C#; the `else` is important here
+        else if ((type.Modifiers & Modifiers.NullableElements) != 0)
         {
-            typeDecl += "[]";
+            elementSuffix = "?";
+        }
+        else
+        {
+            elementSuffix = "";
         }
 
-        typeDecl = $"{ToPrefix(type.Indirection)}{typeDecl}";
+        // Arrays
+        if ((type.Modifiers & Modifiers.Array) != 0)
+        {
+            postfix = elementSuffix + "[]" + postfix;
+        }
+        else if ((type.Modifiers & Modifiers.Span) != 0)
+        {
+            if ((type.Modifiers & Modifiers.ReadOnlyElements) != 0)
+            {
+                typeName = $"ReadOnlySpan<{typeName}>";
+            }
+            else
+            {
+                typeName = $"Span<{typeName}>";
+            }
+        }
 
-        return typeDecl;
+        return $"{prefix}{typeName}{postfix}";
     }
 
     public string ToFnPointerType(string typeDecl)
@@ -366,7 +424,7 @@ public class TypeLibrary
         // Interfaces need to be marshalled
         if ((paramType.Modifiers & Modifiers.Interface) != 0)
         {
-            string owned = (paramType.Modifiers & Modifiers.OwnedInstance) != 0 ? "true" : "false";
+            string owned = (paramType.Modifiers & Modifiers.OwnedInterface) != 0 ? "true" : "false";
             result = $"new {paramType.Name}({paramName}, {owned})";
         }
 
@@ -421,6 +479,36 @@ public class TypeLibrary
             Indirection.RefReadonly => "ref readonly ",
             _ => "",
         };
+    }
+
+    private static string ExtractGenericType(string typeName)
+    {
+        int start = -1;
+        int end = -1;
+
+        int depth = 0;
+        for (int i = 0; i < typeName.Length; i++)
+        {
+            char c = typeName[i];
+            if (c == '<')
+            {
+                depth++;
+                if (depth > 0)
+                {
+                    start = i + 1;
+                }
+            }
+            else if (c == '>')
+            {
+                depth--;
+                if (depth <= 0)
+                {
+                    end = i;
+                }
+            }
+        }
+
+        return typeName[start..end];
     }
 }
 

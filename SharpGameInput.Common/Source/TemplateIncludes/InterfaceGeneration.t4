@@ -624,9 +624,57 @@ public void MakeArrayWrappers(
 {
     var returnType = library.ParseTypeDecl(returnTypeDecl);
 
-    void MakeArrayMethodBody()
+    // Standard array overload
+#>
+
+<#+ MakeArrayMethod(parameters); #>
+
+#if NETSTANDARD2_1_OR_GREATER
+<#+
+    // Span overload
+    MakeArrayMethod(
+        parameters.Select((parameter) =>
+        {
+            var paramType = library.ParseTypeDecl(parameter.TypeDecl);
+
+            // Turn array types into their equivalent span types
+            if ((paramType.Modifiers & Modifiers.Array) != 0)
+            {
+                if ((paramType.Modifiers & Modifiers.ReadOnlyElements) != 0)
+                {
+                    parameter.TypeDecl = $"scoped ReadOnlySpan<{paramType.Name}>";
+                }
+                else
+                {
+                    parameter.TypeDecl = $"scoped Span<{paramType.Name}>";
+                }
+            }
+
+            return parameter;
+        })
+        .ToArray()
+    );
+#>
+#endif
+<#+
+    void MakeArrayMethod(ParameterDecl[] parameters)
     {
 #>
+        public <#= library.ToCodeType(returnType) #> <#= name #>(
+<#+
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var parameter = parameters[i];
+
+            // Can't use a comma on the last parameter
+            string delimiter = i < parameters.Length - 1 ? "," : "";
+
+#>
+            <#= library.ToCodeParameter(parameter) #><#= delimiter #>
+<#+
+        }
+#>
+        )
         {
 <#+
         for (int i = 0; i < parameters.Length; i++)
@@ -634,7 +682,7 @@ public void MakeArrayWrappers(
             var parameter = parameters[i];
             var paramType = library.ParseTypeDecl(parameter.TypeDecl);
 
-            if ((paramType.Modifiers & Modifiers.Array) != 0)
+            if ((paramType.Modifiers & (Modifiers.Array | Modifiers.Span)) != 0)
             {
 #>
             fixed (<#= paramType.Name #>* <#= parameter.Name #>Ptr = <#= parameter.Name #>)
@@ -653,10 +701,10 @@ public void MakeArrayWrappers(
             // Can't use a comma on the last argument
             string delimiter = i < parameters.Length - 1 ? "," : "";
 
-            if ((paramType.Modifiers & Modifiers.Array) != 0)
+            if ((paramType.Modifiers & (Modifiers.Array | Modifiers.Span)) != 0)
             {
                 string lengthCast = castLengthTo != null ? $"({castLengthTo})" : "";
-                string arrayLength = (paramType.Modifiers & Modifiers.NullableArray) != 0
+                string arrayLength = (paramType.Modifiers & Modifiers.Nullable) != 0
                     ? lengthCast + $"({parameter.Name}?.Length ?? 0)"
                     : lengthCast + $"{parameter.Name}.Length";
                 if (lengthBeforePtr)
@@ -687,73 +735,5 @@ public void MakeArrayWrappers(
         }
 <#+
     }
-
-#>
-
-        public <#= library.ToCodeType(returnType) #> <#= name #>(
-<#+
-    for (int i = 0; i < parameters.Length; i++)
-    {
-        var parameter = parameters[i];
-        var paramType = library.ParseTypeDecl(parameter.TypeDecl);
-
-        // Can't use a comma on the last parameter
-        string delimiter = i < parameters.Length - 1 ? "," : "";
-
-#>
-            <#= library.ToCodeParameter(parameter) #><#= delimiter #>
-<#+
-    }
-#>
-        )
-<#+
-    MakeArrayMethodBody();
-
-#>
-
-#if NETSTANDARD2_1_OR_GREATER
-        public <#= library.ToCodeType(returnType) #> <#= name #>(
-<#+
-    for (int i = 0; i < parameters.Length; i++)
-    {
-        var parameter = parameters[i];
-        var paramType = library.ParseTypeDecl(parameter.TypeDecl);
-
-        // Can't use a comma on the last parameter
-        string delimiter = i < parameters.Length - 1 ? "," : "";
-
-        if ((paramType.Modifiers & Modifiers.Array) != 0)
-        {
-            // Spans are value types, and cannot have null instances
-            paramType.Modifiers &= ~Modifiers.NullableArray;
-            parameters[i] = parameter;
-
-            if ((paramType.Modifiers & Modifiers.ReadOnlyArray) != 0)
-            {
-#>
-            scoped System.ReadOnlySpan<<#= paramType.Name #>> <#= parameter.Name #><#= delimiter #>
-<#+
-            }
-            else
-            {
-#>
-            scoped System.Span<<#= paramType.Name #>> <#= parameter.Name #><#= delimiter #>
-<#+
-            }
-        }
-        else
-        {
-#>
-            <#= library.ToCodeParameter(parameter) #><#= delimiter #>
-<#+
-        }
-    }
-#>
-        )
-<#+
-    MakeArrayMethodBody();
-#>
-#endif
-<#+
 }
 #>

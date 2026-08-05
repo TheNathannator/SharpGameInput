@@ -784,7 +784,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerAxisState(
-            scoped System.Span<float> stateArray
+            scoped Span<float> stateArray
         )
         {
             fixed (float* stateArrayPtr = stateArray)
@@ -848,7 +848,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ByteBool> stateArray
+            scoped Span<ByteBool> stateArray
         )
         {
             fixed (ByteBool* stateArrayPtr = stateArray)
@@ -912,7 +912,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerSwitchState(
-            scoped System.Span<GameInputSwitchPosition> stateArray
+            scoped Span<GameInputSwitchPosition> stateArray
         )
         {
             fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
@@ -976,7 +976,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetKeyState(
-            scoped System.Span<GameInputKeyState> stateArray
+            scoped Span<GameInputKeyState> stateArray
         )
         {
             fixed (GameInputKeyState* stateArrayPtr = stateArray)
@@ -1058,7 +1058,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetTouchState(
-            scoped System.Span<GameInputTouchState> stateArray
+            scoped Span<GameInputTouchState> stateArray
         )
         {
             fixed (GameInputTouchState* stateArrayPtr = stateArray)
@@ -1405,7 +1405,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerAxisState(
-            scoped System.Span<float> stateArray
+            scoped Span<float> stateArray
         )
         {
             fixed (float* stateArrayPtr = stateArray)
@@ -1469,7 +1469,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerButtonState(
-            scoped System.Span<ByteBool> stateArray
+            scoped Span<ByteBool> stateArray
         )
         {
             fixed (ByteBool* stateArrayPtr = stateArray)
@@ -1533,7 +1533,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetControllerSwitchState(
-            scoped System.Span<GameInputSwitchPosition> stateArray
+            scoped Span<GameInputSwitchPosition> stateArray
         )
         {
             fixed (GameInputSwitchPosition* stateArrayPtr = stateArray)
@@ -1597,7 +1597,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetKeyState(
-            scoped System.Span<GameInputKeyState> stateArray
+            scoped Span<GameInputKeyState> stateArray
         )
         {
             fixed (GameInputKeyState* stateArrayPtr = stateArray)
@@ -1679,7 +1679,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public uint32_t GetTouchState(
-            scoped System.Span<GameInputTouchState> stateArray
+            scoped Span<GameInputTouchState> stateArray
         )
         {
             fixed (GameInputTouchState* stateArrayPtr = stateArray)
@@ -2192,8 +2192,8 @@ namespace SharpGameInput.v0
 #if NETSTANDARD2_1_OR_GREATER
         public HRESULT ExecuteRawDeviceIoControl(
             uint32_t controlCode,
-            scoped System.ReadOnlySpan<byte> inputBuffer,
-            scoped System.Span<byte> outputBuffer,
+            scoped ReadOnlySpan<byte> inputBuffer,
+            scoped Span<byte> outputBuffer,
             out size_t bytesReturned
         )
         {
@@ -2202,9 +2202,9 @@ namespace SharpGameInput.v0
             {
                 return ExecuteRawDeviceIoControl(
                     controlCode,
-                    (size_t)(inputBuffer?.Length ?? 0),
+                    (size_t)inputBuffer.Length,
                     inputBufferPtr,
-                    (size_t)(outputBuffer?.Length ?? 0),
+                    (size_t)outputBuffer.Length,
                     outputBufferPtr,
                     out bytesReturned
                 );
@@ -2729,8 +2729,8 @@ namespace SharpGameInput.v0
 #if NETSTANDARD2_1_OR_GREATER
         public HRESULT ExecuteRawDeviceIoControl(
             uint32_t controlCode,
-            scoped System.ReadOnlySpan<byte> inputBuffer,
-            scoped System.Span<byte> outputBuffer,
+            scoped ReadOnlySpan<byte> inputBuffer,
+            scoped Span<byte> outputBuffer,
             out size_t bytesReturned
         )
         {
@@ -2739,9 +2739,9 @@ namespace SharpGameInput.v0
             {
                 return ExecuteRawDeviceIoControl(
                     controlCode,
-                    (size_t)(inputBuffer?.Length ?? 0),
+                    (size_t)inputBuffer.Length,
                     inputBufferPtr,
-                    (size_t)(outputBuffer?.Length ?? 0),
+                    (size_t)outputBuffer.Length,
                     outputBufferPtr,
                     out bytesReturned
                 );
@@ -3342,7 +3342,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public size_t GetRawData(
-            scoped System.Span<byte> buffer
+            scoped Span<byte> buffer
         )
         {
             fixed (byte* bufferPtr = buffer)
@@ -3370,7 +3370,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public bool SetRawData(
-            scoped System.ReadOnlySpan<byte> buffer
+            scoped ReadOnlySpan<byte> buffer
         )
         {
             fixed (byte* bufferPtr = buffer)
@@ -3663,7 +3663,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public size_t GetRawData(
-            scoped System.Span<byte> buffer
+            scoped Span<byte> buffer
         )
         {
             fixed (byte* bufferPtr = buffer)
@@ -3691,7 +3691,7 @@ namespace SharpGameInput.v0
 
 #if NETSTANDARD2_1_OR_GREATER
         public bool SetRawData(
-            scoped System.ReadOnlySpan<byte> buffer
+            scoped ReadOnlySpan<byte> buffer
         )
         {
             fixed (byte* bufferPtr = buffer)
