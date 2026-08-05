@@ -17,7 +17,7 @@ namespace SharpGameInput.TestApp.Display
 #if NET7_0_OR_GREATER
             Console.WriteLine($"{message}: 0x{error:X8} ({Marshal.GetPInvokeErrorMessage(error)})");
 #else
-            Console.WriteLine($"{message}: 0x{error:X8}");
+            Console.WriteLine($"{message}: 0x{error:X8} ({new System.ComponentModel.Win32Exception(error).Message})");
 #endif
         }
 
