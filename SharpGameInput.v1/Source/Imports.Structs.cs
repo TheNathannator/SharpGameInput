@@ -81,6 +81,11 @@ namespace SharpGameInput.v1
     {
         public uint16_t page;
         public uint16_t id;
+
+        public readonly override string ToString()
+        {
+            return $"{page:X4}:{id:X4}";
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

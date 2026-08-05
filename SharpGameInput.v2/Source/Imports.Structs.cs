@@ -36,6 +36,11 @@ namespace SharpGameInput.v2
         public uint16_t minor;
         public uint16_t build;
         public uint16_t revision;
+
+        public readonly override string ToString()
+        {
+            return $"{major}.{minor}.{build}.{revision}";
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -110,6 +115,11 @@ namespace SharpGameInput.v2
     {
         public uint16_t page;
         public uint16_t id;
+
+        public readonly override string ToString()
+        {
+            return $"{page:X4}:{id:X4}";
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

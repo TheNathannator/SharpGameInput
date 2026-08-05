@@ -11,7 +11,7 @@ namespace SharpGameInput.TestApp.Display
             Console.WriteLine($"- Collection number: {info.collectionNumber}");
             Console.WriteLine($"-----");
             Console.WriteLine($"- Hardware IDs: VID_{info.vendorId:X4}&PID_{info.productId:X4}&REV_{info.revisionNumber:X4}");
-            Console.WriteLine($"- Usage: {info.usage.page:X4}:{info.usage.id:X4}");
+            Console.WriteLine($"- Usage: {info.usage}");
             Console.WriteLine($"- Hardware version: {info.hardwareVersion}");
             Console.WriteLine($"- Firmware version: {info.firmwareVersion}");
             Console.WriteLine($"-----");
