@@ -782,7 +782,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerAxisState(
             scoped Span<float> stateArray
         )
@@ -846,7 +846,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerButtonState(
             scoped Span<ByteBool> stateArray
         )
@@ -910,7 +910,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerSwitchState(
             scoped Span<GameInputSwitchPosition> stateArray
         )
@@ -974,7 +974,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetKeyState(
             scoped Span<GameInputKeyState> stateArray
         )
@@ -1056,7 +1056,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetTouchState(
             scoped Span<GameInputTouchState> stateArray
         )
@@ -1403,7 +1403,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerAxisState(
             scoped Span<float> stateArray
         )
@@ -1467,7 +1467,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerButtonState(
             scoped Span<ByteBool> stateArray
         )
@@ -1531,7 +1531,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerSwitchState(
             scoped Span<GameInputSwitchPosition> stateArray
         )
@@ -1595,7 +1595,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetKeyState(
             scoped Span<GameInputKeyState> stateArray
         )
@@ -1677,7 +1677,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetTouchState(
             scoped Span<GameInputTouchState> stateArray
         )
@@ -2189,7 +2189,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public HRESULT ExecuteRawDeviceIoControl(
             uint32_t controlCode,
             scoped ReadOnlySpan<byte> inputBuffer,
@@ -2726,7 +2726,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public HRESULT ExecuteRawDeviceIoControl(
             uint32_t controlCode,
             scoped ReadOnlySpan<byte> inputBuffer,
@@ -3340,7 +3340,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public size_t GetRawData(
             scoped Span<byte> buffer
         )
@@ -3368,7 +3368,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public bool SetRawData(
             scoped ReadOnlySpan<byte> buffer
         )
@@ -3661,7 +3661,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public size_t GetRawData(
             scoped Span<byte> buffer
         )
@@ -3689,7 +3689,7 @@ namespace SharpGameInput.v0
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public bool SetRawData(
             scoped ReadOnlySpan<byte> buffer
         )

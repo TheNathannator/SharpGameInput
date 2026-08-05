@@ -627,7 +627,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerAxisState(
             scoped Span<float> stateArray
         )
@@ -691,7 +691,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerButtonState(
             scoped Span<ByteBool> stateArray
         )
@@ -755,7 +755,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerSwitchState(
             scoped Span<GameInputSwitchPosition> stateArray
         )
@@ -819,7 +819,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetKeyState(
             scoped Span<GameInputKeyState> stateArray
         )
@@ -1147,7 +1147,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerAxisState(
             scoped Span<float> stateArray
         )
@@ -1211,7 +1211,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerButtonState(
             scoped Span<ByteBool> stateArray
         )
@@ -1275,7 +1275,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetControllerSwitchState(
             scoped Span<GameInputSwitchPosition> stateArray
         )
@@ -1339,7 +1339,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public uint32_t GetKeyState(
             scoped Span<GameInputKeyState> stateArray
         )
@@ -1689,7 +1689,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public HRESULT DirectInputEscape(
             uint32_t command,
             scoped ReadOnlySpan<byte> bufferIn,
@@ -2046,7 +2046,7 @@ namespace SharpGameInput.v2
             }
         }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
         public HRESULT DirectInputEscape(
             uint32_t command,
             scoped ReadOnlySpan<byte> bufferIn,

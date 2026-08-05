@@ -629,7 +629,7 @@ public void MakeArrayWrappers(
 
 <#+ MakeArrayMethod(parameters); #>
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET5_0_OR_GREATER
 <#+
     // Span overload
     MakeArrayMethod(
