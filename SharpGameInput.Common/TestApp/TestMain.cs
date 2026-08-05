@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using SharpGameInput.TestApp.Display;
 using SharpGameInput.TestApp.Tests;
@@ -7,9 +8,27 @@ namespace SharpGameInput.TestApp
 {
     public static class TestMain
     {
+        public static bool CreateGameInput([NotNullWhen(true)] out IGameInput? gameInput)
+        {
+            if (!GameInput.Create(out gameInput, out int result))
+            {
+                ConsolePrinting.PrintPInvokeError("Failed to create IGameInput", result);
+                ConsoleMenu.WaitForKey("Press any key to exit...");
+                return false;
+            }
+
+            return true;
+        }
+
         public static void Run(IGameInput gameInput)
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
+            // A window is required to receive raw GIP reports up until GameInput v3.5
+            if (!WindowHack.StartWindow())
+            {
+                return;
+            }
 
             ConsolePrinting.SetTimestampBase(gameInput.GetCurrentTimestamp());
 

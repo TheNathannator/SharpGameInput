@@ -1,27 +1,17 @@
-using SharpGameInput.TestApp.Display;
-
 namespace SharpGameInput.TestApp
 {
     internal class Program
     {
         private static void Main()
         {
-            // Initialize GameInput
-            if (!GameInput.Create(out var gameInput, out int result))
+            if (TestMain.CreateGameInput(out var gameInput))
             {
-                ConsolePrinting.PrintPInvokeError("Failed to create IGameInput", result);
-                ConsoleMenu.WaitForKey("Press any key to exit...");
-                return;
-            }
-
-            using (gameInput)
-            {
-                if (!WindowHack.StartWindow())
+                using (gameInput)
                 {
-                    return;
+                    // Version-specific setup is performed here
+                    gameInput.SetFocusPolicy(GameInputFocusPolicy.Default);
+                    TestMain.Run(gameInput);
                 }
-
-                TestMain.Run(gameInput);
             }
         }
     }
